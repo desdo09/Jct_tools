@@ -1,0 +1,33 @@
+{
+   
+   "name"          : "כלים לסטודנטים של המרכז האקדמי לב",
+   "version"       : "3.0",
+   "description"   : "הודעות וחיבור לאתרים של המרכז האקדמי לב - מכון לב",
+   
+   "icons": {"128": "image/icons/jct128.png","16": "image/icons/jct16.png","48": "image/icons/jct48.png"},
+   "browser_action": { "default_icon": "image/icons/jct128.png", "default_popup": "popup.html" },
+   "web_accessible_resources": ["options.html","background.html"],
+   "options_page": "options.html",
+
+   "permissions": [ "storage","alarms", "notifications" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "background": {"page": "background.html"},
+   "content_scripts": 
+   [
+      {
+      "js": [ "js/lib/jquery.min.js", "js/hide-courses.js" ,"js/loginJCT.js","js/dataAccess.js","js/lib/notify.min.js" ], 
+      "matches":
+       [ 
+         "*://1.1.1.1/*",
+         "*://wireless-login.jct.ac.il/*",
+         "*://10.1.1.1/*",
+         "*://*.jct.ac.il/*"
+      ],
+         "run_at": "document_start"  //"document_idle"
+      }
+        
+   ],
+
+	"manifest_version": 2
+}
+

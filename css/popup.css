@@ -1,0 +1,298 @@
+ body{
+    margin: 0 auto;
+    height: auto;
+    width: auto;
+}
+ul{
+	padding:0;
+	margin: 0 auto
+}		
+
+li{
+	display: inline-block;
+	list-style:none;
+
+}
+a{
+	text-decoration:none;
+	cursor: pointer;
+}
+li	a{
+	border-radius: 5px;
+	text-align: center;
+	line-height: 16px;
+	font-size: 16px;
+	background:transparent url("../image/blanco.png") repeat ;
+	color:#00f;
+} 
+
+li	a:hover{
+	background: #fff ;
+	color:#075E86;
+	
+} 
+figure {
+	background:transparent url("../image/blanco.png") repeat ;
+	color:#00f;
+	border-radius: 5px;
+}
+figure:hover {
+	background: #fff ;
+	color:#075E86;
+}
+.checkboxtext
+{
+  margin:0 5px 0 100px;
+  font-size: 110%;
+  display: inline;
+  padding-bottom: 10px;
+  height: 100px;
+  line-height: 100%;
+
+}
+/******************************
+*   Classic div styles
+******************************/
+#classic{
+   width: 250px;
+}
+#classic li	a{
+	display: block;
+	float: left;
+	margin: 0 30px 20px 0;
+	width: 85px;
+	height: 83px;
+	
+} 
+#classic li a img{
+	width: 70px;
+	padding: 0;
+}
+
+#classic #loading p{
+	width:250px;
+	color:#075E86;
+	text-align: center;
+	font-size: 16px;
+}
+#classic #on{
+	background:transparent url("../image/popup_back.jpg") ;
+	width: 250px;
+	height: 383px;
+	margin: 0;
+}
+#classic #off{
+	background:transparent url("../image/popup_back.jpg") ;
+	width: 250px;
+	height: 100px;
+	margin: 0;
+}
+
+#classic #disable {
+	position:absolute;
+	top:70px;
+	left:30px;
+	width:200px;
+	border-radius: 5px;
+	background:transparent url("../image/blanco.png") repeat ;
+	color:#00f;
+	text-align: center;
+	font-size: 16px;
+	
+}
+#classic #disable:hover {
+background: #fff;
+color:#075E86;
+}
+#classic #enable {
+	position:absolute;
+	top:60px;
+	left:30px;
+	width:200px;
+	text-align: center;
+	font-size: 25px;
+	color: #fff;
+}	
+
+#classic #settings {
+	position:absolute;
+	top:340px;
+	left:30px;
+	width:200px;
+	color: #fff; 
+	text-align: center;
+	font-size: 20px;
+	
+}
+#classic #buttons {
+	position:absolute;
+	top:96px;
+	left:2px;
+	width:250px;
+	margin-left: 10px;
+}
+
+#classic #firma{
+	color: #fff;
+	text-align: center;
+}
+/******************************
+*   styleWithHW div styles
+******************************/
+
+#styleWithHW{
+	width: 400px;
+
+}
+#styleWithHW a{
+	color:#00f;
+
+}
+
+#styleWithHW #buttons
+{
+	height: 80px;
+	background:url("../image/options_img/option_Background.png") repeat-x;
+	overflow: hidden;
+	margin: 0 auto;
+	text-align: center;
+}
+#styleWithHW .menu
+{
+	display: inline-block;
+	width: 80px;
+	height: 80px;
+	overflow: hidden;
+
+}
+#styleWithHW figure 
+{
+	min-height: 50px;
+	width:60px;
+	padding: 0;
+	margin: 0 auto;
+	margin-top: 10px;
+}
+#styleWithHW .img
+{
+	display: inline-block;
+	height: 25px;
+}
+
+#styleWithHW figure img
+{
+
+	width:40px;
+}
+/************************************
+*   styleWithHW -> Homeworks styles
+************************************/
+#styleWithHW #Homeworks
+{
+	height: 400px;
+	max-height: 400px;
+	background: #095E87;
+	overflow: auto;
+}
+#styleWithHW #Homeworks .event
+{
+	background:transparent url("../image/blanco.png") repeat ;
+	color:#00f;
+	border-radius: 10px;
+	display: block;
+	margin: 10px 15px;
+	height: 65px;
+	line-height: 100%;
+	padding: 0 15px;
+	font-size: 14px;
+}
+#styleWithHW #Homeworks .event:hover {
+	background: #fff ;
+	color:#075E86;
+}
+
+#styleWithHW #Homeworks .event input[type="checkbox"]
+{
+    display: block;
+    height: 100%;
+    float: right;
+	-webkit-transform: scale(1.5);
+
+}
+#styleWithHW #Homeworks .eventDetails
+{
+	display: block;
+	float: right;
+    width: 250px;
+    height: 100%;
+    margin: 0 20px;
+}
+
+#styleWithHW #Homeworks .eventDetails p{
+    /*display: inline-block;*/
+    margin: 4px 0;
+    padding: 0;
+}
+#styleWithHW #Homeworks .event img
+{
+    width: 20px;
+    display: block;
+    float: right;
+    margin: 18 auto;
+
+}
+#styleWithHW #Homeworks  .total
+{
+	margin-top: 2px;
+	margin-bottom: 5px;
+	text-align: center;	
+	color: #fff;
+}
+/******************************
+*   Homeworks div scr
+******************************/
+#styleWithHW #Homeworks::-webkit-scrollbar-track
+{
+	/*
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #095E87;
+	*/
+}
+
+#styleWithHW #Homeworks::-webkit-scrollbar
+{
+	width: 6px;
+	background-color: #095E87;
+}
+
+#styleWithHW #Homeworks::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #ddd;
+}
+
+/************************************
+*   styleWithHW -> foot styles
+************************************/
+#styleWithHW #foot
+{
+	height: auto;
+	background:url("../image/options_img/option_Background.png") repeat-x;	
+	text-align: center;
+	overflow: hidden;
+}
+#styleWithHW #foot a
+{
+	display: inline-block;
+	height: 90%
+	text-align:center;
+	color: #fff;
+	font-size: 28px;
+	width: 45%;
+}
+#styleWithHW #foot p
+{
+	color: #fff;
+}
