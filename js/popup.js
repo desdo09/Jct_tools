@@ -8,7 +8,9 @@ $(document).ready(	function (){
 function onStart(result)
 {
 
-	/*   Check if the username and password is defined */
+	
+
+	/* Check if the username and password is defined */
 	var status = false;
 	if (result != null)
 		 status = (result["username"] != undefined) && ( window.btoa(result["password"]) != undefined);
@@ -28,6 +30,10 @@ function onStart(result)
 	else
 		themeWithEvents(result);
 
+	if(result.Config != null)
+		// In case the user want to updated when the button is touched
+		if((result.username && result.password) && result.Config.updateOnPopup != false)
+	 		setTimeout(function(){chrome.runtime.sendMessage({updatedata:true,async:true});},20);
 
 }
 
@@ -112,12 +118,17 @@ function insertEvents(data)
 	var deadLine = new Date();
 	var checked;		
 	for (var i = events.length - 1; i >= 0; i--) {
-		
+
+		if(events[i] == null || Date.parse(events[i].deadLine)< Date.now())
+			continue;		
+
+
 		if(data.eventDone != undefined && data.eventDone[events[i].id] != null )
 			checked = ((data.eventDone[events[i].id].checked || data.eventDone[events[i].id].done)?"checked":" ") + ((data.eventDone[events[i].id].done)?" disabled":" ");
 		else
 			checked = "";
 		
+
 		event ="<span class='event'>";
 
 		if(events[i].type =="homework")
@@ -152,7 +163,7 @@ function insertEvents(data)
 
 		$("#Homeworks").prepend(event);
 	} 		//notifications
-	$("#eventsTotal").text(events.length);
+	$("#eventsTotal").text($(".event").length);
 	$(".notifi").click(function()
 	{
 		var currentUrl = $(this).attr("src");
@@ -174,46 +185,4 @@ function insertEvents(data)
 	});
 }
 
-function getDate(date)
-{
-	var weekday = new Array(7);
-	weekday[0]=  "יום ראשון";
-	weekday[1] = "יום שני";
-	weekday[2] = "יום שלישי";
-	weekday[3] = "יום רביעי";
-	weekday[4] = "יום חמישי";
-	weekday[5] = "יום שישי";
-	weekday[6] = "שבת";
-	
-	var month = new Array();
-	month[0] = "ינואר";
-	month[1] = "פברואר";
-	month[2] = "מרץ";
-	month[3] = "אפריל";
-	month[4] = "מאי";
-	month[5] = "יוני";
-	month[6] = "יולי";
-	month[7] = "אוגוסט";
-	month[8] = "ספטמבר";
-	month[9] = "אוקטובר";
-	month[10] = "נובמבר";
-	month[11] = "דצמבר";
 
-	const tomorrow = new Date();
-	tomorrow.setDate(tomorrow.getDate() - 1);
-
-	// Check if the event will be tomorrow
-	if((date.getDate() -1) == tomorrow.getDate()  && date.getMonth() == tomorrow.getMonth())
-		return "מחר " + zeroIsRequiered(date.getHours()) + ":" + zeroIsRequiered(date.getMinutes());
-	
-	if(date.getDate() == (new Date).getDate()  && date.getMonth() == (new Date).getMonth())
-		return "היום " + zeroIsRequiered(date.getHours()) + ":" + zeroIsRequiered(date.getMinutes());
-
-	return zeroIsRequiered(date.getHours()) + ":" + zeroIsRequiered(date.getMinutes())+", " + weekday[date.getDay()] + ", " + zeroIsRequiered(date.getDate()) + " " + month[date.getMonth()] +" " + date.getFullYear();
-}
-function zeroIsRequiered(number)
-{
-	if(number<10)
-		return "0" + number;
-	return number;
-}

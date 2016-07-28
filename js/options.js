@@ -106,6 +106,7 @@ function setData() {
 						enable:true
 						})
 
+	chrome.runtime.sendMessage({changeIcon:true});
 	notification("המאגר עודכן");
 }	
 
@@ -462,8 +463,7 @@ function setNotifications()
 	}
 
 
-	//User Event
-	
+	//User Event	
 	if($("#UEfirstAlarm").is(':checked'))
 	{	
 		if($("#UEfirstAlarmTime") == null || isNaN(parseInt($("#UEfirstAlarmTime").val())) || parseInt($("#UEfirstAlarmTime").val()) < 0 || parseInt($("#UEfirstAlarmTime").val())>6)
@@ -546,6 +546,11 @@ function setAdvancedData(data)
 	else
 		$("#todaysHW").attr('checked',false);
 
+	if(data.Config.updateOnPopup == undefined || data.Config.updateOnPopup)
+		$("#todaysHW").attr('checked',true);
+	else
+		$("#todaysHW").attr('checked',false);
+
 	if(data.Config.hwChanges == undefined || data.Config.hwChanges)
 		$("#hwChanges").attr('checked',true);
 	else
@@ -587,7 +592,6 @@ function setAdvanced()
 	DataAccess.setObject("Config","todaysHW",$("#todaysHW").is(':checked'));
 
 	DataAccess.setObject("Config","style",$("input[name='style']:checked").attr('id'));
-
 	notification("המאגר עודכן");
 
 }
