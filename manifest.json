@@ -2,14 +2,24 @@
    
    "name"          : "כלים לסטודנטים של המרכז האקדמי לב",
    "version"       : "3.0",
+   "version_name"  : "3.0 Beta",
    "description"   : "הודעות וחיבור לאתרים של המרכז האקדמי לב - מכון לב",
    
    "icons": {"128": "image/icons/jct128.png","16": "image/icons/jct16.png","48": "image/icons/jct48.png"},
    "browser_action": { "default_icon": "image/icons/jct128.png", "default_popup": "popup.html" },
    "web_accessible_resources": ["options.html","background.html"],
    "options_page": "options.html",
+   "options_ui": 
+   { 
+      "page": "options.html",
+      "open_in_tab":true
+   },
 
-   "permissions": [ "storage","alarms", "notifications" ],
+   "permissions": [ "storage","alarms", "notifications",
+         "*://1.1.1.1/*",
+         "*://10.1.1.1/*",
+         "*://*.jct.ac.il/*" 
+      ],
    "update_url": "https://clients2.google.com/service/update2/crx",
    "background": {"page": "background.html"},
    "content_scripts": 
@@ -19,7 +29,6 @@
       "matches":
        [ 
          "*://1.1.1.1/*",
-         "*://wireless-login.jct.ac.il/*",
          "*://10.1.1.1/*",
          "*://*.jct.ac.il/*"
       ],
@@ -27,6 +36,14 @@
       }
         
    ],
+
+   "applications": {
+      "gecko": {
+         "id": "abenatha@jct.ac.il",
+         "strict_min_version": "48.0",
+         "strict_max_version": "*"
+      }
+   },
 
 	"manifest_version": 2
 }

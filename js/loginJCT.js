@@ -1,22 +1,24 @@
 var username;
 
-$(document).ready(function() 
+$(document).ready(function()
 {
 	$.notify("hi",{position:"top right",className: 'success'});
 	DataAccess.Data(onStart);
 
-});		
+});
 
 
 function onStart(data)
 {
-
+	console.log("JCT Tools->Auto login: " + data.enable)
 	// Check if the username and password is not empty
 	username =  data["username"];
+
+	console.log("JCT Tools->Username: " + username);
 	// Decrypting the password
 	var password =  window.atob(data["password"]);
 	// Check current host
-	switch(location.host) 
+	switch(location.host)
 	{
     	case "moodle.jct.ac.il":
      	  moodleConnect(password,data);
@@ -32,23 +34,26 @@ function onStart(data)
         	if(data["wf"] && data.enable)
         		wifiConnect(password);
         break;
-        
+        /*case "lev.jct.ac.il":
+        	if(data["re"] && data.enable)
+        		remoteConnect(password);
+        break;*/
 	}
 }
 
 function wifiConnect(pass)
 {
-	
 
-	if(document.title == "Web Authentication Failure") 
+
+	if(document.title == "Web Authentication Failure")
 	{
-   		alert("Web Authentication Failure!\nare you already online?\nWrong username or password?") 
+   		alert("Web Authentication Failure!\nare you already online?\nWrong username or password?")
    		window.close();
     	return;
   	}
 
 	$("input[name='username']").attr("value",username);
-    $("input[name='password']").attr("value",pass);      
+    $("input[name='password']").attr("value",pass);
 	//document.forms[0].err_flag.value = 1;
     var actualCode = "submitAction();";
     var script = document.createElement('script');
@@ -62,41 +67,47 @@ function mazakConnect(pass)
 	if($("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_UserName").length ==0)
 		return;
 	$("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_UserName").attr("value",username);
-	$("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password").attr("value",pass);				
+	$("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password").attr("value",pass);
 	$("#aspnetForm input[type='submit']").click();
+}
+
+function remoteConnect(pass)
+{
+	if($("#username").length ==0)
+		return;
+	console.log("hi");
+	$("#username").attr("value",username);
+	$("#password").attr("value",pass);
+	return;
+	$("button[type='submit']").click();
 }
 
 function moodleConnect(pass,data)
 {
-
-	if(data["mo"] && data.enable)
+	console.log("JCT Tools->" + "Moodle automatic login:" + data["mo"]);
+	if($("#login_username").length != 0 && $("#login_password").length != 0)
 	{
-		if($("#login_username").length != 0 && $("#login_password").length != 0)
+		if(data["mo"] && data.enable)
 		{
 			$("#login_username").attr("value",data.username);
-			$("#login_password").attr("value",pass);				
+			$("#login_password").attr("value",pass);
 			$("#login input[value='התחברות'][type='submit']").click();
-		}else
-			if($("#username").length != 0 && $("#password").length != 0)
-			{
-				$("#username").attr("value",data.username);
-				$("#password").attr("value",pass);				
-				$("#login input[value='התחברות'][type='submit']").click();
-			}
-			else
-			{
-				var coursesTable = $("#frontpage-course-list").html();
-				if(coursesTable == "" || coursesTable.length == 0 || data == null || data.courses == undefined)
-					return;
-				if (undefined == data ) 
-					data = {}
-	
-				if(data.Config == undefined)
-					data.Config = {}
+		}
+	}
+	else
+	{
+		var coursesTable = $("#frontpage-course-list").html();
 
-				hideCourses(data.moodleCoursesTable,data.Config.hiddeModdelHelp);
-			}
+		if(coursesTable == "" || coursesTable.length == 0 || data == null || data.courses == undefined)
+			return;
+		if (undefined == data )
+			data = {}
+
+		if(data.Config == undefined)
+			data.Config = {}
+
+		hideCourses(data.moodleCoursesTable,data.Config.hiddeModdelHelp);
 	}
 
-	
+
 }

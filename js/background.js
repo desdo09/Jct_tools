@@ -15,22 +15,20 @@
 *
 * PARAMETERS
 *   request - an object with contain:
-*             + login = (true/false/undefined)
-*                   + username = to login
-*                   + password = to login
 *             + updatedata  = (true/false/undefined)
 *             + changeIcon  = (true/false/undefined)
+*							+ sender 			= The web sender
 *
 * MEANING
 *   This function will get the request maded by anothers
-*  pages in the extension
+*  pages in the extension and execute backgroundEvent function
 *   In case the object received contain true in login
 *  then the function will login in moodle.jct.ac.il with
-*  the username and password into the object 
+*  the username and password into the object
 *   In case the object received contain true in updatedata
-*  then the function will update the course and task list 
+*  then the function will update the course and task list
 *   In case the object received contain changeIcon
-*  the function will change the extension icon 
+*  the function will change the extension icon
 *
 **********************************************************************/
 var ajaxAns = {status:"undefined" };
@@ -38,77 +36,84 @@ chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 
     //In case that the request is null or not an object return Invalid Parameter
-    if(request == null || typeof request != "object")
-    	{   if(undefined != sendResponse)
-    		sendResponse({operationCompleted:false,error:"Invalid Parameter",request:request});
+    if(request == null || typeof request != "object"){
+    			backgroundEvent({type:"Format error",operationCompleted:false,error:"Invalid Parameter",request:request});
     		return;
     	}
-     //In case that the request contains login and is equal true
-     if(undefined != request.login && request.login == true)
-     {
-        //check if there the username and password
-        if(undefined == request.username||request.password == undefined)
-        	sendResponse({operationCompleted:false,error:"Invalid login arguments",request:request});
 
-        //make the login
-        login(request.username,request.password,false);
-        //because is sychronus we wait 
-        if(request.async != true)
-       		while(ajaxAns.status == "undefined");//because is sychronus we wait 
-       	else
-       	{
-       		DataAccess.Data(function(data)
-       		{
-       			if(data.enable && data.Config != null && data.Config.checkLogin && data.username != null && data.password != null)
-       				login(data.username,window.btoa(data.password));
-       		})
-       	}
-        //if there is an error return the error
-        if(sendResponse != undefined && ajaxAns.status == "error" )
-        {  
-        	sendResponse({operationCompleted:false,error:ajaxAns.error,request:request});
-        	return;
-        }
+     //In case that the request is to update the data
+     if(request.updatedata)
+     {
+			 DataAccess.Data(function(data)
+       {
+        	if((data.Config == null || data.Config != null && data.Config.checkLogin != false) && data.username != null && data.password != null)
+       	 	{	login(data.username,window.atob(data.password))
+						.then(function(){
+							return updateData();
+						});
+					}else
+						updateData();
+       });
     }
-    //In case that the request contains updatedata and is equal true
-    if(request.updatedata)
-    {
-        //update the data
-        updateData(false);
-        //if there is an error return the error
-        if(sendResponse != undefined && ajaxAns.status == "error")
-        {
-        	sendResponse({operationCompleted:false,error:ajaxAns.error,request:request});
-        	return;
-        }
-    }
+
     //In case that the request contains changeIcon.
     if(request.changeIcon != undefined)
-    	DataAccess.Data(function(data)
-    	{
-    		changeIcon(request.changeIcon && data.username && data.password)
-    	})  
+    		changeIcon(request.changeIcon);
 
-
-    //in case that everythink is ok, return true
-    if(sendResponse != undefined)
-    	sendResponse({operationCompleted:true,request:request});
 
 });
+
+function backgroundEvent(eventType)
+{
+	// Look through all the pages in this extension to find one we can use.
+	var views = chrome.extension.getViews();
+	for (var i = 0; i < views.length; i++) {
+		var view = views[i];
+		// If this view has the right URL and hasn't been used yet...
+		if (typeof view["onBackgroundEvent"] == "function") {
+			// ...call one of its functions and set a property.
+			view["onBackgroundEvent"](eventType);
+		}
+	}
+}
+
+chrome.runtime.onInstalled.addListener(function	(reason)
+{
+	if (reason == "install") {
+		DataAccess.setData({
+			Config:
+			{
+				HWSecondAlarm	:	"0.5", HWfirstAlarm:	"1",UESecondAlarm:"0.5",UEfirstAlarm:"1",checkLogin:true,hiddeModdelHelp:false,
+				hiddeUE:false,hwChanges:true,hwDays:"5",hwUpdate:"1",style:"new",todaysHW:true,updateOnPopup:true
+			},
+			mo:true,mz:true,wf:true
+	});
+
+	}
+});
+
 /******************************************************
 * This funcion will executade when the chrome start
 ********************************************************/
 document.addEventListener('DOMContentLoaded', function () {
     //get The data of the data an send it to onStart
     DataAccess.Data(onStart);
-    showTodayEvents(null);
 });
-
-
+//chrome.runtime.onStartup.addListener(function)
 
 function onStart(data)
 {
-	updateData(true);
+
+	 if((data.Config == null || data.Config != null && data.Config.checkLogin != false) && data.username != null && data.password != null)
+	 {
+		 login(data.username,window.atob(data.password))
+		 .then(function(){
+			 return updateData();
+		 });
+	 }else
+		 updateData();
+
+
 	if(data == undefined)
 		return;
 
@@ -116,7 +121,7 @@ function onStart(data)
 		createEventNotification(alarm.name);
 	});
 	chrome.notifications.onClicked.addListener(function (id){
-		if(id.includes("event") ||  id.includes("update"))
+		if(id.includes("event") ||  id.includes("update") || id.includes("todaysHW"))
 			return;
 
 	window.open("http://moodle.jct.ac.il/mod/assign/view.php?id="+id);
@@ -130,7 +135,7 @@ function onStart(data)
    if(data.Config != null && data.Config.todaysHW)
    		showTodayEvents(data.tasks,data.courses);
    if(data.tasks != undefined && data.Config != null && data.Config.firstAlarm != false);
-  		setAlarms(data);
+  		setAlarms(data,true);
 }
 function showTodayEvents(events,courses)
 {
@@ -143,59 +148,75 @@ function showTodayEvents(events,courses)
 	var list = [];
 	for (var i = 0; i < events.length; i++) {
 		deadline = new Date(Date.parse(events[i].deadLine));
-		
-		if(deadline.getDate() == today.getDate() &&  deadline.getMonth() == today.getMonth() && Date.parse(deadline)> Date.now())
+
+		if((deadline.getDate() == today.getDate() || deadline.getDate() == (today.getDate() +1)&& deadline.getHours()< 2) &&  deadline.getMonth() == today.getMonth() && Date.parse(deadline)> Date.now())
 			list[j++] = {title: events[i].name, message: ((events[i].type == "homework")?courses[events[i].courseId].name:" אירוע")}
 	}
 
 	if(events == null || j == 0)
 		return;
 	chrome.notifications.create(
-		'name-for-notification',{
+		'todaysHW',{
 			type: "list",
 			title: "ש\"ב להיום",
 			iconUrl: 'image/icons/jct128.png',
-			message: "", 
+			message: "",
 			items: list
 		});
 
 }
 
-function setAlarms(data)
+function setAlarms(data,onstart = false)
 {
+	console.log("Setting alarms")
+	if(data.Config == undefined)
+		return;
 	var events = data.tasks;
+	console.log("Total events: " +  events.length);
 	var firstAlarm = parseFloat(data.Config.HWfirstAlarm);
 	if(isNaN(firstAlarm))
 		return;
+	console.log("First alarm: " +  firstAlarm);
 	var secondAlarm = parseFloat(data.Config.HWSecondAlarm);
+	console.log("Second alarm: " +  secondAlarm);
 	var deadLine = Date.now();
-	for (var i = 0; i < events.length; i++) 
+	for (var i = 0; i < events.length; i++)
 	{
 
 		if(data.eventDone != null && data.eventDone[events[i].id] != null && (!data.eventDone[events[i].id].notifications || data.eventDone[events[i].id].done || data.eventDone[events[i].id].checked))
 			continue;
 
-		if(events[i] == null || Date.parse(events[i].deadLine)< Date.now())
+		console.log(events[i].name + ": " + Date.parse(events[i].deadLine))
+		console.log("now: " + Date.now())
+		console.log("\n")
+
+		if(events[i] == null || (Date.parse(events[i].deadLine) < Date.now()))
 			continue;
 
-		deadLine = Date.parse(events[i].deadLine) - firstAlarm*60*60*1000;  
-       	chrome.alarms.create(events[i].id + "(1)", {when:deadLine});
+		deadLine = Date.parse(events[i].deadLine) - firstAlarm*60*60*1000;
+		console.log("first notification Alarm:" + deadLine);
+		if(deadLine > Date.parse(new Date()))
+    {
+			chrome.alarms.create(events[i].id + "(1)", {when:deadLine});
+		}
        	if(secondAlarm == null || isNaN(secondAlarm))
         		return;
-       	deadLine = Date.parse(events[i].deadLine) - secondAlarm*60*60*1000; 
-
-       	chrome.alarms.create(events[i].id + "(2)", {when:deadLine});
-
-    }
+		deadLine = Date.parse(events[i].deadLine) - secondAlarm*60*60*1000;
+		console.log("Second notification Alarm:" + deadLine);
+		if( onstart || !onstart && deadLine > Date.parse(new Date()))
+    {
+			 	chrome.alarms.create(events[i].id + "(2)", {when:deadLine});
+		}
+  }
 
 
 }
 
 function createEventNotification(eventId)
 {
-		
+
 	DataAccess.Data(function(data){
-		  
+
 		var event = null;
 		eventId= eventId.substring(0, eventId.length - 3);
 		for (var i = 0; i < data.tasks.length; i++) {
@@ -205,13 +226,13 @@ function createEventNotification(eventId)
 		if(event == null)
 			return;
 
-		var n = chrome.notifications.create(
-			(event.type == "homework")?eventId:"event " + eventId,{   
-				type: 'basic', 
-				iconUrl: 'image/icons/jct128.png', 
+		chrome.notifications.create(
+			(event.type == "homework")?eventId:"event " + eventId,{
+				type: 'basic',
+				iconUrl: 'image/icons/jct128.png',
 				title: ("תזכורת" + ((event.type == "homework")?" על שיעורי בית":" אירוע")),
-				message: (event.name + "\n" + ((event.type == "homework")?data.courses[event.courseId].name+"\n":"") + getDate(new Date(Date.parse(event.deadLine))))  
-			})
+				message: (event.name + "\n" + ((event.type == "homework")?data.courses[event.courseId].name+"\n":"") + getDate(new Date(Date.parse(event.deadLine))))
+			});
 
 	});
 
@@ -230,28 +251,29 @@ function createEventNotification(eventId)
 *   asyncType - True in case we want to use async
 *
 * MEANING
-*    This function will try to login to the moodle page by send it a 
-*   post that contains the username and password (received) 
+*    This function will try to login to the moodle page by send it a
+*   post that contains the username and password (received)
 *
 **********************************************************************/
 function login(username, password, asyncType = true)
 {
     const promise = new Promise(function (resolve, reject) {
-		var request =  $.post( "https://moodle.jct.ac.il/login/index.php", 
+		var request =  $.post( "https://moodle.jct.ac.il/login/index.php",
 			{username:username,password:password} );
 
 		request.done( function(data){
+			console.log("login status ok");
 			resolve(ajaxAns = {status:"ok"});
 		});
 
 		request.fail(function (data) {
+			console.log("login status failed, error: " + data.statusText);
 			resolve(ajaxAns = {status:"error",error:data.statusText});
 		});
 	});
-	
+
 	return promise;
 }
-
 
 /*****************************************************************
 * FUNCTION
@@ -270,56 +292,69 @@ function login(username, password, asyncType = true)
 **********************************************************************/
 function updateData(asyncType)
 {
-	if(typeof asyncType != "boolean")
-		return;
+	console.log("Updating data");
+	if(typeof asyncType == undefined)
+		asyncType = true;
     // async: false
 
-    // login();
-    var request =  $.ajax({
-    	url:"http://moodle.jct.ac.il",
-    	type:'GET',
-    	async: asyncType,
+    const promise = new Promise(function (resolve, reject) {
+	    var request =  $.ajax({
+	    	url:"http://moodle.jct.ac.il",
+	    	type:'GET',
+	    	async: asyncType,
 
-    }); 
+	    });
 
-    request.done( function(data){
-    	if(undefined == data || 0 == data.length)
-    	{
-    		ajaxAns = {status:"error",error:"data is null"};
-    		return;
-    	}
+	    request.done( function(data){
+	    	console.log("request successfully completed");
+	    	if(undefined == data || 0 == data.length)
+	    	{
+	    		console.log("Error:Data is null");
+					backgroundEvent({type:"updateData",operationCompleted:false,error:"Data is null",request:request});
+	    		reject(ajaxAns = {status:"error",error:"data is null"});
+	    		return;
+	    	}
 
-        // Get htm with div
-        var html = jQuery('<div>').html(data);
-        if(html.find(".courses").length == 0)
-        {
-        	ajaxAns = {status:"error",error:"Login is requiered"};
-        	return;
-        }
-        // Get courses list
-        var courses = html.find(".courses");
-        //  wrapAllAttributes(courses);
-        var coursesObject = getAllCourses(courses);
-        // Get homework list
-        var homework = html.find("#inst121811").find(".content");
-        var homeworkObject  = getAllHomeworks(homework);
-        // $('#hidden').html(homework);
-        // $('#hidden').html(courses);
-        DataAccess.setData({courses:coursesObject.data,coursesIndex:coursesObject.index,tasks:homeworkObject},function()
-       	{
-       		 DataAccess.Data(setAlarms);
-       	}); 
-        ajaxAns = {status:"ok"};
-       
-       // Reset the alarms
-      
-   });
+	        // Get htm with div
+	        var html = jQuery('<div>').html(data);
+	        if(html.find(".courses").length == 0)
+	        {
+						reject(ajaxAns = {status:"error",error:"Login is requiered"});
+	        	console.log("No courses found");
+						backgroundEvent({type:"updateData",operationCompleted:false,error:"Login is requiered",request:request});
+	        	return;
+	        }
+	        // Get courses list
+	        var courses = html.find(".courses");
+	        //  wrapAllAttributes(courses);
+	        var coursesObject = getAllCourses(courses);
+	        // Get homework list
+	        var homework = html.find("#inst121811").find(".content");
+	        var homeworkObject  = getAllHomeworks(homework);
+	        console.log("New data:");
+	        console.log({courses:coursesObject.data,coursesIndex:coursesObject.index,tasks:homeworkObject});
 
-    request.fail(function (data) {
-    	ajaxAns = {status:"error",error:data};
-    });
+	        DataAccess.setData({courses:coursesObject.data,coursesIndex:coursesObject.index,tasks:homeworkObject},function()
+	       	{
+	       		 DataAccess.Data(setAlarms);
+	       	});
+					backgroundEvent({type:"updateData",operationCompleted:true});
+	        resolve(ajaxAns = {status:"ok"});
 
-    //return {status:"ok"};
+	       // Reset the alarms
+
+	   });
+
+	    request.fail(function (data) {
+	    	console.log("request failed");
+	    	console.log(data);
+				backgroundEvent({type:"updateData",operationCompleted:false,error:data,request:request});
+	    	  reject(ajaxAns = {status:"error",error:data})
+	    });
+	});
+
+	return promise;
+
 }
 
 /*****************************************************************
@@ -336,12 +371,12 @@ function updateData(asyncType)
 *    This function wrap all attribute from the html
 *
 * ATTENTION
-*   This function is not in use 
+*   This function is not in use
 *
 **********************************************************************/
 function wrapAllAttributes(html)
 {
-    //delete attributes from the main div 
+    //delete attributes from the main div
     $(html).each(function() {
     	var attributes = this.attributes;
     	var i = attributes.length;
@@ -373,11 +408,11 @@ function wrapAllAttributes(html)
 *   html - An html document
 *
 * MEANING
-*   This function will take the couse div in the moodle, then insert 
+*   This function will take the couse div in the moodle, then insert
 *   evey course in an object (with name, id, MoodleId)
 *
 *  ATTENTION
-*   This function help the updateData function 
+*   This function help the updateData function
 *
 **********************************************************************/
 function getAllCourses(html)
@@ -394,8 +429,8 @@ function getAllCourses(html)
         // if there is an error just stop
         if(courseLink.length ==0 || id == undefined ||id.length == 0)
         	return true;
-        
-        // copy the text of the url 
+
+        // copy the text of the url
         var text = courseLink.text();
         // Separe the data by id and name
         var courseDetails = separateCoursesData(text);
@@ -413,12 +448,12 @@ function getAllCourses(html)
 	return {data:data,index:index};
 }
 /***************************************
-* Separe data from courses 
+* Separe data from courses
 * Example 120221.3.5776 - אלגברה לינארית ב
 *
 * The function will search for numbers and
-* save it as id and then take the rest 
-* and save as name 
+* save it as id and then take the rest
+* and save as name
 *****************************************/
 function separateCoursesData(data)
 {
@@ -450,11 +485,11 @@ function separateCoursesData(data)
 *   html - An html document
 *
 * MEANING
-*   This function will take the homeworks div in the moodle, then insert 
+*   This function will take the homeworks div in the moodle, then insert
 *   evey course in an object (with name, id,deadline, type)
 *
 *  ATTENTION
-*   This function help the updateData function 
+*   This function help the updateData function
 *
 **********************************************************************/
 function getAllHomeworks(html)
@@ -487,11 +522,11 @@ function getAllHomeworks(html)
 	return data;
 }
 /***************************************
-* Separe data from homework div 
+* Separe data from homework div
 *
 *  The function will search for the name
-*  and the date then save it in an object 
-*  with the type "userEvent"   
+*  and the date then save it in an object
+*  with the type "userEvent"
 *****************************************/
 function userEventData(usData)
 {
@@ -509,7 +544,7 @@ function separateHomeworkData(hwdata)
     var datatemp = ($(hwdata).find("a"))[0];
     if(datatemp == undefined || datatemp.length==0)
     	return undefined;
-    // Save the homework name 
+    // Save the homework name
     var homeworkName = $(datatemp).text();
     datatemp = $(datatemp).attr('href');
     // Get id from href (ex: http://moodle.jct.ac.il/mod/assign/view.php?id=224301)
@@ -546,7 +581,7 @@ function separateHomeworkData(hwdata)
 }
 /********************************************
 * The function get an day in format DD/MM/YY
-* and a time in format HH:MM then return 
+* and a time in format HH:MM then return
 * a string with the date
 *************************************************/
 function stringToDate(date)
@@ -605,16 +640,15 @@ function changeIcon(flag)
 /**************************************
     Test only
     **************************************/
-
-    $(document).ready(function(){
+$(document).ready(function(){
     	chrome.storage.local.get(null,function(result)
     	{
     		DataAccess.getData = result;
     	});
     	$( "#button" ).click(function(){
-    		
+
     		//console.log("Background");
     		//updateData(false);
     		//alert(ajaxAns.status);
-    	});  
+    	});
     });

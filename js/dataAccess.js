@@ -19,9 +19,9 @@
 
 var inUsed = false;
 var DataAccess = {
-    
+
     /*****************************************************************
-    *  This Function will save the data into chrome.storage.local 
+    *  This Function will save the data into chrome.storage.local
     ******************************************************************/
     setData: function (objName, value = null, callBackFunction = null)
     {
@@ -30,17 +30,17 @@ var DataAccess = {
            return setTimeout(function(){DataAccess.setData(objName,value,callBackFunction)},100);
        // Lock the Database
         inUsed = true;
-        // Check if object name is an object 
+        // Check if object name is an object
         if(typeof objName == 'object')
             chrome.storage.local.set(objName,function(data){
-                // Insert and unlock the database. 
+                // Insert and unlock the database.
                 inUsed = false;
                 // run the callBackFunction
                 if(typeof callBackFunction == "function")
                     callBackFunction(data);
             });
         else
-        { 
+        {
             // Creating a new object variable
             var dataValue = new Object();
             // add a value into our dynamic property
@@ -52,10 +52,10 @@ var DataAccess = {
                     callBackFunction(data);
             });
         }
-      
+
     },
     /*****************************************************************
-    *  This Function will manager an objects inside the dataBase 
+    *  This Function will manager an objects inside the dataBase
     ******************************************************************/
     setObject:function(objName, hash, value = null,callBackFunction = null)
     {
@@ -73,7 +73,7 @@ var DataAccess = {
                 obj = data[objName];
             // insert the data in his hash
             obj[hash] = (value == null)?true:value;
-            // Save it in the database           
+            // Save it in the database
             var nObj = {}
             nObj[objName] = obj;
             chrome.storage.local.set(nObj,function(result){
@@ -82,17 +82,17 @@ var DataAccess = {
                 if(typeof callBackFunction == "function")
                     callBackFunction(result);
             });
-           
+
        });
     },
     /*****************************************************************
     *   This Function will manager an objects inside another objects
-    *  in the dataBase 
-    ******************************************************************/ 
+    *  in the dataBase
+    ******************************************************************/
     setObjectInObject:function(objName,hash1, hash2, value = null,callBackFunction = null)
     {
 
-    
+
         if(inUsed)
            return setTimeout(function(){DataAccess.setObjectInObject(objName, hash1, hash2, value,callBackFunction)},100);
 
@@ -117,16 +117,16 @@ var DataAccess = {
                     if(typeof callBackFunction == "function")
                         callBackFunction(result);
             });
-           
+
        });
     },
     /*****************************************************************
     *   This Function get a call back function and return the data in
     *  dataBase
     ******************************************************************/
-    Data:function(callBackFunction) 
+    Data:function(callBackFunction)
     {
-        //This function use a promise to make more easy to manager  
+        //This function use a promise to make more easy to manager
         const promise = new Promise(function (resolve, reject) {
                             if(callBackFunction == null || typeof callBackFunction != "function")
                                 reject(new Error('Invalid funcion'));
@@ -170,27 +170,35 @@ var DataAccess = {
                     if(typeof callBackFunction == "function")
                         callBackFunction(data)
                 });
-               
+
            });
         }
     },
     /*****************************************************************
-    *  This function will clear the database and change the icon 
+    *  This function will clear the database and change the icon
     ******************************************************************/
     reset:function(){
         chrome.runtime.sendMessage({changeIcon:false});
         chrome.storage.local.clear();
         location.reload();
+        DataAccess.setData({
+    			Config:
+    			{
+    				HWSecondAlarm	:	"0.5", HWfirstAlarm:	"1",UESecondAlarm:"0.5",UEfirstAlarm:"1",checkLogin:true,hiddeModdelHelp:false,
+    				hiddeUE:false,hwChanges:true,hwDays:"5",hwUpdate:"1",style:"new",todaysHW:true,updateOnPopup:true
+    			},
+    			mo:true,mz:true,wf:true
+    	 });
         console.log("Database erased");
 
     }
 
-}    
+}
 
 
 /*****************************************************************
 *  getDate function:
-*   This function receive an date object and return a string of 
+*   This function receive an date object and return a string of
 *   the date in hebrew
 ******************************************************************/
 function getDate(date)
@@ -203,7 +211,7 @@ function getDate(date)
     weekday[4] = "יום חמישי";
     weekday[5] = "יום שישי";
     weekday[6] = "שבת";
-    
+
     var month = new Array();
     month[0] = "ינואר";
     month[1] = "פברואר";
@@ -224,7 +232,7 @@ function getDate(date)
     // Check if the event will be tomorrow
     if(date.getDate() == tomorrow.getDate()  && date.getMonth() == tomorrow.getMonth())
         return "מחר " + zeroIsRequiered(date.getHours()) + ":" + zeroIsRequiered(date.getMinutes());
-    
+
     if(date.getDate() == (new Date).getDate()  && date.getMonth() == (new Date).getMonth())
         return "היום " + zeroIsRequiered(date.getHours()) + ":" + zeroIsRequiered(date.getMinutes());
 

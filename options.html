@@ -35,14 +35,14 @@
 		<div id="account" >
 			<div id="form">
 				<h2>
-					אנא הזן את שם המשתמש ואת הסיסמא שלך להתרים של המרכז האקדמי לב
+					אנא הזן את שם המשתמש ואת הסיסמא שלך לאתרים של המרכז האקדמי לב
 				</h2>
 				<span>
 					<p class="labelsDown">
 						<label for="un" width="50px">שם המשתמש:</label>
 						<input type="text" id="un"/>
 					</p>
-					<p class="labelsDown"> 
+					<p class="labelsDown">
 						<label for="pw">סיסמה:</label>
 						<input type="password" id="pw"/>
 						<p>
@@ -53,34 +53,34 @@
 							<span class="checkboxtext">וויי - פיי</span>
 							<input type="checkbox" id="mo"/>
 							<span class="checkboxtext">מודל</span>
+						<!--<input type="checkbox" id="re"/>
+							<span class="checkboxtext">חיבור מרחוק</span>-->
 							<input type="checkbox" id="mz"/>
 							<span class="checkboxtext lastcheckboxtext">לב נט (מזק)</span>
 						</span>
 						<span class="buttons">
 							<button id="submit">שלח</button>
-							<button id="reset_Data">למחוק נתונים</button>
+							<button id="reset_Data">אפס הגדרות</button>
 						</span>
 					</div>
 		</div>
 		<div id="courses" style="display: none;">
 			<h2>
-				באזור זה ניתן להסתיר קורסים מהמודל
+				באזור זה ניתן להציג קורסים מסויימים מהמודל
 			</h2>
-			<p>
-				ראוי לציין, כי הקורסים עודכנו על ידי חשבון המשתמש הנוכחי במודל
-			</p>	
+
 			<button id="Refresh" class="Refresh">רענן</button>
 			<!--progress doen't work in IE9- -->
 			<progress class="Refresh" value="0" max="2" style="display: none;"></progress>
 			<table id="coursesTable">
 				<tr>
 					<th style="padding:0 12px">הצג </th>
-					<th>שם של הקורס</th> 
+					<th>שם של הקורס</th>
 					<th style="padding:0 12px"> הצג </th>
 					<th >שם של הקורס</th>
 				</tr>
 
-			</table> 
+			</table>
 		</div>
 		<div id="notifications" style="display: none;">
 			<h2>
@@ -92,13 +92,13 @@
 					<span  for="HWfirstAlarm" class="checkboxtext">להודיע על שיעורי בית?</span>
 					<br/>
 					<label for="HWfirstAlarmTime" style="display: none;">כמה שעות לפני?</label>
-					<input type="number" name="HWfirstAlarmTime" id="HWfirstAlarmTime" min="0.5" max="48" step="0.5" value="1" style="display: none;" />
+					<input type="number" name="HWfirstAlarmTime" id="HWfirstAlarmTime" min="0.5" step="0.5" value="1" style="display: none;" />
 				</span><span>
 				<input type="checkbox" id="HWSecondAlarm"  style="display: none;"/>
 				<span class="checkboxtext" for="HWSecondAlarm" style="display: none;">להודיע פעמיים?</span>
 				<br/>
 				<label for="SecondAlarm" style="display: none;">כמה שעות לפני?</label>
-				<input type="number" name="SecondAlarm" id="HWSecondAlarmTime" min="0.5" max="24" step="0.5" value="0.5"   style="display: none;"  />
+				<input type="number" name="SecondAlarm" id="HWSecondAlarmTime" min="0.5" step="0.5" value="0.5"   style="display: none;"  />
 			</span>
 			</div>
 			<div id="UENotifications" class="inlines">
@@ -107,16 +107,16 @@
 					<span class="checkboxtext" for="UEfirstAlarm">להודיע על אירועים?</span>
 					<br/>
 					<label for="firstAlarmTime" style="display: none;">כמה שעות לפני?</label>
-					<input type="number" name="firstAlarmTime" id="UEfirstAlarmTime" min="0.5" max="48" step="0.5" value="1" style="display: none;"/>
+					<input type="number" name="firstAlarmTime" id="UEfirstAlarmTime" min="0.5"  step="0.5" value="1" style="display: none;"/>
 				</span><span>
 				<input type="checkbox" id="UESecondAlarm" style="display: none;"/>
 				<span class="checkboxtext" for="UESecondAlarm" disabled="true" style="display: none;">להודיע פעמיים?</span>
 				<br/>
 				<label for="SecondAlarm" style="display: none;">כמה שעות לפני?</label>
-				<input type="number" name="SecondAlarm" id="UESecondAlarmTime" min="0.5" max="24" step="0.5" value="0.5" style="display: none;"/>
+				<input type="number" name="SecondAlarm" id="UESecondAlarmTime" min="0.5" step="0.5" value="0.5" style="display: none;"/>
 			</span>
 			</div>
-			<button id="updateNotifications">לעדכן</button>   
+			<button id="updateNotifications">עדכן</button>
 		</div>
 		<div id="advanced" style="display: none;">
 			<h2>
@@ -129,54 +129,54 @@
 					</p>
 					<p class="option">
 						<input type="checkbox" id="checkLogin" />
-						<span class="checkboxtext" for="UESecondAlarm">התחברות ברקע</span>
+						<span class="checkboxtext" for="UESecondAlarm">חיבור ברקע</span>
 					</p>
 					<p class="option">
 						<input type="checkbox" id="hiddeModdelHelp" />
 						<span class="checkboxtext" >להסתיר "ניתן להגדיר הקורסים שלי בהגדרות"</span>
 					</p>
-					<p class="option">
-						<input type="checkbox" id="chekUser" />
-						<span class="checkboxtext" >לבדוק שם משתמש לפני כל עדכון</span>
-						<p class="helper" style="margin-right:75px">שם משתמש:<var id="currentUser"></var></p>
-					</p>
 					<p>
 						------------------------------------אירועים------------------------------------
 					</p>
 					<p class="option">
+						<input type="checkbox" id="MoodleHiddeUE" />
+						<span class="checkboxtext" >להסתיר אירועים מהמודל</span>
+					</p>
+					<p class="option">
 						<input type="checkbox" id="hiddeUE" />
-						<span class="checkboxtext" >להסתיר אירועים</span>
-					</p>	
+						<span class="checkboxtext" >להסתיר אירועים מחלון ההתראות</span>
+					</p>
+
 					<p>
 						---------------------------------שיעורי בית---------------------------------
 					</p>
-					<p class="helper">הראה את שיעורי הבית:</p>
-					<input type="radio" name="from" id="portal" />
-					<span class="checkboxtext">מהדף הראשי של המודל</span>
-					<input type="radio" name="from" id="calendar"/>
-					<span class="checkboxtext">מתצוגת לוח-שנה</span>
-					
+					<p class="helper" style="display:none">הראה את שיעורי הבית:</p>
+					<input type="radio" name="from" id="portal" style="display:none"/>
+					<span class="checkboxtext" style="display:none">מהדף הראשי של המודל</span>
+					<input type="radio" name="from" id="calendar" style="display:none"/>
+					<span class="checkboxtext" style="display:none">מתצוגת לוח-שנה</span>
+
 					<p class="option inline">הצג עד
-						<input type="number" min="1" max="5" step="1" value="3" id="hwDays" />
+						<input type="number" min="1" max="10" step="1" value="3" id="hwDays" />
 						ימים של שיעורי בית
-						ולעדכן כל
+						ועדכן כל
 						<input type="number" min="1" max="20" step="1" value="5" id="hwUpdate"/>
 						שעות
 					</p>
 					<p class="option">
 						<input type="checkbox" id="updateOnPopup" />
-						<span class="checkboxtext" >לעדכן בכל פעם, כאשר לוחצים על הסמל של הרחבה </span>
+						<span class="checkboxtext" >עדכון נתונים מחדש בלחיצה על סמל ההרחבה </span>
 					</p>
 					<p class="option">
 						<input type="checkbox" id="todaysHW" />
-						<span class="checkboxtext" >לזכור את כל שיעורי הבית של היום, כאשר הכרום מתחיל</span>
+						<span class="checkboxtext" > תזכורת לשיעורי הבית היומיים בהפעלת הכרום</span>
 					</p>
 						<p class="option">
 						<input type="checkbox" id="hwChanges" />
-						<span class="checkboxtext" >להודיע על שינויים של שיעורי בית</span>
+						<span class="checkboxtext" >להודיע על שינויים בהגשות של שיעורי הבית</span>
 					</p>
 					<p>
-						---------------------------------סגנונות רחב---------------------------------
+						-----------------------------------סגנונות-----------------------------------
 					</p>
 					<figure>
 						<img src="image/newSyle.png"/>
@@ -194,28 +194,28 @@
 					</figure>
 					<br/>
 					<p>
-						<button id="updateSettings">לעדכן</button> 	
+						<button id="updateSettings">עדכן</button>
 					</p>
 				</span>
 			</div>
 		</div>
 		<div id="about" style="display: none;">
 			<p>
-				רחבה שפותחה על ידי דוד בן עטר
+				הרחבה זו פותחה על ידי דוד בן עטר
 				<br/>
 				מייל: abenatha@jct.ac.il
 			</p>
 			<p>
-				הודות ליוסף כשר על עזרתו בפיתוח הסתר קורסים במודל
+				קרדיט ליוסף כשר על פיתוח האופצייה להסתיר קורסים במודל.
 			</p>
 			<p>
 				<details>
 				 	<summary>תנאים</summary>
 				  	<ul>
-			 	 		<li> הנתונים המאוחסנים ברחבה זו, אין להם הצפנה חזקה, ולכן אנחנו לא אחראים על המידע (כגון שם משתמש וסיסמא)</li>
-			 	 		<li> אנו לא מאחסנים נתונים על השרתים שלנו, רק בזיכרון של כרום שבו התקנת התוסף</li>
-			 	 		<li>הרחבה זו יש גישה אך ורק לאתרים הקשורים למוסד (למשל: moodle.jct.ac.il, 10.1.1.1)</li>
-			 	 		<li>אנחנו לא אחראים על תקלה כלשהי בהרחבה, אבל זה תמיד אפשרי לשלוח מייל ולדווח תקלה</li>
+			 	 		<li> הנתונים המאוחסנים בהרחבה זו, אין להם הצפנה חזקה, ולכן אנחנו לא אחראים על המידע (כגון שם משתמש וסיסמא).</li>
+			 	 		<li> אנו לא מאחסנים נתונים על השרתים שלנו, רק בזיכרון של כרום שבו התקנת התוסף מתבצעת.</li>
+			 	 		<li>ההרחבה זו יש גישה אך ורק לאתרים הקשורים למוסד (למשל: moodle.jct.ac.il, 10.1.1.1).</li>
+			 	 		<li>אנחנו לא אחראים על תקלה כלשהי בההרחבה, אבל זה תמיד אפשרי לשלוח מייל ולדווח תקלה.</li>
 			 	 		<li>ההארכה היא קוד פתוח, שזה נמצא בכתובת: <a href="https://github.com/desdo09/Jct_tools">https://github.com/desdo09/Jct_tools</a></li>
 					</ul>
 					</details>
@@ -227,71 +227,71 @@
 			 			<details class="log">
 			  			<summary>3.0 (Current)</summary>
 			  			<ul>
-			  				<li>New gr </li>	
+			  				<li>New gr </li>
 			  				<li>Button wifi url changed to local ip</li>
-			  			</ul>	
+			  			</ul>
 			  			</details>
-			 	
+
 			  			<details class="log">
 			  			<summary>2.0.3</summary>
 			  			<ul>
-			  				<li>Bug fixed in wifi login page</li>	
+			  				<li>Bug fixed in wifi login page</li>
 			  				<li>Button wifi url changed to local ip</li>
-			  			</ul>	
+			  			</ul>
 			  			</details>
-			  			
+
 			  			<details class="log">
 			  			<summary>2.0.2</summary>
 			  			<ul>
-			  				<li>Bug fixed</li>	
-			  			</ul>	
+			  				<li>Bug fixed</li>
+			  			</ul>
 			  			</details>
 
 			  			<details class="log">
 			  			<summary>2.0.1</summary>
 			  			<ul>
-			  				<li>Bug fixed</li>	
-			  			</ul>	
+			  				<li>Bug fixed</li>
+			  			</ul>
 			  			</details>
 
 			  			<details class="log">
 			  			<summary>2.0</summary>
 			  			<ul>
 
-			  				<li>Bug fixed</li>	
-			  				<li>New graphical integration in the extension button</li>	
-			  				<li>Now you can disable the extension!</li>	
-			  				<li>We improve the privacy</li>	
-			  				<li>Now you can choose which pages the extension is activated</li>	
-			  			</ul>	
+			  				<li>Bug fixed</li>
+			  				<li>New graphical integration in the extension button</li>
+			  				<li>Now you can disable the extension!</li>
+			  				<li>We improve the privacy</li>
+			  				<li>Now you can choose which pages the extension is activated</li>
+			  			</ul>
 			  			</details>
 
 			  			<details class="log">
 			  			<summary>1.2.1</summary>
 			  			<ul>
 
-			  				<li>New: option moodle old add in extension's button</li>	
-			  				<li>Bug fixed</li>	
-				  		</ul>	
+			  				<li>New: option moodle old add in extension's button</li>
+			  				<li>Bug fixed</li>
+				  		</ul>
 			  			</details>
 
 			  			<details class="log">
 			  			<summary>1.2</summary>
 			  			<ul>
 
-			  				<li>Now it automatically connects to page Moodle-old!</li>	
-			  				<li>Now it automatically connects mazak page!</li>	
-				  		</ul>	
+			  				<li>Now it automatically connects to page Moodle-old!</li>
+			  				<li>Now it automatically connects mazak page!</li>
+				  		</ul>
 			  			</details>
 
 			  			<details class="log">
 			  			<summary>1.1</summary>
 			  			<ul>
 
-			  				<li>New: Button added to the edge of the browser with the pages of Machon.</li>	
-			  				<li>Update: Improvement in the graphics</li>	
+			  				<li>New: Button added to the edge of the browser with the pages of Machon.</li>
+			  				<li>Update: Improvement in the graphics</li>
 				  			<li>Update: Fix the link "Options" on the page of wifi_login even when the user not configured the password.</li>
-				  		</ul>	
+				  		</ul>
 			  			</details>
 			</details>
 			</p>

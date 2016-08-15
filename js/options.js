@@ -5,8 +5,8 @@ var localData;
 *
 * MEANING:
 * 	The DataAccess work with promise so when
-* the document is ready to work, the function 
-* will set the data in the acount div, then 
+* the document is ready to work, the function
+* will set the data in the acount div, then
 * will set all button functions.
 **************************************************/
 $(document).ready(function () {
@@ -16,7 +16,7 @@ $(document).ready(function () {
 	.then(function(){return DataAccess.Data(setAdvancedData)})
 	.then(function(){return DataAccess.Data(setNotificationsData)})
 	.then(function(){
-		// All links in menu will be set to go to the funcion "changediv", 
+		// All links in menu will be set to go to the funcion "changediv",
 		// and the parameter will be the content of the attribute "div-id"
 		$('#menu').find('a').click(function(){changediv($(this).attr('div-id'));});
 		// The refresh button will initialize the function setdata
@@ -27,7 +27,7 @@ $(document).ready(function () {
 		$("#Refresh").click(refreshData);
 		$("#updateNotifications").click(setNotifications);
 		$("#updateSettings").click(setAdvanced);
-	}); 
+	});
 });
 
 /*************************************************
@@ -49,17 +49,17 @@ function setAccountData(data)
 	localData = data;
 	// in case the data object is null (undefined)
 	// meaning that is the first time (or the user make
-	// a reset data), so by default all "checkbox" in 
+	// a reset data), so by default all "checkbox" in
 	// account div will be checked
 	if(data != null)
 	{
-		if(data["wf"] == undefined || data["wf"]) 
+		if(data["wf"] == undefined || data["wf"])
 		document.getElementById("wf").checked = true;
 
-		if(data["mz"] == undefined || data["mz"]) 
+		if(data["mz"] == undefined || data["mz"])
 		 document.getElementById("mz").checked = true;
 
-		if(data["mo"] == undefined || data["mo"]) 
+		if(data["mo"] == undefined || data["mo"])
 		 document.getElementById("mo").checked = true;
 	}
 	else
@@ -84,14 +84,14 @@ function setAccountData(data)
 *	the function will set into the database
 *
 * ATTENTION
-* 	Because the funcion have no access to "DataAccess" 
+* 	Because the funcion have no access to "DataAccess"
 * objects, the funcion cannot check if the username/password
 * already exist.
 ******************************************************/
 function setData() {
-	
+
 	// in case the user leave the username/password field empty,
-	// means that the user dont want to change it 
+	// means that the user dont want to change it
 	if($("#un").val() != "")
 		DataAccess.setData("username",$("#un").val());
 
@@ -103,12 +103,13 @@ function setData() {
 						wf:document.getElementById('wf').checked,
 						mz:document.getElementById('mz').checked ,
 						mo:document.getElementById('mo').checked,
+					//	re:document.getElementById('re').checked,
 						enable:true
 						})
 
 	chrome.runtime.sendMessage({changeIcon:true});
 	notification("המאגר עודכן");
-}	
+}
 
 
 /*************************************************
@@ -122,7 +123,7 @@ function setData() {
 *   toDiv - The div to show
 *
 * MEANING
-*   The function will hidde al divs and open the 
+*   The function will hidde al divs and open the
 *	the div name received the parameter
 *
 ******************************************************/
@@ -136,11 +137,11 @@ function changediv(toDiv)
 	// In case the div doesn't exist stop
 	if(undefined == $(toDiv) || 0 == ($(toDiv)).length)
 		return;
-	// Every div in the conteiner will be hide 
+	// Every div in the conteiner will be hide
 	$('#contenedor').children().each(function(){
 			$(this).hide(500);
 	});
-	// Then will show the div 
+	// Then will show the div
 	$(toDiv).show(500);
 }
 /*************************************************
@@ -160,15 +161,17 @@ function changediv(toDiv)
 **************************************************/
 function setTabla(data)
 {
-	// in case there is no data then break 
+	// in case there is no data then break
 	if(data == undefined || data.length ==0 || data.courses == undefined || data.courses.length == 0)
 		return;
 
-	//Get all hash values 
+	// Remove all items
+	$("td").remove();
+	//Get all hash values
 	var course = data.courses;
 	var keys = data.coursesIndex;
 	for (var i = 0; i < keys.length; i++) {
-		
+
 		 if(i%2 == 0)
 			$('#coursesTable').find('tbody:last').append('<tr>');
 
@@ -178,7 +181,7 @@ function setTabla(data)
 		else
 			input = '<input type="checkbox" course-id="'+course[keys[i]].moodleId+'"   />'
 		// how can I add the <tr> tag? This is an hack
-		
+
 
 		$('#coursesTable').find('tbody:last').append(
 			'<td>' +input
@@ -190,11 +193,15 @@ function setTabla(data)
 	}
 
 	$('#coursesTable').find("input[type='checkbox']").each(function()
-	{	
+	{
 		$(this).change(function(){
 			updatedata(this.checked,$(this).attr("course-id"));
 		});
 	});
+
+	var progress = $('#courses').find("progress");
+	if(	$(progress).attr('value') == "1")
+			$(progress).attr('value',2);
 }
 /*************************************************
 * FUNCTION
@@ -209,73 +216,21 @@ function setTabla(data)
 * MEANING
 *   When the user request a refresh of the courses table,
 * the function will send and "message" to the background
-* page to refresh the database 
+* page to refresh the database
 *
 ******************************************************/
 function refreshData()
-{	
-	
-	//login();
+{
 
 	var progress = $('#courses').find("progress");
 	//show the progress bar
 	$(progress).show();
 	// Set the progress bar 0/2
-	$(progress).attr('value',0);
-	// send a message to the background page
-	chrome.runtime.sendMessage({updatedata:true},
-		// after the request is maded the backroun page run
-		// this funcion 
-	function(result){
-		// Set the progress bar 1/2
-		$(progress).attr('value',1);
-		//check for errors
-		if(undefined != result && undefined != result.error)
-		{
-			notification(result.error,"error");
-			return;
-		}
-		
-		// Set the table by send the funcion as call back
-		// to the DataAccess
-		DataAccess.Data(setTabla)
-		.then(function(){
-			// After finished set the progress bar 2/2
-			$(progress).attr('value',2);
-		})
 
-	});
+	chrome.runtime.sendMessage({updatedata:true});
 
+	$(progress).attr('value',1);
 
-
-}
-/*************************************************
-* FUNCTION
-*    login
-*
-* RETURN VALUE
-*	This function does not return parameters
-*
-* PARAMETERS
-*   This function does not receive any parameters
-*
-* MEANING
-* 	This function will send a request to the backgound
-* page to login at moodle.jct.ac.il
-*
-******************************************************/
-function login()
-{
-	DataAccess.Data(function(data)
-	{
-		chrome.runtime.sendMessage({login:true,username:data.username,password:window.atob(data.password)},function(result){
-			if(!result.operationCompleted)
-				notification(result.error,"error");
-			else
-				notification(result.operationCompleted);
-		});
-
-	});	
 }
 
 function updatedata(hide,id)
@@ -377,7 +332,7 @@ function setCheckers()
  	});
 
  	$("#HWSecondAlarm").change(function () {
-   		 if (this.checked) 
+   		 if (this.checked)
    		 {
    		 	$("#HWNotifications").find("label[for='SecondAlarm']" ).slideDown();
    		 	$("#HWSecondAlarmTime").slideDown();
@@ -414,7 +369,7 @@ function setCheckers()
  	});
 
  	$("#UESecondAlarm").change(function () {
-   		 if (this.checked) 
+   		 if (this.checked)
    		 {
    		 	$("#UENotifications").find("label[for='SecondAlarm']" ).slideDown();
    		 	$("#UESecondAlarmTime").slideDown();
@@ -431,8 +386,8 @@ function setNotifications()
 {
 	//Homework
 	if($("#HWfirstAlarm").is(':checked'))
-	{	
-		if($("#HWfirstAlarmTime") == null || isNaN(parseInt($("#HWfirstAlarmTime").val())) || parseInt($("#HWfirstAlarmTime").val()) < 0 || parseInt($("#HWfirstAlarmTime").val())>6)
+	{
+		if($("#HWfirstAlarmTime") == null || isNaN(parseInt($("#HWfirstAlarmTime").val())) || parseInt($("#HWfirstAlarmTime").val()) < 0)
 		{
 			notification("זמן לא חוקי","error");
 			return;
@@ -440,7 +395,7 @@ function setNotifications()
 		else
 			DataAccess.setObject("Config","HWfirstAlarm",$("#HWfirstAlarmTime").val());
 
-		
+
 	}
 	else
 	{
@@ -449,7 +404,7 @@ function setNotifications()
 
 	if($("#HWSecondAlarm").is(':checked') && $("#HWfirstAlarm").is(':checked'))
 	{
-		if($("#HWSecondAlarmTime") == null ||isNaN(parseInt($("#HWSecondAlarmTime").val())) || parseInt($("#HWSecondAlarmTime").val()) < 0 || parseInt($("#HWSecondAlarmTime").val())>10)
+		if($("#HWSecondAlarmTime") == null ||isNaN(parseInt($("#HWSecondAlarmTime").val())) || parseInt($("#HWSecondAlarmTime").val()) < 0)
 		{
 			notification("זמן לא חוקי","error");
 			return;
@@ -463,9 +418,9 @@ function setNotifications()
 	}
 
 
-	//User Event	
+	//User Event
 	if($("#UEfirstAlarm").is(':checked'))
-	{	
+	{
 		if($("#UEfirstAlarmTime") == null || isNaN(parseInt($("#UEfirstAlarmTime").val())) || parseInt($("#UEfirstAlarmTime").val()) < 0 || parseInt($("#UEfirstAlarmTime").val())>6)
 		{
 			notification("זמן לא חוקי","error");
@@ -474,12 +429,12 @@ function setNotifications()
 		else
 			DataAccess.setObject("Config","UEfirstAlarm",$("#UEfirstAlarmTime").val());
 
-		
+
 	}
 	else
 	{
 		DataAccess.setObject("Config","UEfirstAlarm",false);
-		
+
 	}
 	if($("#UESecondAlarm").is(':checked') && $("#UEfirstAlarm").is(':checked'))
 	{
@@ -505,7 +460,7 @@ function setAdvancedData(data)
 	$("#calendar").click(function(){
 		$(this).prop('checked',false);
 		$("#portal").prop('checked',true);
-		notification("מתצוגת לוח-שנה: "+"אנחנו עובדים בזה","warning");
+		notification("מתצוגת לוח-שנה: "+"אנחנו עובדים על זה","warning");
 	})
 	if(data.Config == undefined)
 		data.Config = {}
@@ -547,9 +502,9 @@ function setAdvancedData(data)
 		$("#todaysHW").attr('checked',false);
 
 	if(data.Config.updateOnPopup == undefined || data.Config.updateOnPopup)
-		$("#todaysHW").attr('checked',true);
+		$("#updateOnPopup").attr('checked',true);
 	else
-		$("#todaysHW").attr('checked',false);
+		$("#updateOnPopup").attr('checked',false);
 
 	if(data.Config.hwChanges == undefined || data.Config.hwChanges)
 		$("#hwChanges").attr('checked',true);
@@ -560,23 +515,23 @@ function setAdvancedData(data)
 		$("#classic").attr('checked',true);
 	else
 		$("#new").attr('checked',true);
-	
+
 }
 
 function setAdvanced()
 {
-	
-	if($("#hwDays") == null || isNaN(parseInt($("#hwDays").val())) || parseInt($("#hwDays").val()) < 1 || parseInt($("#hwDays").val())>6)
+
+	if($("#hwDays") == null || isNaN(parseFloat($("#hwDays").val())) || parseFloat($("#hwDays").val()) < 0.5)
 	{
 		notification("Invalid days","error");
 		return;
 	}
-	if($("#hwUpdate") == null ||isNaN(parseInt($("#hwUpdate").val())) || parseInt($("#hwUpdate").val()) < 1 || parseInt($("#hwUpdate").val())>10)
+	if($("#hwUpdate") == null ||isNaN(parseFloat($("#hwUpdate").val())) || parseFloat($("#hwUpdate").val()) < 0.5)
 	{
 		notification("Invalid hours","error");
 		return;
 	}
-	// 	
+	//
 	DataAccess.setObject("Config","checkLogin",$("#checkLogin").is(':checked'));
 	DataAccess.setObject("Config","hiddeModdelHelp",$("#hiddeModdelHelp").is(':checked'));
 	DataAccess.setObject("Config","hiddeUE",$("#hiddeUE").is(':checked'));
@@ -585,7 +540,7 @@ function setAdvanced()
 
 	DataAccess.setObject("Config","hwDays",$("#hwDays").val());
 	DataAccess.setObject("Config","hwUpdate",$("#hwUpdate").val());
-	
+
 	DataAccess.setObject("Config","updateOnPopup",$("#updateOnPopup").is(':checked'));
 	DataAccess.setObject("Config","todaysHW",$("#todaysHW").is(':checked'));
 	DataAccess.setObject("Config","hwChanges",$("#hwChanges").is(':checked'));
@@ -604,13 +559,13 @@ function setAdvanced()
 *	This function doesn't return parameters
 *
 * PARAMETERS
-*   message - The message to show 
+*   message - The message to show
 * 	error   - true in case is a error
 *
 * MEANING
 *   When the user request a refresh of the courses table,
 * the function will send and "message" to the background
-* page to refresh the database 
+* page to refresh the database
 *
 ******************************************************/
 function notification(message, type = "success")
@@ -623,4 +578,33 @@ function notification(message, type = "success")
 
 	if(type == "success")
 		$.notify(message,{position:"top right",className: 'success'});
+}
+
+
+function onBackgroundEvent(eventType)
+{
+	if(typeof eventType != "object")
+		return;
+
+		console.log("onBackgroundEvent:");
+		console.log(eventType);
+
+	switch (eventType.type) {
+		case "updateData":
+			var progress = $('#courses').find("progress");
+			if(	$(progress).attr('value') != "1" )
+				break;
+			if(eventType.operationCompleted != true)
+				notification(eventType.error,"error");
+			else {
+				DataAccess.Data(function(data){
+					setTabla(data);
+					$(progress).attr('value',2);
+				});
+			}
+			break;
+		default:
+
+	}
+	//	$(progress).attr('value',1);
 }
