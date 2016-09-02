@@ -34,9 +34,10 @@
 	<div id="contenedor">
 		<div id="account" >
 			<div id="form">
-				<h2>
+				<h2> פרטי חשבון של אתרים של המרכז האקדמי לב</h2>
+				<p>
 					אנא הזן את שם המשתמש ואת הסיסמא שלך לאתרים של המרכז האקדמי לב
-				</h2>
+				</p>
 				<span>
 					<p class="labelsDown">
 						<label for="un" width="50px">שם המשתמש:</label>
@@ -47,7 +48,7 @@
 						<input type="password" id="pw"/>
 						<p>
 						</span>
-						<p class="helper">להפעיל ב:</p>
+						<p class="helper">להתחבר אוטומטית ב:</p>
 						<span class="activeWeb">
 							<input type="checkbox" id="wf"/>
 							<span class="checkboxtext">וויי - פיי</span>
@@ -66,7 +67,7 @@
 		</div>
 		<div id="courses" style="display: none;">
 			<h2>
-				באזור זה ניתן להציג קורסים מסויימים מהמודל
+				באזור זה ניתן להציג קורסים מסויימים במודל
 			</h2>
 
 			<button id="Refresh" class="Refresh">רענן</button>
@@ -125,30 +126,7 @@
 			<div>
 				<span>
 					<p>
-						-------------------------------------מודל-------------------------------------
-					</p>
-					<p class="option">
-						<input type="checkbox" id="checkLogin" />
-						<span class="checkboxtext" for="UESecondAlarm">חיבור ברקע</span>
-					</p>
-					<p class="option">
-						<input type="checkbox" id="hiddeModdelHelp" />
-						<span class="checkboxtext" >להסתיר "ניתן להגדיר הקורסים שלי בהגדרות"</span>
-					</p>
-					<p>
-						------------------------------------אירועים------------------------------------
-					</p>
-					<p class="option">
-						<input type="checkbox" id="MoodleHiddeUE" />
-						<span class="checkboxtext" >להסתיר אירועים מהמודל</span>
-					</p>
-					<p class="option">
-						<input type="checkbox" id="hiddeUE" />
-						<span class="checkboxtext" >להסתיר אירועים מחלון ההתראות</span>
-					</p>
-
-					<p>
-						---------------------------------שיעורי בית---------------------------------
+						-------------------------------------כללי-------------------------------------
 					</p>
 					<p class="helper" style="display:none">הראה את שיעורי הבית:</p>
 					<input type="radio" name="from" id="portal" style="display:none"/>
@@ -157,15 +135,15 @@
 					<span class="checkboxtext" style="display:none">מתצוגת לוח-שנה</span>
 
 					<p class="option inline">הצג עד
-						<input type="number" min="1" max="10" step="1" value="3" id="hwDays" />
+						<input type="number" min="1" max="99" step="1" value="3" id="hwDays" />
 						ימים של שיעורי בית
 						ועדכן כל
-						<input type="number" min="1" max="20" step="1" value="5" id="hwUpdate"/>
+						<input type="number" min="1" max="24" step="1" value="5" id="hwUpdate"/>
 						שעות
 					</p>
 					<p class="option">
-						<input type="checkbox" id="updateOnPopup" />
-						<span class="checkboxtext" >עדכון נתונים מחדש בלחיצה על סמל ההרחבה </span>
+						<input type="checkbox" id="hiddeNofication" />
+						<span class="checkboxtext" >להסתיר ההתראה אחרי פרק זמן</span>
 					</p>
 					<p class="option">
 						<input type="checkbox" id="todaysHW" />
@@ -173,7 +151,42 @@
 					</p>
 						<p class="option">
 						<input type="checkbox" id="hwChanges" />
-						<span class="checkboxtext" >להודיע על שינויים בהגשות של שיעורי הבית</span>
+						<span class="checkboxtext" >להודיע על שינויים בהגשות של שיעורי בית</span>
+					</p>
+					<p>
+						-------------------------------------מודל-------------------------------------
+					</p>
+					<p class="option">
+						<input type="checkbox" id="checkLogin" />
+						<span class="checkboxtext" >חיבור ברקע</span>
+					</p>
+					<p class="option">
+						<input type="checkbox" id="moodleTopic" />
+						<span class="checkboxtext" >להסתיר "נושא האתר" בדף הראשי</span>
+					</p>
+					<p class="option">
+						<input type="checkbox" id="hiddeModdelHelp" />
+						<span class="checkboxtext" >להסתיר "ניתן להגדיר הקורסים שלי בהגדרות"</span>
+					</p>
+					<p class="option">
+						<input type="checkbox" id="MoodleHiddeUE" />
+						<span class="checkboxtext" >להסתיר אירועים</span>
+					</p>
+					<p>
+						-------------------------------חלון ההתראות-------------------------------
+					</p>
+
+					<p class="option">
+						<input type="checkbox" id="hiddeUE" />
+						<span class="checkboxtext" >להסתיר אירועים</span>
+					</p>
+					<p class="option">
+						<input type="checkbox" id="updateOnPopup" />
+						<span class="checkboxtext" >עדכון נתונים מחדש בלחיצה על סמל ההרחבה </span>
+					</p>
+					<p class="option">
+						<input type="checkbox" id="showBadge" />
+						<span class="checkboxtext" >להראות סכ"ה של שיעורי בית בסמל</span>
 					</p>
 					<p>
 						-----------------------------------סגנונות-----------------------------------
@@ -201,6 +214,11 @@
 		</div>
 		<div id="about" style="display: none;">
 			<p>
+			כלים לסטודנטים של המרכז האקדמי לב
+			<br/>
+			גירסה: <var id="version"></var>
+			</p>
+			<p>
 				הרחבה זו פותחה על ידי דוד בן עטר
 				<br/>
 				מייל: abenatha@jct.ac.il
@@ -227,8 +245,9 @@
 			 			<details class="log">
 			  			<summary>3.0 (Current)</summary>
 			  			<ul>
-			  				<li>New gr </li>
-			  				<li>Button wifi url changed to local ip</li>
+			  				<li>New graphical integration in the extension button</li>
+			  				<li>New events notifications</li>
+			  				<li>New option to hide the courses on moodle</li>
 			  			</ul>
 			  			</details>
 

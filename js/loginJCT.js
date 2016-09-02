@@ -2,7 +2,6 @@ var username;
 
 $(document).ready(function()
 {
-	$.notify("hi",{position:"top right",className: 'success'});
 	DataAccess.Data(onStart);
 
 });
@@ -16,7 +15,9 @@ function onStart(data)
 
 	console.log("JCT Tools->Username: " + username);
 	// Decrypting the password
-	var password =  window.atob(data["password"]);
+	var password = "";
+	if(data["password"] != null)
+		password = window.atob(data["password"]);
 	// Check current host
 	switch(location.host)
 	{
@@ -92,14 +93,15 @@ function moodleConnect(pass,data)
 			$("#login_username").attr("value",data.username);
 			$("#login_password").attr("value",pass);
 			$("#login input[value='התחברות'][type='submit']").click();
+
 		}
 	}
 	else
 	{
-		var coursesTable = $("#frontpage-course-list").html();
+		console.log("JCT Tools->" + "Moodle hide user events: " + data.Config["MoodleHiddeUE"]);
+		//var coursesTable = $("#frontpage-course-list").html();
 
-		if(coursesTable == "" || coursesTable.length == 0 || data == null || data.courses == undefined)
-			return;
+
 		if (undefined == data )
 			data = {}
 
@@ -107,6 +109,17 @@ function moodleConnect(pass,data)
 			data.Config = {}
 
 		hideCourses(data.moodleCoursesTable,data.Config.hiddeModdelHelp);
+		
+		if(data.Config["MoodleHiddeUE"] && data["mo"] && data.enable)
+			$(".event").each(function(){
+				if($("img[alt='אירוע משתמש']").length > 0)
+					$(this).remove();
+			});
+
+		if(data.Config["moodleTopic"] && data["mo"] && data.enable)
+			$(".sitetopic").remove();
+
+		
 	}
 
 

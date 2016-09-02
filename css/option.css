@@ -1,6 +1,6 @@
 body
 {
-  background:#0d3d3d ; 
+  background:#0d3d3d ;
   margin:0 auto;
   width:1024px;
   height: auto;
@@ -116,7 +116,7 @@ figure{
 }
 #menu .option .text
 {
- margin: 0; 
+ margin: 0;
 }
 /******************************
 *   Conteiner div styles
@@ -142,7 +142,7 @@ figure{
 /******************************
 *   account div styles
 ******************************/
-#account 
+#account
 {
   overflow: visible;
 }
@@ -165,7 +165,7 @@ figure{
   display: inline-block;
   width: 200px;
   padding: 5px;
- 
+
 
 }
 
@@ -188,7 +188,7 @@ figure{
 *   courses div styles
 ******************************/
 
-#courses 
+#courses
 {
   overflow: visible;
 }
@@ -204,7 +204,7 @@ figure{
   font-style: David;
   font-size: 28px;
 }
-#courses table th,td 
+#courses table th,td
 {
   padding: 0;
   margin:0;
@@ -247,6 +247,7 @@ figure{
 #advanced figure img{
   width: 250px;
   height: 380px;
+  border: #fff solid 0.2px;
 }
 #advanced button{
   font-size: 30px;

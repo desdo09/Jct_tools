@@ -178,23 +178,21 @@ var DataAccess = {
     *  This function will clear the database and change the icon
     ******************************************************************/
     reset:function(){
-        chrome.runtime.sendMessage({changeIcon:false});
+        chrome.runtime.sendMessage({changeIcon:false,setBadge:true,message:"Database erased"});
         chrome.storage.local.clear();
         location.reload();
         DataAccess.setData({
-    			Config:
-    			{
-    				HWSecondAlarm	:	"0.5", HWfirstAlarm:	"1",UESecondAlarm:"0.5",UEfirstAlarm:"1",checkLogin:true,hiddeModdelHelp:false,
-    				hiddeUE:false,hwChanges:true,hwDays:"5",hwUpdate:"1",style:"new",todaysHW:true,updateOnPopup:true
-    			},
-    			mo:true,mz:true,wf:true
+          Config:
+          {
+            HWSecondAlarm	:	"0.5", HWfirstAlarm:	"1",UESecondAlarm:"0.5",UEfirstAlarm:"1",checkLogin:true,hiddeModdelHelp:false,
+            hiddeUE:false,hwChanges:true,hwDays:"5",hwUpdate:"1",style:"new",todaysHW:true,updateOnPopup:true
+          },
+          mo:true,mz:true,wf:true,
+          moodleCoursesTable:{}
     	 });
-        console.log("Database erased");
-
     }
 
 }
-
 
 /*****************************************************************
 *  getDate function:

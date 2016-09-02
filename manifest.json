@@ -1,9 +1,11 @@
 {
    
    "name"          : "כלים לסטודנטים של המרכז האקדמי לב",
-   "version"       : "3.0",
-   "version_name"  : "3.0 Beta",
+   "short_name"    : "Jct tools",
+   "version"       : "3.0.1",
+   "version_name"  : "3.0 Beta 2",
    "description"   : "הודעות וחיבור לאתרים של המרכז האקדמי לב - מכון לב",
+   "author"        : "David Aben Athar",
    
    "icons": {"128": "image/icons/jct128.png","16": "image/icons/jct16.png","48": "image/icons/jct48.png"},
    "browser_action": { "default_icon": "image/icons/jct128.png", "default_popup": "popup.html" },
@@ -15,7 +17,7 @@
       "open_in_tab":true
    },
 
-   "permissions": [ "storage","alarms", "notifications",
+   "permissions": [ "activeTab",  "storage","alarms", "notifications",
          "*://1.1.1.1/*",
          "*://10.1.1.1/*",
          "*://*.jct.ac.il/*" 
@@ -32,9 +34,8 @@
          "*://10.1.1.1/*",
          "*://*.jct.ac.il/*"
       ],
-         "run_at": "document_start"  //"document_idle"
-      }
-        
+         "run_at": "document_start"  
+      }   
    ],
 
    "applications": {

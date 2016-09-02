@@ -27,6 +27,8 @@ $(document).ready(function () {
 		$("#Refresh").click(refreshData);
 		$("#updateNotifications").click(setNotifications);
 		$("#updateSettings").click(setAdvanced);
+		$("#version").text(chrome.runtime.getManifest().version_name);
+
 	});
 });
 
@@ -222,14 +224,20 @@ function setTabla(data)
 function refreshData()
 {
 
-	var progress = $('#courses').find("progress");
-	//show the progress bar
-	$(progress).show();
-	// Set the progress bar 0/2
+	DataAccess.Data(function (data)
+	{
+		if((data["username"] == undefined) || (data["password"] == undefined))
+			return notification("שם משתמש או סיסמא אינו מוגדר","error")
+		var progress = $('#courses').find("progress");
+		//show the progress bar
+		$(progress).show();
+		// Set the progress bar 0/2
 
-	chrome.runtime.sendMessage({updatedata:true});
+		chrome.runtime.sendMessage({updatedata:true});
 
-	$(progress).attr('value',1);
+		$(progress).attr('value',1);
+
+	})
 
 }
 
@@ -303,8 +311,6 @@ function setNotificationsData(data)
 ******************************************************/
 function setCheckers()
 {
-
-	//There is another way???
 
 
 	if(($("#HWfirstAlarm")).length == 0)
@@ -387,7 +393,7 @@ function setNotifications()
 	//Homework
 	if($("#HWfirstAlarm").is(':checked'))
 	{
-		if($("#HWfirstAlarmTime") == null || isNaN(parseInt($("#HWfirstAlarmTime").val())) || parseInt($("#HWfirstAlarmTime").val()) < 0)
+		if($("#HWfirstAlarmTime") == null || isNaN(parseInt($("#HWfirstAlarmTime").val())) || parseFloat($("#HWfirstAlarmTime").val()) < 0)
 		{
 			notification("זמן לא חוקי","error");
 			return;
@@ -404,7 +410,7 @@ function setNotifications()
 
 	if($("#HWSecondAlarm").is(':checked') && $("#HWfirstAlarm").is(':checked'))
 	{
-		if($("#HWSecondAlarmTime") == null ||isNaN(parseInt($("#HWSecondAlarmTime").val())) || parseInt($("#HWSecondAlarmTime").val()) < 0)
+		if($("#HWSecondAlarmTime") == null ||isNaN(parseInt($("#HWSecondAlarmTime").val())) || parseFloat($("#HWSecondAlarmTime").val()) < 0.5)
 		{
 			notification("זמן לא חוקי","error");
 			return;
@@ -421,7 +427,7 @@ function setNotifications()
 	//User Event
 	if($("#UEfirstAlarm").is(':checked'))
 	{
-		if($("#UEfirstAlarmTime") == null || isNaN(parseInt($("#UEfirstAlarmTime").val())) || parseInt($("#UEfirstAlarmTime").val()) < 0 || parseInt($("#UEfirstAlarmTime").val())>6)
+		if($("#UEfirstAlarmTime") == null || isNaN(parseInt($("#UEfirstAlarmTime").val())) || parseFloat($("#UEfirstAlarmTime").val()) < 0.5)
 		{
 			notification("זמן לא חוקי","error");
 			return;
@@ -438,7 +444,7 @@ function setNotifications()
 	}
 	if($("#UESecondAlarm").is(':checked') && $("#UEfirstAlarm").is(':checked'))
 	{
-		if($("#UESecondAlarmTime") == null ||isNaN(parseInt($("#UESecondAlarmTime").val())) || parseInt($("#UESecondAlarmTime").val()) < 0 || parseInt($("#UESecondAlarmTime").val())>10)
+		if($("#UESecondAlarmTime") == null ||isNaN(parseInt($("#UESecondAlarmTime").val())) || parseFloat($("#UESecondAlarmTime").val()) < 0.5 )
 		{
 			notification("Invalid time","error");
 			return;
@@ -470,10 +476,30 @@ function setAdvancedData(data)
 	else
 		$("#checkLogin").attr('checked',false);
 
+	if(data.Config.moodleTopic != undefined && data.Config.moodleTopic)
+		$("#moodleTopic").attr('checked',true);
+	else
+		$("#moodleTopic").attr('checked',false);
+
 	if(data.Config.hiddeModdelHelp != undefined && data.Config.hiddeModdelHelp)
 		$("#hiddeModdelHelp").attr('checked',true);
 	else
 		$("#hiddeModdelHelp").attr('checked',false);
+
+	if(data.Config.hiddeNofication != undefined && data.Config.hiddeNofication)
+		$("#hiddeNofication").attr('checked',true);
+	else
+		$("#hiddeNofication").attr('checked',false);
+
+	if(data.Config.MoodleHiddeUE != undefined && data.Config.MoodleHiddeUE)
+		$("#MoodleHiddeUE").attr('checked',true);
+	else
+		$("#MoodleHiddeUE").attr('checked',false);
+
+	if(data.Config.showBadge != false)
+		$("#showBadge").attr('checked',true);
+	else
+		$("#showBadge").attr('checked',false);
 
 	if(data.Config.hiddeUE != undefined && data.Config.hiddeUE)
 		$("#hiddeUE").attr('checked',true);
@@ -516,12 +542,17 @@ function setAdvancedData(data)
 	else
 		$("#new").attr('checked',true);
 
+	$("#checkLogin").change(function(){
+		if(this.checked == false)
+			notification("זְהִירוּת: "+"\n"+" נדרש להיות מחובר למודל כדי לעדכן את הנתונים.","warning");
+	});
+
 }
 
 function setAdvanced()
 {
 
-	if($("#hwDays") == null || isNaN(parseFloat($("#hwDays").val())) || parseFloat($("#hwDays").val()) < 0.5)
+	if($("#hwDays") == null || isNaN(parseFloat($("#hwDays").val())) || parseFloat($("#hwDays").val()) < 1)
 	{
 		notification("Invalid days","error");
 		return;
@@ -531,16 +562,17 @@ function setAdvanced()
 		notification("Invalid hours","error");
 		return;
 	}
-	//
+
 	DataAccess.setObject("Config","checkLogin",$("#checkLogin").is(':checked'));
 	DataAccess.setObject("Config","hiddeModdelHelp",$("#hiddeModdelHelp").is(':checked'));
+	DataAccess.setObject("Config","hiddeNofication",$("#hiddeNofication").is(':checked'));
+	DataAccess.setObject("Config","moodleTopic",$("#moodleTopic").is(':checked'));
 	DataAccess.setObject("Config","hiddeUE",$("#hiddeUE").is(':checked'));
-
+	DataAccess.setObject("Config","MoodleHiddeUE",$("#MoodleHiddeUE").is(':checked'));
+	DataAccess.setObject("Config","showBadge",$("#showBadge").is(':checked'));
 	DataAccess.setObject("Config","style",$("input[name='from']:checked").attr('id'));
-
 	DataAccess.setObject("Config","hwDays",$("#hwDays").val());
 	DataAccess.setObject("Config","hwUpdate",$("#hwUpdate").val());
-
 	DataAccess.setObject("Config","updateOnPopup",$("#updateOnPopup").is(':checked'));
 	DataAccess.setObject("Config","todaysHW",$("#todaysHW").is(':checked'));
 	DataAccess.setObject("Config","hwChanges",$("#hwChanges").is(':checked'));
@@ -548,6 +580,8 @@ function setAdvanced()
 
 	DataAccess.setObject("Config","style",$("input[name='style']:checked").attr('id'));
 	notification("המאגר עודכן");
+	// until the database will update.
+	setTimeout(function(){chrome.runtime.sendMessage({setBadge:true});},1000);
 
 }
 
@@ -590,6 +624,10 @@ function onBackgroundEvent(eventType)
 		console.log(eventType);
 
 	switch (eventType.type) {
+		case "login" :
+			if(eventType.operationCompleted == false)
+				notification(eventType.error,"error");
+		breakzz
 		case "updateData":
 			var progress = $('#courses').find("progress");
 			if(	$(progress).attr('value') != "1" )

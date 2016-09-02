@@ -10,16 +10,14 @@
 *    chrome.runtime.onMessage.addListener
 *
 * RETURN VALUE
-*   This function execute the sendResponse function
-*  and send an object
+*		This function will execute the function "onBackgroundEvent" in
+*	 all view active
 *
 * PARAMETERS
 *   request - an object with contain:
 *             + updatedata  = (true/false/undefined)
 *             + changeIcon  = (true/false/undefined)
-*							+ sender 			= The web sender
 *
-* MEANING
 *   This function will get the request maded by anothers
 *  pages in the extension and execute backgroundEvent function
 *   In case the object received contain true in login
@@ -30,39 +28,58 @@
 *   In case the object received contain changeIcon
 *  the function will change the extension icon
 *
+* Check too:
+*	backgroundEvent
 **********************************************************************/
 var ajaxAns = {status:"undefined" };
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
+		console.log("External request");
+		console.log(request);
 
-    //In case that the request is null or not an object return Invalid Parameter
-    if(request == null || typeof request != "object"){
-    			backgroundEvent({type:"Format error",operationCompleted:false,error:"Invalid Parameter",request:request});
-    		return;
-    	}
+	    //In case that the request is null or not an object return Invalid Parameter
+	    if(request == null || typeof request != "object"){
+	    	backgroundEvent({type:"Format error",operationCompleted:false,error:"Invalid Parameter",request:request});
+	    	return;
+	    }
 
-     //In case that the request is to update the data
-     if(request.updatedata)
-     {
-			 DataAccess.Data(function(data)
-       {
-        	if((data.Config == null || data.Config != null && data.Config.checkLogin != false) && data.username != null && data.password != null)
-       	 	{	login(data.username,window.atob(data.password))
-						.then(function(){
-							return updateData();
-						});
-					}else
-						updateData();
-       });
-    }
+	     //In case that the request is to update the data
+	     if(request.updatedata)
+			DataAccess.Data(loginAndUpdate);
 
-    //In case that the request contains changeIcon.
-    if(request.changeIcon != undefined)
-    		changeIcon(request.changeIcon);
+	    //In case that the request contains changeIcon.
+	    if(request.changeIcon != undefined)
+	    		changeIcon(request.changeIcon);
 
+		 //setBadge
+		 if(request.setBadge != undefined)
+			setBadge();
 
+		if(typeof request.message == "string")
+		{
+			console.log("External message: "+ request.message);
+			backgroundEvent({type:"ExternalMessage",operationCompleted:true });
+		}
 });
 
+/*****************************************************************
+* FUNCTION
+*    backgroundEvent
+*
+*
+* PARAMETERS
+*   eventType - an object with contain:
+*							+	type = the event type
+*             + operationCompleted  = (true/false)
+*             + error  = string with the error
+*
+* MEANING
+*		When the background page run an operation (like update data)
+*  the function will check in all active views (page of the extension)
+*  if the function "onBackgroundEvent" exist and then run it (sending
+*  the eventType)
+*
+**********************************************************************/
 function backgroundEvent(eventType)
 {
 	// Look through all the pages in this extension to find one we can use.
@@ -76,58 +93,93 @@ function backgroundEvent(eventType)
 		}
 	}
 }
-
-chrome.runtime.onInstalled.addListener(function	(reason)
+/*****************************************************************
+* FUNCTION
+*    chrome.runtime.onInstalled
+*
+* MEANING
+*	When the extesion install the function will run and set the default
+* settings
+**********************************************************************/
+chrome.runtime.onInstalled.addListener(onInstalled);
+function onInstalled(reason)
 {
+
 	if (reason == "install") {
 		DataAccess.setData({
 			Config:
 			{
 				HWSecondAlarm	:	"0.5", HWfirstAlarm:	"1",UESecondAlarm:"0.5",UEfirstAlarm:"1",checkLogin:true,hiddeModdelHelp:false,
-				hiddeUE:false,hwChanges:true,hwDays:"5",hwUpdate:"1",style:"new",todaysHW:true,updateOnPopup:true
+				hiddeUE:false,hwChanges:true,hwDays:"30",hwUpdate:"1",style:"new",todaysHW:true,updateOnPopup:true
 			},
-			mo:true,mz:true,wf:true
+			mo:true,mz:true,wf:true,
+			moodleCoursesTable:{}
 	});
 
 	}
+	else{
+		DataAccess.Data(function(data)
+		{
+			if(data.Config == null)
+			{
+				DataAccess.setData({
+					Config:
+					{
+						HWSecondAlarm	:	"0.5", HWfirstAlarm:	"1",UESecondAlarm:"0.5",UEfirstAlarm:"1",checkLogin:true,hiddeModdelHelp:false,
+						hiddeUE:false,hwChanges:true,hwDays:"30",hwUpdate:"1",style:"new",todaysHW:true,updateOnPopup:true
+					},
+					mo:true,mz:true,wf:true,
+					moodleCoursesTable:{}
+				});
+			}	
+		})
+	}
+	DataAccess.Data(function(data)
+	{
+		if((data["username"] == undefined) && (data["password"] == undefined))
+				chrome.runtime.openOptionsPage();
+	});
+}
+
+chrome.alarms.onAlarm.addListener(function (alarm){
+		if(alarm.name != "updateData")
+			createEventNotification(alarm.name);
+		else
+		{
+			console.log("Alarm of updateData fired");
+			DataAccess.Data(loginAndUpdate);
+		}
 });
+
+chrome.notifications.onClicked.addListener(function (id){
+	chrome.notifications.clear(id);
+	if(id.includes("event") ||  id.includes("updateData") ||  id.includes("update") || id.includes("todaysHW"))
+		return;
+
+	window.open("http://moodle.jct.ac.il/mod/assign/view.php?id="+id);
+});
+
 
 /******************************************************
 * This funcion will executade when the chrome start
 ********************************************************/
-document.addEventListener('DOMContentLoaded', function () {
-    //get The data of the data an send it to onStart
-    DataAccess.Data(onStart);
-});
-//chrome.runtime.onStartup.addListener(function)
+DataAccess.Data(onStart);
 
 function onStart(data)
 {
+	chrome.browserAction.setBadgeBackgroundColor({color:"#043D4E"});
+	//Because firefox onInstalled doesn't work, 
+	//we check if the data.Config is defined,
+	// in case are not the run onInstalled
+	if(data.Config == null)
+	{
+		 onInstalled("install");
+		 data.Config = {}
+	}
 
-	 if((data.Config == null || data.Config != null && data.Config.checkLogin != false) && data.username != null && data.password != null)
-	 {
-		 login(data.username,window.atob(data.password))
-		 .then(function(){
-			 return updateData();
-		 });
-	 }else
-		 updateData();
-
-
-	if(data == undefined)
-		return;
-
-	chrome.alarms.onAlarm.addListener(function (alarm){
-		createEventNotification(alarm.name);
-	});
-	chrome.notifications.onClicked.addListener(function (id){
-		if(id.includes("event") ||  id.includes("update") || id.includes("todaysHW"))
-			return;
-
-	window.open("http://moodle.jct.ac.il/mod/assign/view.php?id="+id);
-
-
-	});
+	console.log("Starting background page");
+	loginAndUpdate(data);
+	
    //Set the icon of the extension status (active/inactive)
    changeIcon(data.enable && data.username != null && data.password != null);
    if(data.Config != null && data.Config.hwUpdate != null)
@@ -137,6 +189,8 @@ function onStart(data)
    if(data.tasks != undefined && data.Config != null && data.Config.firstAlarm != false);
   		setAlarms(data,true);
 }
+
+
 function showTodayEvents(events,courses)
 {
 	if(events == null || events.length ==0 || courses == null || courses.length == 0)
@@ -147,6 +201,8 @@ function showTodayEvents(events,courses)
 	var j = 0;
 	var list = [];
 	for (var i = 0; i < events.length; i++) {
+		if(events[i].type == "userEvent")
+			return
 		deadline = new Date(Date.parse(events[i].deadLine));
 
 		if((deadline.getDate() == today.getDate() || deadline.getDate() == (today.getDate() +1)&& deadline.getHours()< 2) &&  deadline.getMonth() == today.getMonth() && Date.parse(deadline)> Date.now())
@@ -155,87 +211,112 @@ function showTodayEvents(events,courses)
 
 	if(events == null || j == 0)
 		return;
+
 	chrome.notifications.create(
 		'todaysHW',{
 			type: "list",
 			title: "ש\"ב להיום",
-			iconUrl: 'image/icons/jct128.png',
+			iconUrl:  chrome.extension.getURL('image/icons/jct128.png'),
 			message: "",
 			items: list
 		});
 
 }
 
+
+
 function setAlarms(data,onstart = false)
 {
+	if(data.Config != undefined && data.Config.hwUpdate != undefined && !isNaN(data.Config.hwUpdate) )
+	{
+		chrome.alarms.create("updateData", {periodInMinutes: (data.Config.hwUpdate*60)});
+	}
+	else
+		console.log("data.Config.hwUpdate is not defined");
+
 	console.log("Setting alarms")
 	if(data.Config == undefined)
 		return;
 	var events = data.tasks;
+	if(events == undefined)
+		return
 	console.log("Total events: " +  events.length);
-	var firstAlarm = parseFloat(data.Config.HWfirstAlarm);
-	if(isNaN(firstAlarm))
-		return;
-	console.log("First alarm: " +  firstAlarm);
-	var secondAlarm = parseFloat(data.Config.HWSecondAlarm);
-	console.log("Second alarm: " +  secondAlarm);
+	var hwFirstAlarm = parseFloat(data.Config.HWfirstAlarm);
+	var ueFirstAlarm = parseFloat(data.Config.UEfirstAlarm);
+
+	console.log("Homework first alarm: " +  hwFirstAlarm + ", event first alarm: " +  hwFirstAlarm);
+	var hwSecondAlarm = parseFloat(data.Config.HWSecondAlarm);
+	var ueSecondAlarm = parseFloat(data.Config.UESecondAlarm);
+	console.log("Homework second alarm: " +  hwSecondAlarm + ", event second alarm: " +  ueSecondAlarm );
 	var deadLine = Date.now();
 	for (var i = 0; i < events.length; i++)
 	{
-
+		//events[i].type == "userEvent"
+		if((events[i].type == "homework" && isNaN(hwFirstAlarm))|| (events[i].type == "userEvent" && isNaN(ueFirstAlarm)))
+			continue;
 		if(data.eventDone != null && data.eventDone[events[i].id] != null && (!data.eventDone[events[i].id].notifications || data.eventDone[events[i].id].done || data.eventDone[events[i].id].checked))
 			continue;
-
-		console.log(events[i].name + ": " + Date.parse(events[i].deadLine))
-		console.log("now: " + Date.now())
-		console.log("\n")
 
 		if(events[i] == null || (Date.parse(events[i].deadLine) < Date.now()))
 			continue;
 
-		deadLine = Date.parse(events[i].deadLine) - firstAlarm*60*60*1000;
-		console.log("first notification Alarm:" + deadLine);
+		deadLine = Date.parse(events[i].deadLine) - ((events[i].type == "homework")?hwFirstAlarm:ueFirstAlarm)*60*60*1000;
 		if(deadLine > Date.parse(new Date()))
     {
 			chrome.alarms.create(events[i].id + "(1)", {when:deadLine});
 		}
-       	if(secondAlarm == null || isNaN(secondAlarm))
-        		return;
-		deadLine = Date.parse(events[i].deadLine) - secondAlarm*60*60*1000;
-		console.log("Second notification Alarm:" + deadLine);
+		if((events[i].type == "homework" && isNaN(hwSecondAlarm))|| (events[i].type == "userEvent" && isNaN(ueSecondAlarm)))
+    		return;
+		deadLine = Date.parse(events[i].deadLine) - ((events[i].type == "homework")?hwSecondAlarm:ueSecondAlarm)*60*60*1000;
 		if( onstart || !onstart && deadLine > Date.parse(new Date()))
     {
 			 	chrome.alarms.create(events[i].id + "(2)", {when:deadLine});
 		}
   }
+	setBadge();
 
 
 }
 
-function createEventNotification(eventId)
+function createEventNotification(eventId,change = false)
 {
-
 	DataAccess.Data(function(data){
-
+		if(data.tasks == undefined)
+			return;
 		var event = null;
-		eventId= eventId.substring(0, eventId.length - 3);
-		for (var i = 0; i < data.tasks.length; i++) {
-			if(data.tasks[i].id == eventId)
-				event = data.tasks[i];
-		}
+		eventId= ((change == true)?eventId:eventId.substring(0, eventId.length - 3));
+		if(change != true)
+			for (var i = 0; i < data.tasks.length; i++) {
+				if(data.tasks[i].id == eventId)
+					event = data.tasks[i];
+			}
+		else
+			event = eventId;
+
 		if(event == null)
 			return;
 
-		chrome.notifications.create(
-			(event.type == "homework")?eventId:"event " + eventId,{
-				type: 'basic',
-				iconUrl: 'image/icons/jct128.png',
-				title: ("תזכורת" + ((event.type == "homework")?" על שיעורי בית":" אירוע")),
-				message: (event.name + "\n" + ((event.type == "homework")?data.courses[event.courseId].name+"\n":"") + getDate(new Date(Date.parse(event.deadLine))))
-			});
+		console.log("createEventNotification");
 
+		if(change == true)
+			chrome.notifications.create(
+				  event.id,{
+					type: 'basic',
+					requireInteraction:(data.Config != undefined && data.Config.hiddeNofication == true)?false:true,
+					iconUrl: chrome.extension.getURL('image/icons/jct128.png'),
+					title: "שינוי בשיעורי בית",
+					message: ((event.name + "\n" + data.courses[event.courseId].name+"\n") + getDate(new Date(Date.parse(event.deadLine))))
+				});
+		else
+			chrome.notifications.create(
+				(event.type == "homework")?eventId:"event " + eventId,{
+					type: 'basic',
+					requireInteraction:true,
+					iconUrl: chrome.extension.getURL('image/icons/jct128.png'),
+					title: ("תזכורת" + ((event.type == "homework")?" על שיעורי בית":" אירוע")),
+					message: (event.name + "\n" + ((event.type == "homework")?data.courses[event.courseId].name+"\n":"") + getDate(new Date(Date.parse(event.deadLine))))
+				});
 	});
-
 }
 
 /*****************************************************************
@@ -266,13 +347,54 @@ function login(username, password, asyncType = true)
 			resolve(ajaxAns = {status:"ok"});
 		});
 
-		request.fail(function (data) {
-			console.log("login status failed, error: " + data.statusText);
-			resolve(ajaxAns = {status:"error",error:data.statusText});
+		request.fail(function (xhr, status, error) {
+			setBadge();
+			console.log("login status failed, status: " + xhr.status);
+			backgroundEvent({type:"login",operationCompleted:false,error:"אין חיבור למודל" });
+			reject(ajaxAns = {status:"error",error:xhr.statusText});
 		});
 	});
 
 	return promise;
+}
+
+/*****************************************************************
+* FUNCTION
+*   wrapAllAttributes
+*
+* RETURN VALUE
+*   This function doesn't return nothing
+*
+* PARAMETERS
+*   html - An html document
+*
+* MEANING
+*    This function wrap all attribute from the html
+*
+* ATTENTION
+*   This function is not in use
+*
+**********************************************************************/
+function wrapAllAttributes(html)
+{
+	//delete attributes from the main div
+	$(html).each(function() {
+		var attributes = this.attributes;
+		var i = attributes.length;
+		while( i-- ){
+			this.removeAttributeNode(attributes[i]);
+		}
+	});
+	//delete all attributes from the children of main div
+	$(html).children().each(function () {
+		$(this).each(function() {
+			var attributes = this.attributes;
+			var i = attributes.length;
+			while( i-- ){
+				this.removeAttributeNode(attributes[i]);
+			}
+		});
+	});
 }
 
 /*****************************************************************
@@ -333,12 +455,15 @@ function updateData(asyncType)
 	        var homeworkObject  = getAllHomeworks(homework);
 	        console.log("New data:");
 	        console.log({courses:coursesObject.data,coursesIndex:coursesObject.index,tasks:homeworkObject});
+					checkChanges(homeworkObject).then(function(){
+						DataAccess.setData({courses:coursesObject.data,coursesIndex:coursesObject.index,tasks:homeworkObject})
+					}).then(function(){
+						console.log("updateData setting new alarms");
+						DataAccess.Data(setAlarms);
+						backgroundEvent({type:"updateData",operationCompleted:true});
+						setBadge();
+					});
 
-	        DataAccess.setData({courses:coursesObject.data,coursesIndex:coursesObject.index,tasks:homeworkObject},function()
-	       	{
-	       		 DataAccess.Data(setAlarms);
-	       	});
-					backgroundEvent({type:"updateData",operationCompleted:true});
 	        resolve(ajaxAns = {status:"ok"});
 
 	       // Reset the alarms
@@ -348,6 +473,7 @@ function updateData(asyncType)
 	    request.fail(function (data) {
 	    	console.log("request failed");
 	    	console.log(data);
+				setBadge();
 				backgroundEvent({type:"updateData",operationCompleted:false,error:data,request:request});
 	    	  reject(ajaxAns = {status:"error",error:data})
 	    });
@@ -355,45 +481,6 @@ function updateData(asyncType)
 
 	return promise;
 
-}
-
-/*****************************************************************
-* FUNCTION
-*   wrapAllAttributes
-*
-* RETURN VALUE
-*   This function doesn't return nothing
-*
-* PARAMETERS
-*   html - An html document
-*
-* MEANING
-*    This function wrap all attribute from the html
-*
-* ATTENTION
-*   This function is not in use
-*
-**********************************************************************/
-function wrapAllAttributes(html)
-{
-    //delete attributes from the main div
-    $(html).each(function() {
-    	var attributes = this.attributes;
-    	var i = attributes.length;
-    	while( i-- ){
-    		this.removeAttributeNode(attributes[i]);
-    	}
-    });
-    //delete all attributes from the children of main div
-    $(html).children().each(function () {
-    	$(this).each(function() {
-    		var attributes = this.attributes;
-    		var i = attributes.length;
-    		while( i-- ){
-    			this.removeAttributeNode(attributes[i]);
-    		}
-    	});
-    });
 }
 
 /*****************************************************************
@@ -546,7 +633,10 @@ function separateHomeworkData(hwdata)
     	return undefined;
     // Save the homework name
     var homeworkName = $(datatemp).text();
-    datatemp = $(datatemp).attr('href');
+		if(homeworkName.length>33)
+			homeworkName =  homeworkName.substring(0,30) + "...";
+
+		datatemp = $(datatemp).attr('href');
     // Get id from href (ex: http://moodle.jct.ac.il/mod/assign/view.php?id=224301)
     datatemp = datatemp.substring(datatemp.lastIndexOf("id")+3);
     // Save the homework id
@@ -579,6 +669,7 @@ function separateHomeworkData(hwdata)
 
     return {type:"homework",id:homeworkId,name:homeworkName,courseId:courseId,deadLine:homeworkDeadLine}
 }
+
 /********************************************
 * The function get an day in format DD/MM/YY
 * and a time in format HH:MM then return
@@ -625,6 +716,93 @@ function stringToDate(date)
 	return new Date(dayArray[2],dayArray[1],dayArray[0],timeArray[0],timeArray[1],0);
 
 }
+
+function checkChanges(newHomeworks)
+{
+	return DataAccess.Data(function(data)
+	{
+		console.log("Check homeworks: " + (data.Config != null && data.Config.hwChanges != false))
+		if(data.Config != null && data.Config.hwChanges == false)
+			return;
+		if(typeof newHomeworks != "object")
+			return;
+		if(data.tasks == undefined)
+			return;
+			console.log("Checking changes on homework");
+		for (var i = 0; i < newHomeworks.length; i++) {
+			if(newHomeworks[i].type != "homework")
+				continue;
+			for (var j = 0; j < data.tasks.length; j++) {
+					if(data.tasks[j].type == "homework" && newHomeworks[i].id == data.tasks[j].id)
+					{
+						if(Date.parse(data.tasks[j].deadLine) != Date.parse(newHomeworks[i].deadLine))
+							createEventNotification(newHomeworks[i],true)
+						break;
+					}
+			}
+		}
+	});
+}
+
+function loginAndUpdate(data)
+{
+	if(data == null)
+		return;
+
+	if((data.Config == null || data.Config != null && data.Config.checkLogin != false) && data.username != null && data.password != null)
+	 {
+		 console.log("trying to make a login in moodle");
+		 login(data.username,window.atob(data.password))
+		 .then(function(){
+			 console.log("updating database");
+			 return updateData();
+		 });
+	 }
+
+}
+
+function setBadge()
+{//showBadge
+	DataAccess.Data(function (data)
+	{
+
+		var counter = 0;
+		var events = data.tasks;
+		var event;
+		var deadLine = new Date();
+		var checked;
+		if(events != undefined && data.Config != null && data.Config.showBadge != false)
+		for (var i = events.length - 1; i >= 0  ; i--) {
+
+			// Check if the event already finish
+			if(events[i] == null || Date.parse(events[i].deadLine)< Date.now())
+			continue;
+
+			// Check if the user want to show user events
+			if(data.Config != undefined)
+			{
+				if(events[i].type == "userEvent")
+				continue;
+
+				if(data.Config.hwDays != null && Date.parse(events[i].deadLine) > (Date.now()+data.Config.hwDays*24*60*60*1000))
+				continue;
+			}
+			// Check if the user already did the homework
+			if(data.eventDone != undefined && data.eventDone[events[i].id] != null && (data.eventDone[events[i].id]["checked"] || data.eventDone[events[i].id]["notifications"] == false ))
+			continue;
+
+			counter++;
+		}
+		console.log("setBadge: Total outstanding tasks: " + counter);
+		if(counter>0)
+		chrome.browserAction.setBadgeText({text:String(counter)});
+		else
+		chrome.browserAction.setBadgeText({text:""});
+
+	});
+
+	backgroundEvent({type:"setBadge",operationCompleted:true})
+}
 /***********************************
 this function change the extension
 icon when the user active/desactive
@@ -637,18 +815,3 @@ function changeIcon(flag)
 	else
 		chrome.browserAction.setIcon({path: "../image/icons/jctDisable.png"});
 }
-/**************************************
-    Test only
-    **************************************/
-$(document).ready(function(){
-    	chrome.storage.local.get(null,function(result)
-    	{
-    		DataAccess.getData = result;
-    	});
-    	$( "#button" ).click(function(){
-
-    		//console.log("Background");
-    		//updateData(false);
-    		//alert(ajaxAns.status);
-    	});
-    });

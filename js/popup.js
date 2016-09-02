@@ -29,11 +29,16 @@ function onStart(result)
 	else
 		themeWithEvents(result);
 
+		$("a[target='_blank']").click(function(){
+		 	window.close();
+		})
+
 	if(result.Config != null)
 		// In case the user want to updated when the button is touched
 		if((result.username && result.password) && result.Config.updateOnPopup != false)
-	 		setTimeout(function(){chrome.runtime.sendMessage({updatedata:true,async:true});},20);
-
+	 		setTimeout(function(){chrome.runtime.sendMessage({updatedata:true});},20);
+	 
+	 chrome.runtime.sendMessage({setBadge:true});
 }
 
 function classicTheme(data)
@@ -167,7 +172,7 @@ function insertEvents(data)
 		if(events[i].type =="homework")
 			event +="</a>";
 
-		if(data.eventDone != undefined && data.eventDone[events[i].id] != null && !data.eventDone[events[i].id].notifications)
+		if(data.eventDone != undefined && data.eventDone[events[i].id] != null && data.eventDone[events[i].id].notifications == false)
 			event +="<img src='image/popup/timbreOff.png' class='notifi'  courseId='"+events[i].id+"'>";
 		else
 			event +="<img src='image/popup/timbre.png' class='notifi'  courseId='"+events[i].id+"'>";
@@ -192,11 +197,12 @@ function insertEvents(data)
 			$(this).attr("src","image/popup/timbre.png");
 			DataAccess.setObjectInObject("eventDone",$(this).attr("courseId"),"notifications",true);
 		}
-
+		setTimeout(function(){chrome.runtime.sendMessage({setBadge:true});},20);
 	});
 	$(".done").change(function(){
 		//in case flag is true then set as c (checked) otherwise set as u (unchecked)
 		DataAccess.setObjectInObject("eventDone",$(this).attr("courseId"),"checked",this.checked);
+		setTimeout(function(){chrome.runtime.sendMessage({setBadge:true});},20);
 	});
 }
 
