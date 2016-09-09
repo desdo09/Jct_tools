@@ -343,6 +343,15 @@ function login(username, password, asyncType = true)
 			{username:username,password:password} );
 
 		request.done( function(data){
+			// In case the username/password are wrong the moodle return an error that is requiered to
+	        // logout before login a new user
+	        if($(data).find('#notice').length>0)
+	        {	
+	        	console.log("wrong password");
+	        	backgroundEvent({type:"login",operationCompleted:false,error:"שם המשתמש או הסיסמה שהזנת שגויים" });
+	        	reject(ajaxAns = {status:"error",error:"שם המשתמש או הסיסמה שגויים"});
+	        	return;
+	        }
 			console.log("login status ok");
 			resolve(ajaxAns = {status:"ok"});
 		});

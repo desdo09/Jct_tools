@@ -486,6 +486,11 @@ function setAdvancedData(data)
 	else
 		$("#hiddeModdelHelp").attr('checked',false);
 
+	if(data.Config.eventsOnTop != undefined && data.Config.eventsOnTop)
+		$("#eventsOnTop").attr('checked',true);
+	else
+		$("#eventsOnTop").attr('checked',false);
+
 	if(data.Config.hiddeNofication != undefined && data.Config.hiddeNofication)
 		$("#hiddeNofication").attr('checked',true);
 	else
@@ -566,6 +571,7 @@ function setAdvanced()
 	DataAccess.setObject("Config","checkLogin",$("#checkLogin").is(':checked'));
 	DataAccess.setObject("Config","hiddeModdelHelp",$("#hiddeModdelHelp").is(':checked'));
 	DataAccess.setObject("Config","hiddeNofication",$("#hiddeNofication").is(':checked'));
+	DataAccess.setObject("Config","eventsOnTop",$("#eventsOnTop").is(':checked'));
 	DataAccess.setObject("Config","moodleTopic",$("#moodleTopic").is(':checked'));
 	DataAccess.setObject("Config","hiddeUE",$("#hiddeUE").is(':checked'));
 	DataAccess.setObject("Config","MoodleHiddeUE",$("#MoodleHiddeUE").is(':checked'));

@@ -52,7 +52,9 @@ function wifiConnect(pass)
    		window.close();
     	return;
   	}
-
+  	var err = $("input[name='err_flag']");
+  	if(err != null && $(err).attr("value") == "1")
+  		return;
 	$("input[name='username']").attr("value",username);
     $("input[name='password']").attr("value",pass);
 	//document.forms[0].err_flag.value = 1;
@@ -110,15 +112,25 @@ function moodleConnect(pass,data)
 
 		hideCourses(data.moodleCoursesTable,data.Config.hiddeModdelHelp);
 		
-		if(data.Config["MoodleHiddeUE"] && data["mo"] && data.enable)
+		if(!data["mo"] || !data.enable)
+			return;
+
+		if(data.Config["MoodleHiddeUE"])
 			$(".event").each(function(){
 				if($("img[alt='אירוע משתמש']").length > 0)
 					$(this).remove();
 			});
 
-		if(data.Config["moodleTopic"] && data["mo"] && data.enable)
+		if(data.Config["moodleTopic"])
 			$(".sitetopic").remove();
 
+		if(data.Config["eventsOnTop"] && data["mo"] && data.enable)
+		{
+			$("#inst121811").find(".block_action").remove();
+			var eventsDiv = $("#inst121811");
+			$("#inst121811").remove();
+			$("#block-region-side-post").prepend(eventsDiv);
+		}
 		
 	}
 

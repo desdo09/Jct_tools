@@ -48,7 +48,7 @@
 						<input type="password" id="pw"/>
 						<p>
 						</span>
-						<p class="helper">להתחבר אוטומטית ב:</p>
+						<p class="helper">התחבר אוטומטית ב:</p>
 						<span class="activeWeb">
 							<input type="checkbox" id="wf"/>
 							<span class="checkboxtext">וויי - פיי</span>
@@ -143,15 +143,15 @@
 					</p>
 					<p class="option">
 						<input type="checkbox" id="hiddeNofication" />
-						<span class="checkboxtext" >להסתיר ההתראה אחרי פרק זמן</span>
+						<span class="checkboxtext" >הסתר את ההתראה אחרי פרק זמן</span>
 					</p>
 					<p class="option">
 						<input type="checkbox" id="todaysHW" />
-						<span class="checkboxtext" > תזכורת לשיעורי הבית היומיים בהפעלת הכרום</span>
+						<span class="checkboxtext" > תזכורת לשיעורי הבית היומיים בהפעלת הדפדפן</span>
 					</p>
 						<p class="option">
 						<input type="checkbox" id="hwChanges" />
-						<span class="checkboxtext" >להודיע על שינויים בהגשות של שיעורי בית</span>
+						<span class="checkboxtext" >הודע על שינויים בהגשות של שיעורי הבית</span>
 					</p>
 					<p>
 						-------------------------------------מודל-------------------------------------
@@ -162,31 +162,34 @@
 					</p>
 					<p class="option">
 						<input type="checkbox" id="moodleTopic" />
-						<span class="checkboxtext" >להסתיר "נושא האתר" בדף הראשי</span>
+						<span class="checkboxtext" >הסתר את "נושא האתר" בדף הראשי</span>
+					</p>
+					<p class="option">
+						<input type="checkbox" id="eventsOnTop" />
+						<span class="checkboxtext" >הצג את חלונית "אירועים קרבים" בראש הדף</span>
 					</p>
 					<p class="option">
 						<input type="checkbox" id="hiddeModdelHelp" />
-						<span class="checkboxtext" >להסתיר "ניתן להגדיר הקורסים שלי בהגדרות"</span>
+						<span class="checkboxtext" >הסתר את "ניתן להגדיר הקורסים שלי בהגדרות"</span>
 					</p>
 					<p class="option">
 						<input type="checkbox" id="MoodleHiddeUE" />
-						<span class="checkboxtext" >להסתיר אירועים</span>
+						<span class="checkboxtext" >הסתר אירועים</span>
 					</p>
 					<p>
 						-------------------------------חלון ההתראות-------------------------------
-					</p>
-
-					<p class="option">
-						<input type="checkbox" id="hiddeUE" />
-						<span class="checkboxtext" >להסתיר אירועים</span>
-					</p>
+					</p>					
 					<p class="option">
 						<input type="checkbox" id="updateOnPopup" />
-						<span class="checkboxtext" >עדכון נתונים מחדש בלחיצה על סמל ההרחבה </span>
+						<span class="checkboxtext" >עדכן נתונים מחדש בלחיצה על סמל ההרחבה </span>
 					</p>
 					<p class="option">
 						<input type="checkbox" id="showBadge" />
-						<span class="checkboxtext" >להראות סכ"ה של שיעורי בית בסמל</span>
+						<span class="checkboxtext" >הצג סכ"ה של שיעורי הבית בסמל</span>
+					</p>
+					<p class="option">
+						<input type="checkbox" id="hiddeUE" />
+						<span class="checkboxtext" >הסתר אירועים</span>
 					</p>
 					<p>
 						-----------------------------------סגנונות-----------------------------------
@@ -224,17 +227,17 @@
 				מייל: abenatha@jct.ac.il
 			</p>
 			<p>
-				קרדיט ליוסף כשר על פיתוח האופצייה להסתיר קורסים במודל.
+				קרדיט ליוסף כשר על פיתוח האפשרות להסתיר קורסים במודל.
 			</p>
 			<p>
 				<details>
 				 	<summary>תנאים</summary>
 				  	<ul>
-			 	 		<li> הנתונים המאוחסנים בהרחבה זו, אין להם הצפנה חזקה, ולכן אנחנו לא אחראים על המידע (כגון שם משתמש וסיסמא).</li>
-			 	 		<li> אנו לא מאחסנים נתונים על השרתים שלנו, רק בזיכרון של כרום שבו התקנת התוסף מתבצעת.</li>
-			 	 		<li>ההרחבה זו יש גישה אך ורק לאתרים הקשורים למוסד (למשל: moodle.jct.ac.il, 10.1.1.1).</li>
-			 	 		<li>אנחנו לא אחראים על תקלה כלשהי בההרחבה, אבל זה תמיד אפשרי לשלוח מייל ולדווח תקלה.</li>
-			 	 		<li>ההארכה היא קוד פתוח, שזה נמצא בכתובת: <a href="https://github.com/desdo09/Jct_tools">https://github.com/desdo09/Jct_tools</a></li>
+			 	 		<li>אין לנתונים המאוחסנים בהרחבה זו הצפנה חזקה, ולכן איננו אחראים על המידע (כגון שם משתמש וסיסמא).</li>
+			 	 		<li>איננו מאחסנים נתונים על השרתים שלנו, רק בזיכרון של כרום בו התקנת התוסף מתבצעת.</li>
+			 	 		<li>להרחבה זו יש גישה אך ורק לאתרים הקשורים למוסד (למשל: moodle.jct.ac.il, 10.1.1.1).</li>
+			 	 		<li>איננו אחראים על תקלה כלשהי בהרחבה זו, אבל זה תמיד אפשרי (ומומלץ) לשלוח מייל ולדווח תקלה.</li>
+			 	 		<li>הרחבה זו היא קוד פתוח הנמצא בכתובת: <a href="https://github.com/desdo09/Jct_tools">https://github.com/desdo09/Jct_tools</a></li>
 					</ul>
 					</details>
 			</p>
