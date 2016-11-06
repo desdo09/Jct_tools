@@ -135,6 +135,7 @@ function insertEvents(data)
 		// Check if the user want to show user events
 		if(data.Config != undefined)
 		{
+
 			if(data.Config.hiddeUE && events[i].type == "userEvent")
 			   continue;
 
@@ -144,7 +145,13 @@ function insertEvents(data)
 
 		// Check if the user already did the homework
 		if(data.eventDone != undefined && data.eventDone[events[i].id] != null )
+		{	
+			//Check if the user want to hide tasks done
+			if(data.Config != null && data.Config.hiddeTasksDone != false && data.eventDone[events[i].id].checked)
+				continue;
+			
 			checked = ((data.eventDone[events[i].id].checked || data.eventDone[events[i].id].done)?"checked":" ") + ((data.eventDone[events[i].id].done)?" disabled":" ");
+		}
 		else
 			checked = "";
 

@@ -522,10 +522,6 @@ function setAdvancedData(data)
 	if(data.Config.hwUpdate != undefined)
 		$("#hwUpdate").val(data.Config.hwUpdate);
 
-	if(data.Config.updateOnPopup == undefined || data.Config.updateOnPopup)
-		$("#updateOnPopup").attr('checked',true);
-	else
-		$("#updateOnPopup").attr('checked',false);
 
 	if(data.Config.todaysHW == undefined || data.Config.todaysHW)
 		$("#todaysHW").attr('checked',true);
@@ -536,6 +532,11 @@ function setAdvancedData(data)
 		$("#updateOnPopup").attr('checked',true);
 	else
 		$("#updateOnPopup").attr('checked',false);
+
+	if(data.Config.hiddeTasksDone == undefined || data.Config.hiddeTasksDone)
+		$("#hiddeTasksDone").attr('checked',true);
+	else
+		$("#hiddeTasksDone").attr('checked',false);
 
 	if(data.Config.hwChanges == undefined || data.Config.hwChanges)
 		$("#hwChanges").attr('checked',true);
@@ -580,6 +581,7 @@ function setAdvanced()
 	DataAccess.setObject("Config","hwDays",$("#hwDays").val());
 	DataAccess.setObject("Config","hwUpdate",$("#hwUpdate").val());
 	DataAccess.setObject("Config","updateOnPopup",$("#updateOnPopup").is(':checked'));
+	DataAccess.setObject("Config","hiddeTasksDone",$("#hiddeTasksDone").is(':checked'));
 	DataAccess.setObject("Config","todaysHW",$("#todaysHW").is(':checked'));
 	DataAccess.setObject("Config","hwChanges",$("#hwChanges").is(':checked'));
 	DataAccess.setObject("Config","todaysHW",$("#todaysHW").is(':checked'));

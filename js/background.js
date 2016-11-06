@@ -450,9 +450,9 @@ function updateData(asyncType)
 	        var html = jQuery('<div>').html(data);
 	        if(html.find(".courses").length == 0)
 	        {
-						reject(ajaxAns = {status:"error",error:"Login is requiered"});
+				reject(ajaxAns = {status:"error",error:"Login is requiered"});
 	        	console.log("No courses found");
-						backgroundEvent({type:"updateData",operationCompleted:false,error:"Login is requiered",request:request});
+				backgroundEvent({type:"updateData",operationCompleted:false,error:"נדרש חיבור למודל",request:request});
 	        	return;
 	        }
 	        // Get courses list
@@ -757,7 +757,7 @@ function loginAndUpdate(data)
 {
 	if(data == null)
 		return;
-
+	
 	if((data.Config == null || data.Config != null && data.Config.checkLogin != false) && data.username != null && data.password != null)
 	 {
 		 console.log("trying to make a login in moodle");
