@@ -198,6 +198,7 @@ function setTabla(data)
 	{
 		$(this).change(function(){
 			updatedata(this.checked,$(this).attr("course-id"));
+			chrome.runtime.sendMessage({setBadge:true});
 		});
 	});
 
@@ -528,6 +529,16 @@ function setAdvancedData(data)
 	else
 		$("#todaysHW").attr('checked',false);
 
+	if(data.Config.hiddeNoSelectedCourseInWindows == undefined || data.Config.hiddeNoSelectedCourseInWindows)
+		$("#hiddeNoSelectedCourseInWindows").attr('checked',true);
+	else
+		$("#hiddeNoSelectedCourseInWindows").attr('checked',false);
+
+	if(data.Config.hiddeNoSelectedCourseInMoodle == undefined || data.Config.hiddeNoSelectedCourseInMoodle)
+		$("#hiddeNoSelectedCourseInMoodle").attr('checked',true);
+	else
+		$("#hiddeNoSelectedCourseInMoodle").attr('checked',false);
+
 	if(data.Config.updateOnPopup == undefined || data.Config.updateOnPopup)
 		$("#updateOnPopup").attr('checked',true);
 	else
@@ -572,6 +583,8 @@ function setAdvanced()
 	DataAccess.setObject("Config","checkLogin",$("#checkLogin").is(':checked'));
 	DataAccess.setObject("Config","hiddeModdelHelp",$("#hiddeModdelHelp").is(':checked'));
 	DataAccess.setObject("Config","hiddeNofication",$("#hiddeNofication").is(':checked'));
+	DataAccess.setObject("Config","hiddeNoSelectedCourseInWindows",$("#hiddeNoSelectedCourseInWindows").is(':checked'));
+	DataAccess.setObject("Config","hiddeNoSelectedCourseInMoodle",$("#hiddeNoSelectedCourseInMoodle").is(':checked'));
 	DataAccess.setObject("Config","eventsOnTop",$("#eventsOnTop").is(':checked'));
 	DataAccess.setObject("Config","moodleTopic",$("#moodleTopic").is(':checked'));
 	DataAccess.setObject("Config","hiddeUE",$("#hiddeUE").is(':checked'));

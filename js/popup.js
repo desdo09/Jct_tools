@@ -141,6 +141,9 @@ function insertEvents(data)
 
 			if(data.Config.hwDays != null && Date.parse(events[i].deadLine) > (Date.now()+data.Config.hwDays*24*60*60*1000))
 				continue;
+
+			if(data.Config.hiddeNoSelectedCourseInWindows == true && events[i].type =="homework" && data.moodleCoursesTable[events[i].courseId] != true)
+				continue;
 		}
 
 		// Check if the user already did the homework
