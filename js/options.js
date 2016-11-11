@@ -468,7 +468,21 @@ function setAdvancedData(data)
 		$(this).prop('checked',false);
 		$("#portal").prop('checked',true);
 		notification("מתצוגת לוח-שנה: "+"אנחנו עובדים על זה","warning");
-	})
+	});
+	
+	$("#checkLogin").change(function(){
+		if(this.checked == false)
+			notification("זְהִירוּת: "+"\n"+" נדרש להיות מחובר למודל כדי לעדכן את הנתונים.","warning");
+	});
+
+	$("#limitedHw").change(function(){
+		if( $("#limitedHw").is(':checked'))
+			$( "#limitedHwAmount" ).removeAttr( "disabled" );
+		else
+			$("#limitedHwAmount").attr('disabled', 'disabled');
+			
+			
+	});
 	if(data.Config == undefined)
 		data.Config = {}
 
@@ -559,10 +573,23 @@ function setAdvancedData(data)
 	else
 		$("#new").attr('checked',true);
 
-	$("#checkLogin").change(function(){
-		if(this.checked == false)
-			notification("זְהִירוּת: "+"\n"+" נדרש להיות מחובר למודל כדי לעדכן את הנתונים.","warning");
-	});
+	if(data.Config.hiddeSameDay != undefined && data.Config.hiddeSameDay)
+		$("#hiddeSameDay").attr('checked',true);
+	else
+		$("#hiddeSameDay").attr('checked',false);
+
+	if(data.Config.limitedHw != undefined && data.Config.limitedHw)
+	{
+		$("#limitedHw").attr('checked',true);
+		$("#limitedHwAmount").val(data.Config.limitedHwAmount);
+	}	
+	else
+	{
+		$("#limitedHw").attr('checked',false);
+		$("#limitedHwAmount").attr('disabled', 'disabled');
+	}
+	
+
 
 }
 
@@ -577,6 +604,12 @@ function setAdvanced()
 	if($("#hwUpdate") == null ||isNaN(parseFloat($("#hwUpdate").val())) || parseFloat($("#hwUpdate").val()) < 0.5)
 	{
 		notification("Invalid hours","error");
+		return;
+	}
+	var limitedHw = $("#limitedHw").is(':checked');
+	if( limitedHw == true && ($("#limitedHwAmount") == null ||isNaN(parseFloat($("#limitedHwAmount").val())) || parseFloat($("#limitedHwAmount").val()) < 1))
+	{
+		notification("כמות של מטלות, לא חוקי","error");
 		return;
 	}
 
@@ -598,6 +631,12 @@ function setAdvanced()
 	DataAccess.setObject("Config","todaysHW",$("#todaysHW").is(':checked'));
 	DataAccess.setObject("Config","hwChanges",$("#hwChanges").is(':checked'));
 	DataAccess.setObject("Config","todaysHW",$("#todaysHW").is(':checked'));
+	DataAccess.setObject("Config","hiddeSameDay",$("#hiddeSameDay").is(':checked'));
+	DataAccess.setObject("Config","limitedHw",limitedHw);
+	DataAccess.setObject("Config","limitedHwAmount",((limitedHw))?($("#limitedHwAmount").val()):(0));
+	
+		
+
 
 	DataAccess.setObject("Config","style",$("input[name='style']:checked").attr('id'));
 	notification("המאגר עודכן");

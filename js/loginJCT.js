@@ -76,13 +76,13 @@ function mazakConnect(pass)
 
 function remoteConnect(pass)
 {
-	if($("#username").length ==0)
-		return;
-	console.log("hi");
-	$("#username").attr("value",username);
-	$("#password").attr("value",pass);
+//	if($("#username").length ==0)
+//		return;
+//	console.log("hi");
+//	$("#username").attr("value",username);
+//	$("#password").attr("value",pass);
 	return;
-	$("button[type='submit']").click();
+//	$("button[type='submit']").click();
 }
 
 function moodleConnect(pass,data)
@@ -120,15 +120,51 @@ function moodleConnect(pass,data)
 			data.Config = {}
 
 		hideCourses(data.moodleCoursesTable,data.Config.hiddeModdelHelp);
-		
 		if(!data["mo"] || !data.enable)
 			return;
+		
 
-		if(data.Config["MoodleHiddeUE"])
-			$(".event").each(function(){
-				if($("img[alt='אירוע משתמש']").length > 0)
+		var homeworkId = {};
+		var courseId;
+		$(".event").each(function(){
+			
+			if($(this).find("img").attr("alt") == "אירוע משתמש")
+			{	
+				if(data.Config["MoodleHiddeUE"])
 					$(this).remove();
-			});
+			}else{
+
+				/********** Delete homeworks done***************
+					homeworkId = ($(this).find("a"))[0];
+					homeworkId = $(homeworkId).attr('href');
+					homeworkId = homeworkId.substring(homeworkId.lastIndexOf("id")+3);
+					if(data.eventDone[homeworkId] != null && data.eventDone[homeworkId].checked)
+						$(this).remove();
+				************************************************/
+
+				if(data.Config.hiddeNoSelectedCourseInMoodle)
+				{
+					/**************************************
+					* Search the homework course id
+					***************************************/
+					//data.Config.hiddeNoSelectedCourseInWindows == true &&
+					courseId = $(this).find('.course').find('a');
+					if(courseId == undefined || courseId.length == 0)
+						return undefined;
+					courseId = $(courseId).attr('href');
+					// Get id from href (ex: http://moodle.jct.ac.il/course/view.php?id=28513)
+					courseId = courseId.substring(courseId.lastIndexOf("id")+3);
+					if(data.moodleCoursesTable[courseId] != true)
+					{
+						console.log("JCT Tools->Homework with course id: "+courseId+" deleted");
+						$( this ).next( "hr" ).remove();
+						$(this).remove();
+					}	
+				}
+				
+			}
+		
+		});
 
 		if(data.Config["moodleTopic"])
 			$(".sitetopic").remove();

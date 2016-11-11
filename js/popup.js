@@ -126,7 +126,8 @@ function insertEvents(data)
 	var event;
 	var deadLine = new Date();
 	var checked;
-	for (var i = events.length - 1; i >= 0; i--) {
+	var duplicate = {};
+	for (var i = 0; i <= events.length; i++) {
 
 		// Check if the event already finish
 		if(events[i] == null || Date.parse(events[i].deadLine)< Date.now())
@@ -142,8 +143,40 @@ function insertEvents(data)
 			if(data.Config.hwDays != null && Date.parse(events[i].deadLine) > (Date.now()+data.Config.hwDays*24*60*60*1000))
 				continue;
 
-			if(data.Config.hiddeNoSelectedCourseInWindows == true && events[i].type =="homework" && data.moodleCoursesTable[events[i].courseId] != true)
-				continue;
+			if(events[i].type =="homework")
+			{
+
+				if(data.Config.hiddeNoSelectedCourseInWindows == true && data.moodleCoursesTable[events[i].courseId] != true)
+					continue;
+
+			
+				/*
+				* In this part the program will check if the user limited the total of homeworks 
+				* Is important to remember that the homework are sorted by deadline
+				* in this case the program will save the last homework deadline to check with the next.
+				*/
+
+				if(duplicate[events[i].courseId] == null)
+				{	
+					duplicate[events[i].courseId] = {};
+					duplicate[events[i].courseId].lastDeadLine = events[i].deadLine;
+					duplicate[events[i].courseId].counter = 1;
+				}else{	
+					
+					if(data.Config.hiddeSameDay && Date.parse(events[i].deadLine) == Date.parse(duplicate[events[i].courseId].lastDeadLine))
+						continue;
+					
+					if(data.Config.limitedHw && duplicate[events[i].courseId].counter >= data.Config.limitedHwAmount)
+						continue;
+
+
+					duplicate[events[i].courseId].lastDeadLine = events[i].deadLine;
+					duplicate[events[i].courseId].counter++;
+				}
+
+			}
+
+
 		}
 
 		// Check if the user already did the homework
@@ -191,8 +224,9 @@ function insertEvents(data)
 
 		event +="</span>";
 
-		$("#Homeworks").prepend(event);
+		$("#homeworksContent").append(event);
 	} 		//notifications
+
 	$("#eventsTotal").text($(".event").length);
 	$(".notifi").click(function()
 	{
