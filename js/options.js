@@ -687,7 +687,7 @@ function onBackgroundEvent(eventType)
 		case "login" :
 			if(eventType.operationCompleted == false)
 				notification(eventType.error,"error");
-		breakzz
+		break;
 		case "updateData":
 			var progress = $('#courses').find("progress");
 			if(	$(progress).attr('value') != "1" )
