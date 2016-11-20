@@ -92,19 +92,9 @@ function moodleConnect(pass,data)
 	{
 		if(data["mo"] && data.enable)
 		{
-			$("#login_username").attr("value",data.username);
-			$("#login_password").attr("value",pass);
+			$("#login_username").val(data.username);
+			$("#login_password").val(pass);
 			$("#login input[value='התחברות'][type='submit']").click();
-
-		}
-	}else if($("#username").length != 0 && $("#password").length != 0){
-
-		if(data["mo"] && data.enable)
-		{
-			$("#username").attr("value",data.username);
-			$("#password").attr("value",pass);
-			$("#loginbtn input[value='התחברות'][type='submit']").click();
-
 		}
 	}
 	else
