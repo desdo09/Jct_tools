@@ -11,11 +11,14 @@ function hideCourses(data,hiddeModdelHelp){
 
 	console.log("JCT Tools->" + "hideCourses");
 
+	//check if this web page is the main page
+	if($("#frontpage-course-list").length == 0)
+		return;
+
 	if($(".hide_button").length>0)
 		console.log("jct moodle ++");
 
 	coursesList = Object.keys(data);
-
 
 	addButtons(hiddeModdelHelp);
 
