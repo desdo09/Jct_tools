@@ -97,7 +97,8 @@ function openMyCourses() {
 	//remove all the courses the user chose (the options to be hide are save in the local storage)
 	for (var i = 0; i < coursesList.length; i++) {
 		if(coursesList[i])
+			var testDate = "" 
 			$("[data-courseid="+coursesList[i]+"]").show();
-
 	}
 }
+

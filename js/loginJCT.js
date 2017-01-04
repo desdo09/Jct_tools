@@ -166,6 +166,54 @@ function moodleConnect(pass,data)
 			$("#inst121811").remove();
 			$("#block-region-side-post").prepend(eventsDiv);
 		}
+
+
+		if(data.testsDate != undefined && data.Config.showTestDay != false)
+		{
+			var mycourses = Object.keys(data.moodleCoursesTable);
+			for (var i = 0; i < mycourses.length; i++) {
+				var courseTest = data.courses[mycourses[i]];
+				if(courseTest == undefined  || courseTest.id == undefined)
+					continue;
+				console.log(courseTest.id);								
+				courseTest = data.testsDate[courseTest.id.split('.')[0]];
+				console.log(courseTest);			
+				if(courseTest == undefined)
+					continue;
+
+				var testDateHtml = "";
+
+				var moed = stringDateToDateObject(courseTest["moed1day"],courseTest["moed1time"]);
+				if(Date.parse(moed)> Date.now())
+				{	
+					testDateHtml = "מועד א";
+					testDateHtml += "<br/>";
+					testDateHtml += courseTest["moed1day"] + " - " + courseTest["moed1time"];
+				}
+				else
+				{
+					var moed = stringDateToDateObject(courseTest["moed2day"],courseTest["moed2time"]);					
+					if(Date.parse(moed)> Date.now() && courseTest[registerToMoedBet] == true)
+					{
+							testDateHtml = "מועד ב";
+							testDateHtml += "<br/>";
+							testDateHtml += courseTest["moed2day"] + " - " + courseTest["moed2time"];
+							
+					}
+					else
+						continue;	
+				}
+				console.log(testDateHtml);
+				$("[data-courseid="+mycourses[i]+"]").find(".moreinfo").append(testDateHtml);
+				$("[data-courseid="+mycourses[i]+"]").find(".moreinfo").css({ "text-align": "center", "color" : "#0070a8", "font-weight": "bold", "margin-left": "15px"});
+			}
+
+		}
+
+	
+	
+
+
 		
 	}
 

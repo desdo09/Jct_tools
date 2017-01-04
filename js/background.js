@@ -31,7 +31,7 @@
 * Check too:
 *	backgroundEvent
 **********************************************************************/
-var ajaxAns = {status:"undefined" };
+
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 		console.log("External request");
@@ -132,8 +132,10 @@ function onInstalled(reason)
 					moodleCoursesTable:{}
 				});
 			}	
+			updateTestDate(data,true);
 		})
 	}
+
 	DataAccess.Data(function(data)
 	{
 		if((data["username"] == undefined) && (data["password"] == undefined))
@@ -143,7 +145,10 @@ function onInstalled(reason)
 
 chrome.alarms.onAlarm.addListener(function (alarm){
 		if(alarm.name != "updateData")
+		{
 			createEventNotification(alarm.name);
+			DataAccess.Data(updateTestDate);
+		}
 		else
 		{
 			console.log("Alarm of updateData fired at: " + (new Date));
@@ -349,18 +354,18 @@ function login(username, password, asyncType = true)
 	        {	
 	        	console.log("wrong password");
 	        	backgroundEvent({type:"login",operationCompleted:false,error:"שם המשתמש או הסיסמה שהזנת שגויים" });
-	        	reject(ajaxAns = {status:"error",error:"שם המשתמש או הסיסמה שגויים"});
+	        	reject();
 	        	return;
 	        }
 			console.log("login status ok");
-			resolve(ajaxAns = {status:"ok"});
+			resolve();
 		});
 
 		request.fail(function (xhr, status, error) {
 			setBadge();
 			console.log("login status failed, status: " + xhr.status);
 			backgroundEvent({type:"login",operationCompleted:false,error:"אין חיבור למודל" });
-			reject(ajaxAns = {status:"error",error:xhr.statusText});
+			reject();
 		});
 	});
 
@@ -442,7 +447,7 @@ function updateData(asyncType)
 	    	{
 	    		console.log("Error:Data is null");
 					backgroundEvent({type:"updateData",operationCompleted:false,error:"Data is null",request:request});
-	    		reject(ajaxAns = {status:"error",error:"data is null"});
+	    		reject();
 	    		return;
 	    	}
 
@@ -450,7 +455,7 @@ function updateData(asyncType)
 	        var html = jQuery('<div>').html(data);
 	        if(html.find(".courses").length == 0)
 	        {
-				reject(ajaxAns = {status:"error",error:"Login is requiered"});
+				reject();
 	        	console.log("No courses found");
 				backgroundEvent({type:"updateData",operationCompleted:false,error:"נדרש חיבור למודל",request:request});
 	        	return;
@@ -473,7 +478,7 @@ function updateData(asyncType)
 						setBadge();
 					});
 
-	        resolve(ajaxAns = {status:"ok"});
+	        resolve();
 
 	       // Reset the alarms
 
@@ -484,7 +489,7 @@ function updateData(asyncType)
 	    	console.log(data);
 				setBadge();
 				backgroundEvent({type:"updateData",operationCompleted:false,error:data,request:request});
-	    	  reject(ajaxAns = {status:"error",error:data})
+	    	  reject()
 	    });
 	});
 
@@ -860,4 +865,174 @@ function changeIcon(flag)
 		chrome.browserAction.setIcon({path: "../image/icons/jct128.png"});
 	else
 		chrome.browserAction.setIcon({path: "../image/icons/jctDisable.png"});
+}
+
+
+
+function mazakLogin(username,password)
+{
+	//Mazak inputs
+	var input = {
+		__EVENTARGUMENT:"",
+		__EVENTTARGET:"",
+		__EVENTVALIDATION:"/wEdAAetF+uTdeuF9ad4H3Y1oKlMCW8vdzVzmzgmuoYuqTP+fqct0ueWAA0YL7V6O1AochnANEsgx9K9r/2lixUqPdVYOVB//zNqTaUBR/8dOG4iyLATo2l1y7ugf3AadYP1/o1HSZucqxgKJG9VFVk9Fehc9i5wlba+qpEhMW4syJgKQI9Fcbo=",
+		__SCROLLPOSITIONX:"0",
+		__SCROLLPOSITIONY:"0",
+		__VIEWSTATE:"/wEPDwUJODQ1NTExNDM3ZBgCBR5fX0NvbnRyb2xzUmVxdWlyZVBvc3RCYWNrS2V5X18WAgU4Y3RsMDAkY3RsMDAkQ29udGVudFBsYWNlSG9sZGVyMSRMb2dpblN0YXR1c0NvbnRyb2wkY3RsMDEFOGN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlcjEkTG9naW5TdGF0dXNDb250cm9sJGN0bDAzBSljdGwwMCRjdGwwMCRDb250ZW50UGxhY2VIb2xkZXIxJExvZ2luVmlldw8PZAIBZFaS5PztvvCrKjw5Qdg2KADb8t9m",
+		__VIEWSTATEGENERATOR:"1806D926",
+		ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$LoginButton:"כניסה",
+		ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$Password:password,
+		ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$UserName:username,
+	};
+	
+
+
+	
+	const promise = new Promise(function (resolve, reject) {
+		var request =  $.post( "https://mazak.jct.ac.il/Login/Login.aspx",input);
+
+		request.done( function(data){
+			// In case the username/password are wrong the moodle return an error that is requiered to
+	        // logout before login a new user
+	        if($("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_lErrorFailed").text().length>0)
+	        {	
+	        	console.log("Mazak wrong password");
+	        	backgroundEvent({type:"mazakLogin",operationCompleted:false,error:"שם המשתמש או הסיסמה שהזנת שגויים" });
+	        	reject();
+	        	return;
+	        }
+			console.log("login status ok");
+			resolve("");
+		});
+
+		request.fail(function (xhr, status, error) {
+			setBadge();
+			console.log("login status failed, status: " + xhr.status);
+			backgroundEvent({type:"login",operationCompleted:false,error:"אין חיבור למודל" });
+			reject();
+		});
+	});
+	return promise;
+}
+
+function updateTestDate(data, doIt)
+{
+	//Do it only 1 time in 15 days
+	if(data.testDate != undefined)
+	{
+		var nextUpdate = data.testDate["Last update"].split('/');
+		var day = parseInt(nextUpdate[0]) + 15;
+		if(doIt != true && Date.parse(stringDateToDateObject(day + '/' + nextUpdate[1] + '/'+ nextUpdate[2]))<= Date.now())
+			return;
+	}
+
+	mazakLogin(data.username,window.atob(data.password))
+		.then(function(){
+			return getFromMazakTestData();
+	}).then(function(MazakData)
+	{
+		if(getFromMazakTestDataRequest != undefined)
+			getFromMazakTestDataRequest.abort();
+			
+		DataAccess.setData("testsDate",MazakData);
+	}).catch(e => {
+			console.log("getFromMazakTestData promise error: " + e);
+			
+	});
+
+}
+
+function getFromMazakTestData()
+{
+	const promise = new Promise(function (resolve, reject) {
+	    var request =  $.ajax({
+	    	url:"https://mazak.jct.ac.il/Student/Tests.aspx",
+			function(data) {
+				var myHTML = $(data).not('script');
+				
+			}
+	    });
+
+	    request.done( function(data){
+
+			var table =$(data).find("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdStudentTests_itemPlaceholderContainer");
+			
+			if($(table).length==0)
+				reject("Table is empty");
+			var tr = $(table).find("tr");
+			if($(tr).length==0)
+				reject("tr is empty");
+
+			var test = {}
+			var allTests ={}
+
+			$(tr).each(function()
+			{
+				var i=0;
+				var sTemp = "";
+				var iTemp = 0;
+				var saTemp;
+				var course = "";
+				var moed =0;
+				$(this).find("td").each(function()
+				{
+				
+					switch(i)
+					{
+						case 0:
+							sTemp = $(this).text().trim();
+							saTemp = sTemp.split('.');
+
+							course = saTemp[0];
+							if(allTests[course] == undefined)
+							{	
+								allTests[course]={};
+								allTests[course]["courseYear"]=saTemp[2];
+							}				
+						break;
+
+						case 2:
+							if($(this).text().trim() == "מועד א")
+								moed = 1;
+							if($(this).text().trim() == "מועד ב")
+								moed = 2;
+							if($(this).text().trim() == "מועד ג")
+								moed = 3;	
+						break;
+
+						case 3:
+						sTemp = $(this).text().trim();
+						iTemp = sTemp.indexOf(' ');
+						if(Date.parse(stringDateToDateObject(sTemp.substr(0,iTemp),sTemp.substr(iTemp+1)))<Date.now())
+							return false;
+								allTests[course]["moed" + moed + "day" ] = sTemp.substr(0,iTemp);
+								allTests[course]["moed" + moed + "time" ] = sTemp.substr(iTemp+1);
+						break;
+
+						case 5:
+						sTemp = $(this).find('a').text().trim();
+						if(sTemp == "בטל הרשמה")
+							allTests[course]["registerToMoedBet"] = true;
+						else
+							if(allTests[course]["registerToMoedBet"] !=  true)
+								allTests[course]["registerToMoedBet"] = false;
+						break;						
+
+					}
+					i++;
+				})
+			});
+			var date = new Date();
+			allTests["Last update"] = date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();
+			resolve(allTests);
+							
+
+	   });
+
+	    request.fail(function (data) {
+	    	reject("Test page conection error");
+	    });
+
+	});
+	return promise;
 }

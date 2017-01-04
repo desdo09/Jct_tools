@@ -516,6 +516,11 @@ function setAdvancedData(data)
 	else
 		$("#MoodleHiddeUE").attr('checked',false);
 
+	if(data.Config.showTestDay != false)
+		$("#showTestDay").attr('checked',true);
+	else
+		$("#showTestDay").attr('checked',false);
+
 	if(data.Config.showBadge != false)
 		$("#showBadge").attr('checked',true);
 	else
@@ -623,6 +628,7 @@ function setAdvanced()
 	DataAccess.setObject("Config","hiddeUE",$("#hiddeUE").is(':checked'));
 	DataAccess.setObject("Config","MoodleHiddeUE",$("#MoodleHiddeUE").is(':checked'));
 	DataAccess.setObject("Config","showBadge",$("#showBadge").is(':checked'));
+	DataAccess.setObject("Config","showTestDay",$("#showTestDay").is(':checked'));
 	DataAccess.setObject("Config","style",$("input[name='from']:checked").attr('id'));
 	DataAccess.setObject("Config","hwDays",$("#hwDays").val());
 	DataAccess.setObject("Config","hwUpdate",$("#hwUpdate").val());
@@ -634,7 +640,7 @@ function setAdvanced()
 	DataAccess.setObject("Config","hiddeSameDay",$("#hiddeSameDay").is(':checked'));
 	DataAccess.setObject("Config","limitedHw",limitedHw);
 	DataAccess.setObject("Config","limitedHwAmount",((limitedHw))?($("#limitedHwAmount").val()):(0));
-	
+
 		
 
 

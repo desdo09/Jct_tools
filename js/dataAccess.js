@@ -247,3 +247,16 @@ function zeroIsRequiered(number)
         return "0" + number;
     return number;
 }
+
+function stringDateToDateObject(day,time)
+{
+    var DateArray = day.split('/');
+    if(time == null)
+        return new Date(DateArray[2],DateArray[1]-1,DateArray[0],0,0,0,0);
+    
+    var timeArray = time.split(':');
+    
+    return new Date(DateArray[2],DateArray[1]-1,DateArray[0],timeArray[0],timeArray[1],0,0);
+    
+
+}
