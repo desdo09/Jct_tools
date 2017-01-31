@@ -182,7 +182,7 @@ function moodleConnect(pass,data)
 					continue;
 
 				var testDateHtml = "";
-					console.log("course "+ courseTest +": moed1 date: " + courseTest["moed1day"] + " moed1 time:" + courseTest["moed1time"])
+					//console.log("course "+ courseTest +": moed1 date: " + courseTest["moed1day"] + " moed1 time:" + courseTest["moed1time"])
 					if(courseTest["moed1day"] == undefined || courseTest["moed1time"] == undefined)
 					{
 						continue;
@@ -197,7 +197,7 @@ function moodleConnect(pass,data)
 				}
 				else
 				{
-					console.log("course "+ courseTest +": moed2 date: " + courseTest["moed2day"] + " moed2 time:" + courseTest["moed2day"])
+					//console.log("course "+ courseTest +": moed2 date: " + courseTest["moed2day"] + " moed2 time:" + courseTest["moed2day"])
 					if(courseTest["moed2day"] == undefined || courseTest["moed2time"] == undefined)
 					{
 						continue;
