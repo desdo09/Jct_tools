@@ -182,6 +182,8 @@ function moodleConnect(pass,data)
 					continue;
 
 				var testDateHtml = "";
+				if(courseTest["moed1day"] == undefined || courseTest["moed1time"] )
+				continue;
 
 				var moed = stringDateToDateObject(courseTest["moed1day"],courseTest["moed1time"]);
 				if(Date.parse(moed)> Date.now())
@@ -192,6 +194,8 @@ function moodleConnect(pass,data)
 				}
 				else
 				{
+						if(courseTest["moed2day"] == undefined || courseTest["moed2time"] )
+						continue;
 					var moed = stringDateToDateObject(courseTest["moed2day"],courseTest["moed2time"]);					
 					if(Date.parse(moed)> Date.now() && courseTest[registerToMoedBet] == true)
 					{

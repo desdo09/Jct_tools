@@ -930,10 +930,7 @@ function updateTestDate(data, doIt)
 		.then(function(){
 			return getFromMazakTestData();
 	}).then(function(MazakData)
-	{
-		if(getFromMazakTestDataRequest != undefined)
-			getFromMazakTestDataRequest.abort();
-			
+	{			
 		DataAccess.setData("testsDate",MazakData);
 	}).catch(e => {
 			console.log("getFromMazakTestData promise error: " + e);
