@@ -182,8 +182,11 @@ function moodleConnect(pass,data)
 					continue;
 
 				var testDateHtml = "";
-				if(courseTest["moed1day"] == undefined || courseTest["moed1time"] )
-				continue;
+					console.log("course "+ courseTest +": moed1 date: " + courseTest["moed1day"] + " moed1 time:" + courseTest["moed1time"])
+					if(courseTest["moed1day"] == undefined || courseTest["moed1time"] == undefined)
+					{
+						continue;
+					}
 
 				var moed = stringDateToDateObject(courseTest["moed1day"],courseTest["moed1time"]);
 				if(Date.parse(moed)> Date.now())
@@ -194,8 +197,11 @@ function moodleConnect(pass,data)
 				}
 				else
 				{
-						if(courseTest["moed2day"] == undefined || courseTest["moed2time"] )
+					console.log("course "+ courseTest +": moed2 date: " + courseTest["moed2day"] + " moed2 time:" + courseTest["moed2day"])
+					if(courseTest["moed2day"] == undefined || courseTest["moed2time"] == undefined)
+					{
 						continue;
+					}
 					var moed = stringDateToDateObject(courseTest["moed2day"],courseTest["moed2time"]);					
 					if(Date.parse(moed)> Date.now() && courseTest[registerToMoedBet] == true)
 					{
@@ -207,7 +213,7 @@ function moodleConnect(pass,data)
 					else
 						continue;	
 				}
-				console.log(testDateHtml);
+			
 				$("[data-courseid="+mycourses[i]+"]").find(".moreinfo").append(testDateHtml);
 				$("[data-courseid="+mycourses[i]+"]").find(".moreinfo").css({ "text-align": "center", "color" : "#0070a8", "font-weight": "bold", "margin-left": "15px"});
 			}
