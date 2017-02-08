@@ -166,12 +166,14 @@ chrome.notifications.onClicked.addListener(function (id){
 
 
 /******************************************************
-* This funcion will executade when the chrome start
+* This funcions will executade when the chrome start
 ********************************************************/
+chrome.alarms.clearAll();
 DataAccess.Data(onStart);
-
+/******************************************************/
 function onStart(data)
 {
+	chrome.alarms.clearAll();
 	chrome.browserAction.setBadgeBackgroundColor({color:"#043D4E"});
 	//Because firefox onInstalled doesn't work, 
 	//we check if the data.Config is defined,
@@ -246,11 +248,15 @@ function setAlarms(data,onstart = false)
 	if(events == undefined)
 		return
 	console.log("Total events: " +  events.length);
+	//Homework first alarm
 	var hwFirstAlarm = parseFloat(data.Config.HWfirstAlarm);
+	//User event second alarm
 	var ueFirstAlarm = parseFloat(data.Config.UEfirstAlarm);
 
 	console.log("Homework first alarm: " +  hwFirstAlarm + ", event first alarm: " +  hwFirstAlarm);
+	//Homework first alarm	
 	var hwSecondAlarm = parseFloat(data.Config.HWSecondAlarm);
+	//User event second alarm
 	var ueSecondAlarm = parseFloat(data.Config.UESecondAlarm);
 	console.log("Homework second alarm: " +  hwSecondAlarm + ", event second alarm: " +  ueSecondAlarm );
 	var deadLine = Date.now();
@@ -1032,4 +1038,32 @@ function getFromMazakTestData()
 
 	});
 	return promise;
+}
+
+function testNotifications(type)
+{
+	switch (type)
+	{
+		case 1:
+			chrome.notifications.create(
+				"0",{
+				type: 'basic',
+				requireInteraction:true,
+				iconUrl: chrome.extension.getURL('image/icons/reminder.png'),
+				title: ("תזכורת על שיעורי בית"),
+				message: (("Test" + "\n" + "Course test" +"\n") + new Date())
+			});
+		break;
+
+		case 2:
+		chrome.notifications.create(
+				"0",{
+				type: 'basic',
+				requireInteraction:true,
+				iconUrl: chrome.extension.getURL('image/icons/jct128.png'),
+				title: "שינוי בשיעורי בית",
+				message: (("Test" + "\n" + "Course test" +"\n") + new Date())
+			});
+		break;
+	}
 }

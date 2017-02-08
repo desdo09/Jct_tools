@@ -32,6 +32,7 @@ function onStart(data)
         case "1.1.1.1":
         case "10.1.1.1":
         case "wireless-login.jct.ac.il":
+		case "captiveportal-login.jct.ac.il":
         	if(data["wf"] && data.enable)
         		wifiConnect(password);
         break;
@@ -57,12 +58,21 @@ function wifiConnect(pass)
   		return;
 	$("input[name='username']").attr("value",username);
     $("input[name='password']").attr("value",pass);
-	//document.forms[0].err_flag.value = 1;
-    var actualCode = "submitAction();";
-    var script = document.createElement('script');
-    script.textContent = actualCode;
-    (document.head||document.documentElement).appendChild(script);
-    script.parentNode.removeChild(script);
+	
+	var submitButton = $("#frmLogin #btnSubmit_6");
+	if($(submitButton).length >0)
+	{
+		//New wifi login (01/02/2017)
+		$(submitButton).click();
+	}else{
+		//old wifi login		
+		var actualCode = "submitAction();";
+		var script = document.createElement('script');
+		script.textContent = actualCode;
+		(document.head||document.documentElement).appendChild(script);
+		script.parentNode.removeChild(script);
+	}
+
 }
 
 function mazakConnect(pass)
