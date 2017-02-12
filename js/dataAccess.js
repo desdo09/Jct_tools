@@ -38,6 +38,9 @@ var DataAccess = {
                 // run the callBackFunction
                 if(typeof callBackFunction == "function")
                     callBackFunction(data);
+
+                setTimeout(function(){chrome.runtime.sendMessage({setBadge:true});},1000);
+
             });
         else
         {
@@ -50,6 +53,8 @@ var DataAccess = {
                 inUsed = false;
                 if(typeof callBackFunction == "function")
                     callBackFunction(data);
+
+                setTimeout(function(){chrome.runtime.sendMessage({setBadge:true});},1000);
             });
         }
 
@@ -81,6 +86,7 @@ var DataAccess = {
                 inUsed = false;
                 if(typeof callBackFunction == "function")
                     callBackFunction(result);
+                setTimeout(function(){chrome.runtime.sendMessage({setBadge:true});},1000);
             });
 
        });
@@ -116,6 +122,7 @@ var DataAccess = {
                 if(typeof callBackFunction == "function")
                     if(typeof callBackFunction == "function")
                         callBackFunction(result);
+                setTimeout(function(){chrome.runtime.sendMessage({setBadge:true});},1000);
             });
 
        });

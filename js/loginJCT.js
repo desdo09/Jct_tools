@@ -22,7 +22,7 @@ function onStart(data)
 	switch(location.host)
 	{
     	case "moodle.jct.ac.il":
-     	  moodleConnect(password,data);
+     	  moodle(password,data);
         break;
   		case "mazak.jct.ac.il":
         case "levnet.jct.ac.il":
@@ -95,8 +95,13 @@ function remoteConnect(pass)
 //	$("button[type='submit']").click();
 }
 
-function moodleConnect(pass,data)
+function moodle(pass,data)
 {
+	if(location.pathname.includes("assign") )
+	{
+		checkHW();
+		return;
+	}
 	console.log("JCT Tools->" + "Moodle automatic login:" + data["mo"]);
 	if($("#login_username").length != 0 && $("#login_password").length != 0)
 	{
@@ -239,3 +244,31 @@ function moodleConnect(pass,data)
 
 
 }
+function checkHW()
+{	
+	console.log("JCT Tools->" + " Cheking homework status")
+	
+	var urlParam = location.search.replace('?', '').replace('&','=').split('=');
+	var urlCourseId = null;
+	for(var i=0;i<urlParam.length;i++)
+	{
+		if(urlParam[i] == "id")
+		{
+			urlCourseId = urlParam[i+1];
+			console.log("JCT Tools->" + " Homework id = " +urlCourseId );			
+			break;
+		}
+	}
+	if(urlCourseId == null)
+		return;
+	
+	if($(".submissionstatussubmitted").length > 0 || $(".latesubmission").length > 0 || $(".earlysubmission").length > 0)
+	{
+		//setObjectInObject:function(objName,hash1, hash2, value = null,callBackFunction = null)
+		DataAccess.setObjectInObject("eventDone",urlCourseId,"checked",true);
+		console.log("JCT Tools->" + " Homework is done");			
+		
+	}
+	
+}
+
