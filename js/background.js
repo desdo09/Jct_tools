@@ -318,7 +318,9 @@ function createEventNotification(eventId,change = false)
 					title: "שינוי בשיעורי בית",
 					message: ((event.name + "\n" + data.courses[event.courseId].name+"\n") + getDate(new Date(Date.parse(event.deadLine))))
 				});
-		else
+		else{
+			if(Date.parse(event.deadLine) < Date.now())
+				return;
 			chrome.notifications.create(
 				(event.type == "homework")?eventId:"event " + eventId,{
 					type: 'basic',
@@ -327,6 +329,7 @@ function createEventNotification(eventId,change = false)
 					title: ("תזכורת" + ((event.type == "homework")?" על שיעורי בית":" אירוע")),
 					message: (event.name + "\n" + ((event.type == "homework")?data.courses[event.courseId].name+"\n":"") + getDate(new Date(Date.parse(event.deadLine))))
 				});
+		}
 	});
 }
 
