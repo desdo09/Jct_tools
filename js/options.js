@@ -668,15 +668,16 @@ function setAdvanced()
 * page to refresh the database
 *
 ******************************************************/
-function notification(message, type = "success")
+function notification(message, type)
 {
+	
 	if(type == "error")
 		$.notify(message,{position:"top right", className: 'error'} );
 
 	if(type == "warning")
 		$.notify(message,{position:"top right",className: 'warn'});
 
-	if(type == "success")
+	if(type == null || type == "success")
 		$.notify(message,{position:"top right",className: 'success'});
 }
 

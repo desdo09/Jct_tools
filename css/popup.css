@@ -150,14 +150,20 @@ color:#075E86;
 	color:#00f;
 
 }
+ #styleWithHW #sliderMenu
+ {
+	 background:url("../image/options_img/option_Background.png") repeat-x;
+	 overflow: hidden;
+	 margin: 0 auto;
+	 text-align: center;
+ }
 
 #styleWithHW #buttons
 {
+
 	height: 80px;
-	background:url("../image/options_img/option_Background.png") repeat-x;
-	overflow: hidden;
-	margin: 0 auto;
 	text-align: center;
+
 }
 #styleWithHW .menu
 {
@@ -186,6 +192,40 @@ color:#075E86;
 
 	width:40px;
 }
+
+
+ #styleWithHW #Content
+ {
+     height: 400px;
+     max-height: 400px;
+     background: #095E87;
+     overflow: auto;
+ }
+
+ /*#styleWithHW .slider*/
+ /*{*/
+
+	 /*color: white;*/
+	 /*font-size: 40px;*/
+	 /*!*position: absolute;*!*/
+	 /*margin-left: 0;*/
+	 /*padding: 0;*/
+	 /*margin-top:20px; ;*/
+ /*}*/
+ #sliderRight{
+	 float: right;
+	width: 10px;
+	 font-size: 20px;
+	 color:white;
+
+
+ }
+
+ #sliderLeft{
+	 float: right;
+	 margin-left: -10px;
+	 padding-left: -10px;
+ }
 /************************************
 *   styleWithHW -> Homeworks styles
 ************************************/
@@ -193,10 +233,9 @@ color:#075E86;
 {
 	height: 400px;
 	max-height: 400px;
-	background: #095E87;
 	overflow: auto;
 }
-#styleWithHW #Homeworks .event
+#styleWithHW #Homeworks .event,.options
 {
 	background:transparent url("../image/blanco.png") repeat ;
 	color:#00f;
@@ -208,7 +247,7 @@ color:#075E86;
 	padding: 0 15px;
 	font-size: 14px;
 }
-#styleWithHW #Homeworks .event:hover {
+#styleWithHW #Homeworks .event:hover,.options:hover,.usefulSite:hover {
 	background: #fff ;
 	color:#075E86;
 }
@@ -240,7 +279,7 @@ color:#075E86;
     width: 20px;
     display: block;
     float: right;
-    margin: 18 auto;
+//    margin: 18 auto;
 
 }
 #styleWithHW #Homeworks  .total
@@ -250,31 +289,93 @@ color:#075E86;
 	text-align: center;
 	color: #fff;
 }
-/******************************
-*   Homeworks div scr
-******************************/
-#styleWithHW #Homeworks::-webkit-scrollbar-track
+ #styleWithHW #Homeworks  .notifi
+ {
+	 margin-top: 20px;
+
+ }
+
+ /******************************
+ *   Homeworks div scr
+ ******************************/
+
+
+ #styleWithHW #Content::-webkit-scrollbar, #styleWithHW #Homeworks::-webkit-scrollbar
+ {
+	 width: 6px;
+	 background-color: #095E87;
+ }
+
+ #styleWithHW #Content::-webkit-scrollbar-thumb, #styleWithHW #Homeworks::-webkit-scrollbar-thumb
+ {
+	 border-radius: 10px;
+	 -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	 background-color: #ddd;
+ }
+
+ /************************************
+ *   styleWithHW -> wifiConnect styles
+ ************************************/
+
+#wificonnect{
+    /*height: 400px;*/
+    /*max-height: 400px;*/
+    margin: 0 auto;
+    text-align: center;
+    margin-top:50px ;
+}
+#wifimsg{
+    color: #ffffff;
+    font-size: 16px;
+    margin-top: 30px;
+}
+.wifiIcon
 {
-	/*
-	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-	border-radius: 10px;
-	background-color: #095E87;
-	*/
+    height: 100px;
+}
+.options{
+    height: auto;
+    padding: 5px;
+}
+.main{
+	text-align: center;
+	font-size: 26px;
 }
 
-#styleWithHW #Homeworks::-webkit-scrollbar
-{
-	width: 6px;
-	background-color: #095E87;
+.navigator{
+	font-size: 16px;
+	padding: 10px 15px;
+	text-align: justify;
 }
 
-#styleWithHW #Homeworks::-webkit-scrollbar-thumb
-{
-	border-radius: 10px;
-	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-	background-color: #ddd;
-}
+ .usefulSite{
+	 background:transparent url("../image/blanco.png") repeat ;
+	 color:#00f;
+	 border-radius: 10px;
+	 display: block;
+	 margin: 10px 15px;
+	 line-height: 100%;
+	 padding: 0 15px;
+	 font-size: 14px;
+	 height: 50px;
+	 overflow: hidden;
 
+ }
+ .usefulSite .usLogo{
+	 display: block;
+	 margin-top: 5px;
+	 margin-left: 10px;
+	 float: right;
+	 width: 50px;
+ }
+ .usefulSite .usLogo img{
+	height: 40px;
+}
+ .usefulSite .usName{
+	 display: block;
+	 float: right;
+	 line-height: 40px;
+ }
 /************************************
 *   styleWithHW -> foot styles
 ************************************/
@@ -288,12 +389,18 @@ color:#075E86;
 #styleWithHW #foot a
 {
 	display: inline-block;
-	height: 90%
-	text-align:center;
+	/*height: 90%;*/
+	/*text-align:center;*/
 	color: #fff;
 	font-size: 28px;
 	width: 45%;
+	/*width: 30%;*/
 }
+ #styleWithHW #foot a:hover
+ {
+	background-color: white;
+	color: black;
+ }
 #styleWithHW #foot p
 {
 	color: #fff;

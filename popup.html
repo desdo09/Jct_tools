@@ -29,8 +29,9 @@
 			</div>
 		</div>
 		<div id ="styleWithHW" style="display:none;">
+		<div id="sliderMenu">
 			<div id="buttons" >
-				<a href="https://10.1.1.1/login.html" target="_blank" class="menu">
+				<a id="wifiLogin"  target="_blank" class="menu">
 			 		<figure>
 			 			<p class="img">
 							<img src="image/popup/wifi.png" class="image" >
@@ -40,8 +41,8 @@
 				    	</figcaption>
 					</figure>
 				</a>
-				
-				<a href="http://moodle.jct.ac.il/" target="_blank" class="menu">
+
+				<a id="moodleButton"  target="_blank" class="menu">
 			 		<figure>
 			 		<p class="img">
 						<img src="image/popup/moodle.png" >
@@ -51,8 +52,8 @@
 				    	</figcaption>
 					</figure>
 				</a>
-				
-				<a href="https://levnet.jct.ac.il/" target="_blank" class="menu">
+
+				<a id="levnetButton" target="_blank" class="menu">
 			 		<figure>
 			 		<p class="img">
 						<img src="image/popup/levnet.png" >
@@ -62,27 +63,115 @@
 				    	</figcaption>
 					</figure>
 				</a>
-				
-				<a href="https://lev.jct.ac.il/dana-na/auth/url_1/welcome.cgi" target="_blank" class="menu">
+
+				<a id="usefulSitesButton" target="_blank" class="menu">
 			 		<figure>
 			 			<p class="img">
-							<img src="image/popup/lock.png" >
+							<img src="image/icons/links.png" >
 						</p>
 						<figcaption>
-					    		התחברות
+					    		קשורים
 				    	</figcaption>
 					</figure>
 				</a>
+
 			</div>
-			<div id="Homeworks">
-				<span id="homeworksContent"></span>
-				<p class="total">סכ"ה: <var id="eventsTotal">0</var> ש"ב</p>
-				
+		</div>
+			<div id="Content" >
+				<div id="Homeworks" >
+					<div id="homeworksContent"> </div>
+					<p class="total">סכ"ה: <var id="eventsTotal">0</var> ש"ב</p>
+				</div >
+				<div id="WifiConnect" style="display:none;">
+					<span class="wifiloader wifiIcon" style="display:none;"> <img src="image/sppiner.gif"></span>
+                    <span class="wifiConected wifiIcon" style="display:none;"> <img src="image/connected.png"/></span>
+                    <span class="wifiNotConected wifiIcon" style="display:none;"> <img src="image/notConnected.png"/></span>
+                    <p id="wifimsg">Please wait while we connect to wifi</p>
+                    <span class='options'><a>Take me to the website</a></span>
+				</div>
+				<div id="MoodleCourse" style="display:none;">
+
+				</div>
+				<div id="levnetPages" style="display:none;">
+					<div label="main">
+						<a href="https://levnet.jct.ac.il" target="_blank"><span class='options main'> לב נט </span></a>
+						<a label-target="1"><span class='options navigator'>אקדמיה ></span></a>
+						<a label-target="2"><span class='options navigator'>חשבונות וכספים ></span></a>
+						<a label-target="3"><span class='options navigator'>אישורים ></span></a>
+					</div>
+
+					<div label="1" style="display:none;">
+						<a label-target="main"><span class='options navigator'> < לחזור </span></a>
+						<a label-target="4"><span class='options navigator'>מערכת ></span></a>
+						<a label-target="5"><span class='options navigator'>ציונים ומבחנים ></span></a>
+					</div>
+
+					<div label="2" style="display:none;">
+						<a label-target="main"><span class='options navigator'> < לחזור </span></a>
+						<a href="https://levnet.jct.ac.il/Student/AccountOperationsStartPage.aspx" target="_blank"><span class='options navigator'>תנועות בחשבון </span></a>
+						<a href="https://levnet.jct.ac.il/Student/AccountVouchers.aspx" target="_blank"><span class='options navigator'>שוברי תשלום </span></a>
+						<a href="https://levnet.jct.ac.il/Student/AccountCreditPayments.aspx" target="_blank"><span class='options navigator'>תשלום באשראי</span></a>
+						<a href="https://levnet.jct.ac.il/Student/Printing.aspx" target="_blank"><span class='options navigator'>רכישת הדפסות </span></a>
+					</div>
+
+					<div label="3" style="display:none;">
+						<a label-target="main"><span class='options navigator'> < לחזור </span></a>
+						<a href="https://levnet.jct.ac.il/Student/StudyingCertificate.aspx" target="_blank"><span class='options navigator'>אישור לימודים </span></a>
+						<a href="https://levnet.jct.ac.il/Student/TestCertificate.aspx" target="_blank"><span class='options navigator'>אישור נבחן </span></a>
+						<a href="https://levnet.jct.ac.il/Student/GradesSheetForm.aspx" target="_blank"><span class='options navigator'>גליון ציונים </span></a>
+						<a href="https://levnet.jct.ac.il/Student/Printing.aspx" target="_blank"><span class='options navigator'>רכישת הדפסות </span></a>
+					</div>
+
+					<div label="4" style="display:none;">
+						<a label-target="1"><span class='options navigator'> < לחזור </span></a>
+						<a href="https://levnet.jct.ac.il/Student/AccountOperationsStartPage.aspx" target="_blank"><span class='options navigator'>בניית מערכת </span></a>
+						<a href="https://levnet.jct.ac.il/Student/Schedule.aspx" target="_blank"><span class='options navigator'>לו"ז </span></a>
+						<a href="https://levnet.jct.ac.il/Student/CoursesConfirmationCertificate.aspx" target="_blank"><span class='options navigator'>טופס הערות לקורסים </span></a>
+					</div>
+
+					<div label="5" style="display:none;">
+						<a label-target="1"><span class='options navigator'> < לחזור </span></a>
+						<a href="https://levnet.jct.ac.il/Student/Tests.aspx" target="_blank"><span class='options navigator'>מבחנים </span></a>
+						<a href="https://levnet.jct.ac.il/Student/Tests.aspx?2" target="_blank"><span class='options navigator'>רישום למועד ב' </span></a>
+						<a href="https://levnet.jct.ac.il/Student/Grades.aspx" target="_blank"><span class='options navigator'>ציונים </span></a>
+						<a href="https://levnet.jct.ac.il/Student/Appeals.aspx" target="_blank"><span class='options navigator'>ערעורים </span></a>
+					</div>
+
+				</div>
+				<div id="usefulSitesContent" style="display:none;">
+					<a class="usefulSite" href="http://www.jct.ac.il/" target="_blank">
+						<span class="usLogo"><img src="image/icons/jct128.png" ></span>
+						<span class="usName">המרכז האקדמי לב האתר הראשי</span>
+					</a>
+					<a class="usefulSite" target="_blank" href="http://midrash.jct.ac.il/v2/">
+					<span class="usLogo"><img src="image/icons/time.png" ></span>
+					<span class="usName">זמני התפילות – בית המדרש</span>
+					</a>
+					<a class="usefulSite" target="_blank" href="https://lev.jct.ac.il/dana-na/auth/url_1/welcome.cgi">
+						<span class="usLogo"><img src="image/popup/lock.png" ></span>
+						<span class="usName">מערכת התחברות מרחוק</span>
+					</a>
+					<a class="usefulSite" target="_blank" href="http://jct.exlibris.co.il/F">
+						<span class="usLogo"><img src="image/icons/library.png" ></span>
+						<span class="usName">קטלוג הספריה</span>
+					</a>
+					<a class="usefulSite" target="_blank" href="http://it-support.jct.ac.il/">
+						<span class="usLogo"><img src="image/icons/Picture8.png" ></span>
+						<span class="usName">פורטל תמיכה</span>
+					</a>
+					<a class="usefulSite" target="_blank" href="http://www.jct.ac.il/sites/default/files/%D7%9C%D7%95%D7%96%20%D7%A6%D7%91%D7%A2%D7%95%D7%A0%D7%99%20%D7%A2%D7%9D%20%D7%94%D7%A2%D7%A8%D7%95%D7%AA.pdf">
+						<span class="usLogo"><img src="image/icons/calendar.png" ></span>
+						<span class="usName">לוז אקדמיה</span>
+					</a>
+
+				</div>
+
 			</div>
 			<div id="foot">
 				<!--לאפשר-->
 				<a id="enable" style="display:none">אפשר</a>
 				<a id="disable">השבת</a>
+				<!--<a id="myfiles">אזור שלי</a>-->
 				<a id="settings">הגדרות</a>
 				<p>V: <var id="version"></var></p>
 			</div>

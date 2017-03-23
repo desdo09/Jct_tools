@@ -1,6 +1,14 @@
+//global data;
+var homeworkWindow;
+var wifiWindow;
+var moodleWindow;
+var levnetWindow;
+var usefulSites;
+var currentOpen;
+
+
 $(document).ready(	function (){
 	DataAccess.Data(onStart);
-
 })
 
 
@@ -30,7 +38,7 @@ function onStart(result)
 		themeWithEvents(result);
 
 		$("a[target='_blank']").click(function(){
-		 	window.close();
+		 //	window.close();
 		})
 
 	if(result.Config != null)
@@ -105,8 +113,55 @@ function themeWithEvents(data)
 
 		setTimeout(function () { window.close(); }, 1);
 	});
+
+	setGloblaVar();
+
 	$("#version").text(chrome.runtime.getManifest().version_name);
+	
+	$("#wifiLogin").click(function () {
+        autoWifiLogin();
+    });
+
+	$("#moodleButton").click(function () {
+		DataAccess.Data(showCourses);
+	});
+
+	$("#levnetButton").click(function () {
+        openWindow("L");
+    });
+	$(levnetWindow).find('div').each(function () {
+		var that = this;
+		$(this).find('a').each(function () {
+			$(this).click(function () {
+                var label = $(this).attr("label-target");
+                if(label == null || label == "")
+                    return true;
+				console.log("div[label='"+label+"']");
+                $(that).hide();
+                $(levnetWindow).find("div[label='"+label+"']").show(500);
+            });
+        })
+    });
+
+	$("#usefulSitesButton").click(function () {
+		openWindow('U');
+    });
 	insertEvents(data);
+
+
+
+}
+
+function setGloblaVar() {
+
+	var content = $("#Content");
+
+    homeworkWindow = $(content).find("#Homeworks");
+    wifiWindow = $(content).find("#WifiConnect");
+    moodleWindow =$(content).find("#MoodleCourse");
+    levnetWindow = $(content).find("#levnetPages");
+    usefulSites = $(content).find("#usefulSitesContent");
+    currentOpen = 'H';
 
 }
 
@@ -223,7 +278,7 @@ function insertEvents(data)
 
 
 		event +="</span>";
-
+		console.log(event);
 		$("#homeworksContent").append(event);
 	} 		//notifications
 
@@ -265,8 +320,163 @@ function onBackgroundEvent(eventType)
 				insertEvents(data);
 		 });
 			break;
+		case "wifiLogin":
+			autoWifiLogin(eventType.operationCompleted,eventType.error)
+			break;
 		default:
 
 	}
 
+}
+function autoWifiLogin(status,error) {
+
+
+	if(status == null)
+	{
+        openWindow("W");
+        $(wifiWindow).find(".wificonected").hide();
+        $(wifiWindow).find(".wifiNotConected").hide();
+        $(wifiWindow).find(".wifiloader").show();
+        $(wifiWindow).find("#wifimsg").show();
+
+        chrome.runtime.sendMessage({wifiLogin:true});
+	}
+    else {
+		if(status)
+		{
+            $(wifiWindow).find(".wifiloader").hide();
+            $(wifiWindow).find(".wificonected").show();
+            $(wifiWindow).find("#wifimsg").text("מחובר");
+		}
+		else
+		{
+            $(wifiWindow).find(".wifiloader").hide();
+            $(wifiWindow).find(".wifiNotConected").show();
+            $(wifiWindow).find("#wifimsg").text(error);
+		}
+
+        setTimeout(function(){
+
+            $(wifiWindow).find(".wifiloader").hide();
+            $(wifiWindow).find(".wifiNotConected").hide();
+            $(wifiWindow).find("#wifimsg").hide();
+        	if(currentOpen == "W")
+				openWindow("H");
+
+
+        }, 5000);
+
+	}
+
+}
+
+
+function showCourses(data)
+{
+
+	openWindow("M");
+
+
+	//Set var to courses div
+    var MoodleCourseDiv = $("#MoodleCourse");
+
+	//reset div
+    $(MoodleCourseDiv).find(".options").remove();
+
+    //Add a button to open moodle
+    $(MoodleCourseDiv).append("<a href='http://moodle.jct.ac.il/' target='_blank' style='text-align: center'><span class='options main' >מודל</span></a>");
+
+
+	//Get my courses in order
+    var courses = orderCourses(data.moodleCoursesTable,data.coursesIndex);
+
+    //Temp var
+	var course = {};
+	var courseSpan = "";
+
+    //remove all the courses the user chose (the options to be hide are save in the local storage)
+    for (var i = 0; i < courses.length; i++) {
+
+		//Get course details
+		course = data.courses[courses[i]];
+		//Set span
+		courseSpan ="<a href='http://moodle.jct.ac.il/course/view.php?id="+ course.moodleId + "' target='_blank'><span class='options navigator' >" +course.id+" - "+ course.name +"</span></a>";
+		//Add to the div
+		$(MoodleCourseDiv).append(courseSpan);
+    }
+
+}
+
+function orderCourses(courses,index) {
+
+	if(courses == null || index == null)
+		return [];
+
+	var orderCourses = [];
+	var j = 0;
+	for(var i=0;i<index.length;i++)
+	{
+		if(courses[index[i]] == true)
+		{
+            orderCourses[j++]=index[i];
+		}
+	}
+	return orderCourses;
+}
+
+
+
+function openWindow(type) {
+
+
+
+	switch (currentOpen)
+	{
+		case 'H':
+			$(homeworkWindow).hide();
+			break;
+        case 'W':
+            $(wifiWindow).hide();
+            break;
+        case 'M':
+            $(moodleWindow).hide();
+            break;
+        case 'L':
+            $(levnetWindow).hide();
+            $(levnetWindow).find('div').hide();
+            $(levnetWindow).find('div[label="main"]').show();
+            break;
+		case 'U':
+			$(usefulSites).hide();
+	}
+
+
+
+	switch (type)
+	{
+		case currentOpen:
+            $(homeworkWindow).show();
+            currentOpen = "H";
+            break;
+		case "H":
+			$(homeworkWindow).show();
+            currentOpen = "H";
+            break;
+        case "W":
+            $(wifiWindow).show();
+            currentOpen = "W";
+            break;
+        case "M":
+            $(moodleWindow).show();
+            currentOpen = "M";
+            break;
+        case "L":
+            $(levnetWindow).show();
+            currentOpen = "L";
+            break;
+		case 'U':
+            $(usefulSites).show();
+            currentOpen = "U";
+            break;
+	}
 }

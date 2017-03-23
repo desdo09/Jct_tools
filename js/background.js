@@ -4,7 +4,6 @@
 *
 * Last update: 30/07/2016               email: abenatha@jct.ac.il
 ******************************************************************/
-
 /*****************************************************************
 * FUNCTION
 *    chrome.runtime.onMessage.addListener
@@ -46,6 +45,9 @@ chrome.runtime.onMessage.addListener(
 	     //In case that the request is to update the data
 	     if(request.updatedata)
 			DataAccess.Data(loginAndUpdate);
+
+        if(request.wifiLogin)
+            DataAccess.Data(wifiLogin);
 
 	    //In case that the request contains changeIcon.
 	    if(request.changeIcon != undefined)
@@ -232,7 +234,7 @@ function showTodayEvents(events,courses)
 
 
 
-function setAlarms(data,onstart = false)
+function setAlarms(data,onstart)
 {
 	if(data.Config != undefined && data.Config.hwUpdate != undefined && !isNaN(data.Config.hwUpdate) )
 	{
@@ -246,7 +248,7 @@ function setAlarms(data,onstart = false)
 		return;
 	var events = data.tasks;
 	if(events == undefined)
-		return
+		return;
 	console.log("Total events: " +  events.length);
 	//Homework first alarm
 	var hwFirstAlarm = parseFloat(data.Config.HWfirstAlarm);
@@ -289,8 +291,9 @@ function setAlarms(data,onstart = false)
 
 }
 
-function createEventNotification(eventId,change = false)
+function createEventNotification(eventId,change)
 {
+
 	DataAccess.Data(function(data){
 		if(data.tasks == undefined)
 			return;
@@ -309,23 +312,24 @@ function createEventNotification(eventId,change = false)
 
 		console.log("createEventNotification");
 
-		if(change == true)
+		if(change == true){
 			chrome.notifications.create(
 				  event.id,{
 					type: 'basic',
 					requireInteraction:(data.Config != undefined && data.Config.hiddeNofication == true)?false:true,
-					iconUrl: chrome.extension.getURL('image/icons/jct128.png'),
+					iconUrl: chrome.extension.getURL('image/icons/change.png'),
 					title: "שינוי בשיעורי בית",
 					message: ((event.name + "\n" + data.courses[event.courseId].name+"\n") + getDate(new Date(Date.parse(event.deadLine))))
 				});
-		else{
+		}else{
+			//in case that the alarm its late.
 			if(Date.parse(event.deadLine) < Date.now())
 				return;
 			chrome.notifications.create(
 				(event.type == "homework")?eventId:"event " + eventId,{
 					type: 'basic',
 					requireInteraction:true,
-					iconUrl: chrome.extension.getURL('image/icons/jct128.png'),
+					iconUrl: chrome.extension.getURL('image/icons/reminder.png'),
 					title: ("תזכורת" + ((event.type == "homework")?" על שיעורי בית":" אירוע")),
 					message: (event.name + "\n" + ((event.type == "homework")?data.courses[event.courseId].name+"\n":"") + getDate(new Date(Date.parse(event.deadLine))))
 				});
@@ -350,7 +354,7 @@ function createEventNotification(eventId,change = false)
 *   post that contains the username and password (received)
 *
 **********************************************************************/
-function login(username, password, asyncType = true)
+function login(username, password, asyncType)
 {
     const promise = new Promise(function (resolve, reject) {
 		var request =  $.post( "https://moodle.jct.ac.il/login/index.php",
@@ -758,9 +762,16 @@ function checkChanges(newHomeworks)
 			for (var j = 0; j < data.tasks.length; j++) {
 					if(data.tasks[j].type == "homework" && newHomeworks[i].id == data.tasks[j].id)
 					{
+						//Check if the HW is already submited
 						if(Date.parse(data.tasks[j].deadLine) != Date.parse(newHomeworks[i].deadLine))
+						{	
+							if(data.eventDone != null && data.eventDone[newHomeworks[i].id] != null && data.eventDone[newHomeworks[i].id]["checked"] == true)
+								if(data.Config != null && data.Config["showChangeAfterSubmit"] != true)
+									break;
+							
 							createEventNotification(newHomeworks[i],true)
-						break;
+							break;
+						}
 					}
 			}
 		}
@@ -891,7 +902,7 @@ function mazakLogin(username,password)
 		__VIEWSTATEGENERATOR:"1806D926",
 		ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$LoginButton:"כניסה",
 		ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$Password:password,
-		ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$UserName:username,
+		ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$UserName:username
 	};
 	
 
@@ -941,7 +952,7 @@ function updateTestDate(data, doIt)
 	}).then(function(MazakData)
 	{			
 		DataAccess.setData("testsDate",MazakData);
-	}).catch(e => {
+	}).catch(function(e) {
 			console.log("getFromMazakTestData promise error: " + e);
 			
 	});
@@ -950,17 +961,16 @@ function updateTestDate(data, doIt)
 
 function getFromMazakTestData()
 {
+	
 	const promise = new Promise(function (resolve, reject) {
 	    var request =  $.ajax({
 	    	url:"https://mazak.jct.ac.il/Student/Tests.aspx",
-			function(data) {
-				var myHTML = $(data).not('script');
-				
-			}
+ 			
 	    });
 
+	
 	    request.done( function(data){
-
+		
 			var table =$(data).find("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdStudentTests_itemPlaceholderContainer");
 			
 			if($(table).length==0)
@@ -1009,10 +1019,11 @@ function getFromMazakTestData()
 						case 3:
 						sTemp = $(this).text().trim();
 						iTemp = sTemp.indexOf(' ');
-						if(Date.parse(stringDateToDateObject(sTemp.substr(0,iTemp),sTemp.substr(iTemp+1)))<Date.now())
+						if(allTests[course]["moed" + moed + "day" ] != undefined && Date.parse(stringDateToDateObject(allTests[course]["moed" + moed + "day" ] ,sTemp.substr(iTemp+1)))>Date.now())
 							return false;
 								allTests[course]["moed" + moed + "day" ] = sTemp.substr(0,iTemp);
-								allTests[course]["moed" + moed + "time" ] = sTemp.substr(iTemp+1);
+								sTemp = sTemp.substr(iTemp+1);
+								allTests[course]["moed" + moed + "time" ] = sTemp.substr(0,sTemp.lastIndexOf(':'));
 						break;
 
 						case 5:
@@ -1030,7 +1041,24 @@ function getFromMazakTestData()
 			});
 			var date = new Date();
 			allTests["Last update"] = date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();
-			resolve(allTests);
+			getFromMazakregisterMoed3().then(function(moed3)
+			{
+				if(typeof moed3 == "object")
+				{
+					$.each(moed3, function(key, value){
+						
+						$.each(moed3[key], function(key2, value2){
+							allTests[key][key2]= moed3[key][key2];
+						});
+						
+					});
+				}
+				resolve(allTests);
+			}).catch(function(e) {
+				console.log("getFromMazakregisterMoed3 promise error: " + e);
+				resolve(allTests);
+			});
+			
 							
 
 	   });
@@ -1041,6 +1069,89 @@ function getFromMazakTestData()
 
 	});
 	return promise;
+}
+
+
+function getFromMazakregisterMoed3()
+{
+		const promise = new Promise(function (resolve, reject) {
+			var request =  $.ajax({
+				url:"https://mazak.jct.ac.il/Student/TestTimeCRegistration.aspx",
+				
+			});
+
+			request.done( function(data){
+					var table =$(data).find("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdTests_itemPlaceholderContainer");
+					
+				if($(table).length==0)
+					reject("Moed 3 table is empty");
+				var tr = $(table).find("tr");
+				if($(tr).length==0)
+					reject("tr is empty");
+
+				var test = {}
+				var allTests ={}
+
+				$(tr).each(function()
+				{
+					
+					var i=0;
+					var sTemp = "";
+					var iTemp = 0;
+					var saTemp;
+					var course = "";
+					var moed =0;
+					$(this).find("td").each(function()
+					{
+						switch(i)
+						{
+							case 0:
+								course = $(this).text().trim();
+							break;
+
+							case 5:
+							if(allTests[course] == undefined)
+								allTests[course] ={}
+							else{
+								if(allTests[course]["registerToMoed3"] == true)
+									return false;
+							}	
+
+							sTemp = $(this).text().trim();							
+							iTemp = sTemp.indexOf(' ');
+
+							
+
+							if(course == undefined || sTemp == undefined || iTemp ==undefined)
+								return false;
+							saTemp = sTemp.substr(0,iTemp);
+							saTemp = saTemp.substr(0,sTemp.lastIndexOf('/')+1) + 20 + saTemp.substr(saTemp.lastIndexOf('/')+1);//2017 and not 17
+							allTests[course]["moed" + 3 + "day" ] =saTemp;
+							allTests[course]["moed" + 3 + "time" ] = sTemp.substr(iTemp+1);
+							break;
+							case 6:
+								sTemp = $(this).find('a').text().trim();
+								if(sTemp == "ביטול/ שינוי")
+									allTests[course]["registerToMoed3"] = true;
+								else
+								if(allTests[course]["registerToMoed3"] !=  true)
+									allTests[course]["registerToMoed3"] = false;
+							break;	
+
+						}
+
+						i++;
+					});
+				});
+				resolve(allTests);
+			});
+
+
+			request.fail(function (data) {
+				reject("Test page conection error");
+			});
+		});
+		return promise;
 }
 
 function testNotifications(type)
@@ -1063,10 +1174,30 @@ function testNotifications(type)
 				"0",{
 				type: 'basic',
 				requireInteraction:true,
-				iconUrl: chrome.extension.getURL('image/icons/jct128.png'),
+				iconUrl: chrome.extension.getURL('image/icons/change.png'),
 				title: "שינוי בשיעורי בית",
 				message: (("Test" + "\n" + "Course test" +"\n") + new Date())
 			});
 		break;
 	}
+}
+
+function wifiLogin(data)
+{
+    console.log("Auto wifi login required")
+	var request =  $.post( "https://captiveportal-login.jct.ac.il/auth/index.html/u",
+			{username:data.username,password:atob(data.password)} );
+
+		request.done( function(data){
+			
+			console.log("login status ok");
+            backgroundEvent({type:"wifiLogin",operationCompleted:true });
+
+		});
+		request.fail(function (xhr, status, error) {
+			setBadge();
+			console.log("login status failed, status: " + xhr.status);
+			backgroundEvent({type:"wifiLogin",operationCompleted:false,error:"שגיא " + xhr.status + ": אין חיבור לוויפי" });
+		//	reject();
+		});
 }
