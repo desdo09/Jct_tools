@@ -49,6 +49,12 @@ chrome.runtime.onMessage.addListener(
         if(request.wifiLogin)
             DataAccess.Data(wifiLogin);
 
+        if(request.levnetLoginAndUpdate)
+            DataAccess.Data(function (data) {updateTestDate(data,true)});
+
+        if(request.levnetLogin)
+            DataAccess.Data(function (data) {mazakLogin(data.username,window.atob(data.password));});
+
 	    //In case that the request contains changeIcon.
 	    if(request.changeIcon != undefined)
 	    		changeIcon(request.changeIcon);
@@ -891,48 +897,52 @@ function changeIcon(flag)
 
 function mazakLogin(username,password)
 {
-	//Mazak inputs
-	var input = {
-		__EVENTARGUMENT:"",
-		__EVENTTARGET:"",
-		__EVENTVALIDATION:"/wEdAAetF+uTdeuF9ad4H3Y1oKlMCW8vdzVzmzgmuoYuqTP+fqct0ueWAA0YL7V6O1AochnANEsgx9K9r/2lixUqPdVYOVB//zNqTaUBR/8dOG4iyLATo2l1y7ugf3AadYP1/o1HSZucqxgKJG9VFVk9Fehc9i5wlba+qpEhMW4syJgKQI9Fcbo=",
-		__SCROLLPOSITIONX:"0",
-		__SCROLLPOSITIONY:"0",
-		__VIEWSTATE:"/wEPDwUJODQ1NTExNDM3ZBgCBR5fX0NvbnRyb2xzUmVxdWlyZVBvc3RCYWNrS2V5X18WAgU4Y3RsMDAkY3RsMDAkQ29udGVudFBsYWNlSG9sZGVyMSRMb2dpblN0YXR1c0NvbnRyb2wkY3RsMDEFOGN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlcjEkTG9naW5TdGF0dXNDb250cm9sJGN0bDAzBSljdGwwMCRjdGwwMCRDb250ZW50UGxhY2VIb2xkZXIxJExvZ2luVmlldw8PZAIBZFaS5PztvvCrKjw5Qdg2KADb8t9m",
-		__VIEWSTATEGENERATOR:"1806D926",
-		ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$LoginButton:"כניסה",
-		ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$Password:password,
-		ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$UserName:username
-	};
-	
+    //Mazak inputs
+    var input = {
+        __EVENTARGUMENT:"",
+        __EVENTTARGET:"",
+        __EVENTVALIDATION:"/wEdAAetF+uTdeuF9ad4H3Y1oKlMCW8vdzVzmzgmuoYuqTP+fqct0ueWAA0YL7V6O1AochnANEsgx9K9r/2lixUqPdVYOVB//zNqTaUBR/8dOG4iyLATo2l1y7ugf3AadYP1/o1HSZucqxgKJG9VFVk9Fehc9i5wlba+qpEhMW4syJgKQI9Fcbo=",
+        __SCROLLPOSITIONX:"0",
+        __SCROLLPOSITIONY:"0",
+        __VIEWSTATE:"/wEPDwUJODQ1NTExNDM3ZBgCBR5fX0NvbnRyb2xzUmVxdWlyZVBvc3RCYWNrS2V5X18WAgU4Y3RsMDAkY3RsMDAkQ29udGVudFBsYWNlSG9sZGVyMSRMb2dpblN0YXR1c0NvbnRyb2wkY3RsMDEFOGN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlcjEkTG9naW5TdGF0dXNDb250cm9sJGN0bDAzBSljdGwwMCRjdGwwMCRDb250ZW50UGxhY2VIb2xkZXIxJExvZ2luVmlldw8PZAIBZFaS5PztvvCrKjw5Qdg2KADb8t9m",
+        __VIEWSTATEGENERATOR:"1806D926",
+        ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$LoginButton:"כניסה",
+        ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$Password:password,
+        ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$UserName:username
+    };
 
 
-	
-	const promise = new Promise(function (resolve, reject) {
-		var request =  $.post( "https://mazak.jct.ac.il/Login/Login.aspx",input);
 
-		request.done( function(data){
-			// In case the username/password are wrong the moodle return an error that is requiered to
-	        // logout before login a new user
-	        if($("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_lErrorFailed").text().length>0)
-	        {	
-	        	console.log("Mazak wrong password");
-	        	backgroundEvent({type:"mazakLogin",operationCompleted:false,error:"שם המשתמש או הסיסמה שהזנת שגויים" });
-	        	reject();
-	        	return;
-	        }
-			console.log("login status ok");
-			resolve("");
-		});
 
-		request.fail(function (xhr, status, error) {
-			setBadge();
-			console.log("login status failed, status: " + xhr.status);
-			backgroundEvent({type:"login",operationCompleted:false,error:"אין חיבור למודל" });
-			reject();
-		});
-	});
-	return promise;
+    const promise = new Promise(function (resolve, reject) {
+        var request =  $.post( "https://mazak.jct.ac.il/Login/Login.aspx",input);
+
+        request.done( function(data){
+            // In case the username/password are wrong the moodle return an error that is requiered to
+            // logout before login a new user
+            if($("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_lErrorFailed").text().length>0)
+            {
+
+                console.log("Mazak wrong password");
+                backgroundEvent({type:"mazakLogin",operationCompleted:false,error:"שם המשתמש או הסיסמה שהזנת שגויים" });
+                reject();
+                return;
+            }
+            chrome.runtime.sendMessage({message:"login status ok"});
+
+            console.log("login status ok");
+            resolve("");
+        });
+
+        request.fail(function (xhr, status, error) {
+            chrome.runtime.sendMessage({message:"login status failed, status: " + xhr.status});
+            setBadge();
+            console.log("login status failed, status: " + xhr.status);
+            backgroundEvent({type:"login",operationCompleted:false,error:"אין חיבור למודל" });
+            reject();
+        });
+    });
+    return promise;
 }
 
 function updateTestDate(data, doIt)
@@ -1028,7 +1038,7 @@ function getFromMazakTestData()
 
 						case 5:
 						sTemp = $(this).find('a').text().trim();
-						if(sTemp == "בטל הרשמה")
+						if(sTemp == "בטל הרשמה" || sTemp == "בוצעה הרשמה למועד ב")
 							allTests[course]["registerToMoedBet"] = true;
 						else
 							if(allTests[course]["registerToMoedBet"] !=  true)
@@ -1131,7 +1141,7 @@ function getFromMazakregisterMoed3()
 							break;
 							case 6:
 								sTemp = $(this).find('a').text().trim();
-								if(sTemp == "ביטול/ שינוי")
+								if(sTemp == "ביטול/ שינוי" || sTemp== "נרשם")
 									allTests[course]["registerToMoed3"] = true;
 								else
 								if(allTests[course]["registerToMoed3"] !=  true)

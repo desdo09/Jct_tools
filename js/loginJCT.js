@@ -18,7 +18,7 @@ function onStart(data)
 	var password = "";
 	if(data["password"] != null)
 		password = window.atob(data["password"]);
-	console.log("JCT Tools->Current host: " + location.host)		
+	console.log("JCT Tools->Current host: " + location.host);
 	// Check current host
 	switch(location.host)
 	{
@@ -90,7 +90,7 @@ function mazakConnect(pass)
         }
         return;
     }
-	$("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_UserName").attr("value",username);
+
 	if($("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password").length ==0) {
         if (location.pathname.includes("Login")) {
             console.log("JCT Tools-> password field not found");
@@ -98,8 +98,18 @@ function mazakConnect(pass)
         }
         return;
     }
-	$("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password").attr("value",pass);
-//	$("#aspnetForm input[type='submit']").click();
+	//This function is a little hack to replace the chrome autofill.
+    $( ":input" ).each(function(){
+        if (this.name == "ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$UserName")
+            this.value =username;
+        if (this.name == "#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password")
+            this.value =pass;
+    });
+
+    console.log("JCT Tools-> Starting levnet autologin ");
+    $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_UserName").attr("value",username);
+    $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password").attr("value",pass);
+    $("#aspnetForm input[type='submit']").click();
 }
 
 function gradesButton() {
