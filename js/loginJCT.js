@@ -132,19 +132,94 @@ function gradesButton() {
 
         '</div>';
 
-    var customTotal = '<tr id="customTotal">' +
-							'<td></td>'  +
-							'<td> סכ"ה קורסים  </td> ' +
-							'<td id="TCourses">10</td>' +
-						    '<td colspan="2">סכ"ה נ"ז:</td> ' +
-							'<td id="TNZ">10</td> ' +
-							'<td>ממוצעה:</td> ' +
-							'<td id="TG">10</td> ' +
-							'<td colspan="2"></td>' +
+    var customTotal = '<tr id="customTotal" style="background-color:#004184;color:#fff;font-weight: bolder;">' +
+							'<th></th>'  +
+							'<th> סה"כ קורסים:  </th> ' +
+							'<th id="TCourses">10</td>' +
+						    '<th colspan="2">סכ"ה נ"ז:</th> ' +
+							'<th id="TNZ">10</th> ' +
+							'<th>ממוצע:</th> ' +
+							'<th id="TG">10</th> ' +
+							'<th colspan="2"></th>' +
 					'</tr>' ;
 
      $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdGrades_itemPlaceholderContainer").append(customTotal);
+	$("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdGrades_itemPlaceholderContainer").find("tr").each(function () {
+        $(this).dblclick(function () {
 
+        	var that = this;
+
+        	var td = $(this).find("td");
+
+        	var grade = $(td)[6];
+
+        	var min = $($(td)[5]).text().trim();
+
+        	if(isNaN(min)) min = 0;
+
+        	var gradeInput = $(grade).find(":input");
+
+        	if($(gradeInput).length>0)
+			{
+				//Writing new grade
+                var value = $(gradeInput).val().trim();
+                $(grade).empty();
+                $(grade).append(value);
+                customGrades();
+
+                //Set new class
+                console.log(value + " " + min);
+
+                if(isNaN(value)|| parseInt(value)>parseInt(min))
+                {
+                    if($(this).hasClass("notPassed"))
+                        $(this).removeClass("notPassed ");
+                }else{
+                	if(!isNaN(value))
+                        if(!$(this).hasClass("notPassed"))
+                            $(this).addClass("notPassed");
+				}
+
+
+			}else {
+                var tText = $(grade).text().trim();
+                if(isNaN(tText))
+                    tText = "";
+                var inputGrade = "<input type='text' value='"+tText+"' style='width: 50px;text-align: center;font-size: 15px;height: 22px;'>";
+                $(grade).empty();
+                $(grade).append(inputGrade);
+                inputGrade = $(grade).find(":input");
+
+
+                $(inputGrade).keypress(function(e) {
+                    if(e.which == 13) {
+                        var gradeInput = $(grade).find(":input");
+                        var value = $(gradeInput).val().trim();
+                        $(grade).empty();
+                        $(grade).append(value);
+
+                        customGrades();
+
+                        //Set new class
+						console.log(value + " " + min);
+                        if(isNaN(value)|| parseInt(value)>parseInt(min))
+                        {
+                            if($(that).hasClass("notPassed"))
+                                $(that).removeClass("notPassed ");
+                        }else{
+                            if(!isNaN(value))
+                                if(!$(that).hasClass("notPassed"))
+                                    $(that).addClass("notPassed");
+                        }
+                    }
+                });
+
+
+			}
+
+
+        });
+    });
 
     var temp = $(examples[0]).find("span");
     $(examples[0]).empty();

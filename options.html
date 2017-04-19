@@ -5,7 +5,9 @@
 	<script type="text/javascript" src="js/lib/jquery.min.js"></script>
 	<script type="text/javascript" src="js/options.js"></script>
 	<script type="text/javascript" src="js/dataAccess.js"></script>
+	<script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
 	<script type="text/javascript" src="js/lib/notify.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/lib/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="css/option.css">
 </head>
 <body>
@@ -60,8 +62,8 @@
 							<span class="checkboxtext lastcheckboxtext">לב נט (מזק)</span>
 						</span>
 						<span class="buttons">
-							<button id="submit">שלח</button>
-							<button id="reset_Data">אפס הגדרות</button>
+							<button class="btn btn-default" id="submit">שלח</button>
+							<button class="btn btn-default" id="reset_Data">אפס הגדרות</button>
 						</span>
 					</div>
 		</div>
@@ -70,7 +72,7 @@
 				באזור זה ניתן להציג קורסים מסויימים במודל
 			</h2>
 
-			<button id="Refresh" class="Refresh">רענן</button>
+			<button id="Refresh" class="btn btn-default" class="Refresh">רענן</button>
 			<!--progress doen't work in IE9- -->
 			<progress class="Refresh" value="0" max="2" style="display: none;"></progress>
 			<table id="coursesTable">
@@ -117,14 +119,23 @@
 				<input type="number" name="SecondAlarm" id="UESecondAlarmTime" min="0.5" step="0.5" value="0.5" style="display: none;"/>
 			</span>
 			</div>
-			<button id="updateNotifications">עדכן</button>
+			<button class="btn btn-default" id="updateNotifications">עדכן</button>
 		</div>
 		<div id="advanced" style="display: none;">
+
+
 			<h2>
 				באזור זה ניתן להגדיר הגדרות מתקדמות
 			</h2>
-			<div>
-				<span>
+			<div id="advanced_content" class="panel">
+
+				<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#general">כללי</button>
+				<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#moodle">מודל</button>
+				<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#popup">חלון ההתראות</button>
+				<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#theme">סגנונות</button>
+
+
+				<div id="general" class="collapse in">
 					<p>
 						-------------------------------------כללי-------------------------------------
 					</p>
@@ -154,6 +165,8 @@
 						<span class="checkboxtext" >הודע על שינויים בהגשות של שיעורי הבית</span>
 					</p>
 					<p>
+				</div>
+				<div id="moodle" class="collapse">
 						-------------------------------------מודל-------------------------------------
 					</p>
 					<p class="option">
@@ -184,9 +197,12 @@
 						<input type="checkbox" id="MoodleHiddeUE" />
 						<span class="checkboxtext" >הסתר אירועים</span>
 					</p>
+				</div>
+				<div id="popup" class="collapse">
 					<p>
+
 						-------------------------------חלון ההתראות-------------------------------
-					</p>					
+					</p>
 					<p class="option">
 						<input type="checkbox" id="updateOnPopup" />
 						<span class="checkboxtext" >עדכן נתונים מחדש בלחיצה על סמל ההרחבה </span>
@@ -213,34 +229,37 @@
 					</p>
 					<p class="option">
 						<input type="checkbox" id="limitedHw" />
-						<span class="checkboxtext" > 
+						<span class="checkboxtext" >
 							הראה עד
 							<input type="number" min="1" max="99" step="1" id="limitedHwAmount" />
 							מטלות של אותו קורס
 						</span>
 					</p>
-					<p>
-						-----------------------------------סגנונות-----------------------------------
-					</p>
-					<figure>
-						<img src="image/newSyle.png"/>
-					    <figcaption>
-					    	<input type="radio" name="style" id="new"/>
-					    	סגנון עם שיעורי הבית
-					    </figcaption>
-					</figure>
-					<figure>
-						<img src="image/classicSyle.png"/>
-					    <figcaption>
-					    	<input type="radio" name="style" id="classic"/>
-					    	סגנון קלאסי
-					    </figcaption>
-					</figure>
-					<br/>
-					<p>
-						<button id="updateSettings">עדכן</button>
-					</p>
-				</span>
+				</div>
+				<div id="theme" class="collapse">
+				<p>
+					-----------------------------------סגנונות-----------------------------------
+				</p>
+				<figure>
+					<img src="image/newSyle.png"/>
+					<figcaption>
+						<input type="radio" name="style" id="new"/>
+						סגנון עם שיעורי הבית
+					</figcaption>
+				</figure>
+				<figure>
+					<img src="image/classicSyle.png"/>
+					<figcaption>
+						<input type="radio" name="style" id="classic"/>
+						סגנון קלאסי
+					</figcaption>
+				</figure>
+				<br/>
+
+				</div>
+				<p>
+					<button class="btn btn-default" id="updateSettings">עדכן</button>
+				</p>
 			</div>
 		</div>
 		<div id="about" style="display: none;">
@@ -268,107 +287,6 @@
 			 	 		<li>הרחבה זו היא קוד פתוח הנמצא בכתובת: <a href="https://github.com/desdo09/Jct_tools">https://github.com/desdo09/Jct_tools</a></li>
 					</ul>
 					</details>
-			</p>
-			<p>
-				<details>
-			 		<summary>שינויים (אנגלית)</summary>
-
-						<details class="log">
-			  			<summary>3.3 (Current)</summary>
-			  			<ul>
-							<li>Now the extension check if the homeworks is done</li>
-							<li>Bugs fixed</li>
-			  			</ul>
-			  			</details>
-					 	<details class="log">
-			  			<summary>3.2</summary>
-			  			<ul>
-							<li>Now you can see the test day in my courses</li>
-							<li>Bugs fixed</li>
-			  			</ul>
-			  			</details>
-
-					 	<details class="log">
-			  			<summary>3.1</summary>
-			  			<ul>
-							<li>Bug with "Virtual programming lab" fixed</li>
-			  				<li>Option to hide homeworks done in the popup window</li>
-			  				<li>Option to show only homeworks from "my courses" in the popup window and Moodle</li>
-			  				<li>Option to show only one homework per date </li>
-			  			</ul>
-			  			</details>
-						  
-			 			<details class="log">
-			  			<summary>3.0</summary>
-			  			<ul>
-			  				<li>New graphical integration in the extension button</li>
-			  				<li>New events notifications</li>
-			  				<li>New option to hide the courses on moodle</li>
-			  			</ul>
-			  			</details>
-
-			  			<details class="log">
-			  			<summary>2.0.3</summary>
-			  			<ul>
-			  				<li>Bug fixed in wifi login page</li>
-			  				<li>Button wifi url changed to local ip</li>
-			  			</ul>
-			  			</details>
-
-			  			<details class="log">
-			  			<summary>2.0.2</summary>
-			  			<ul>
-			  				<li>Bug fixed</li>
-			  			</ul>
-			  			</details>
-
-			  			<details class="log">
-			  			<summary>2.0.1</summary>
-			  			<ul>
-			  				<li>Bug fixed</li>
-			  			</ul>
-			  			</details>
-
-			  			<details class="log">
-			  			<summary>2.0</summary>
-			  			<ul>
-
-			  				<li>Bug fixed</li>
-			  				<li>New graphical integration in the extension button</li>
-			  				<li>Now you can disable the extension!</li>
-			  				<li>We improve the privacy</li>
-			  				<li>Now you can choose which pages the extension is activated</li>
-			  			</ul>
-			  			</details>
-
-			  			<details class="log">
-			  			<summary>1.2.1</summary>
-			  			<ul>
-
-			  				<li>New: option moodle old add in extension's button</li>
-			  				<li>Bug fixed</li>
-				  		</ul>
-			  			</details>
-
-			  			<details class="log">
-			  			<summary>1.2</summary>
-			  			<ul>
-
-			  				<li>Now it automatically connects to page Moodle-old!</li>
-			  				<li>Now it automatically connects mazak page!</li>
-				  		</ul>
-			  			</details>
-
-			  			<details class="log">
-			  			<summary>1.1</summary>
-			  			<ul>
-
-			  				<li>New: Button added to the edge of the browser with the pages of Machon.</li>
-			  				<li>Update: Improvement in the graphics</li>
-				  			<li>Update: Fix the link "Options" on the page of wifi_login even when the user not configured the password.</li>
-				  		</ul>
-			  			</details>
-			</details>
 			</p>
 		</div>
 	</div>

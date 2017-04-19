@@ -127,7 +127,9 @@ function themeWithEvents(data)
 	});
 
 	$("#levnetButton").click(function () {
+        chrome.runtime.sendMessage({levnetLogin:true});
         openWindow("L");
+
     });
 	$(levnetWindow).find('div').each(function () {
 		var that = this;

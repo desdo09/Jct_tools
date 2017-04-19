@@ -95,7 +95,7 @@ figure{
   vertical-align: center;
 
   display: inline-block;
-  padding:10px;
+  padding:10px 10px 2px 10px;
   text-decoration: none;
 }
 #menu .lastoption
@@ -260,4 +260,11 @@ figure{
 #about .log
 {
   margin:25px 50px 0 0;
+}
+
+
+/*OVERIDE BOOTSTRAT*/
+
+.panel{
+  background-color: transparent;
 }
