@@ -268,3 +268,9 @@ figure{
 .panel{
   background-color: transparent;
 }
+
+#passiveMode
+{
+  text-align: right;
+  margin-right: 50px;
+}

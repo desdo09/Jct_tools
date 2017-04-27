@@ -76,6 +76,12 @@ function wifiConnect(pass)
 
 function mazakConnect(pass)
 {
+    if(location.pathname.includes("/Student/ScheduleList.aspx")) {
+
+        $("td").removeClass('right');
+        return;
+    }
+
 	if(location.pathname.includes("Student/Grades.aspx")) {
         gradesButton();
         //customGrades();
@@ -504,7 +510,6 @@ function moodle(pass,data)
 
 
                 courseHtml = getCourseSpan(courseTest);
-
                 if(courseHtml == null)
                 	continue;
 
@@ -572,9 +577,9 @@ function getCourseSpan(courseTest) {
             }
         }else
             return null;
-
-        return testDateHtml;
     }
+    return testDateHtml;
+
 }
 function checkHW()
 {	

@@ -280,7 +280,6 @@ function insertEvents(data)
 
 
 		event +="</span>";
-		console.log(event);
 		$("#homeworksContent").append(event);
 	} 		//notifications
 

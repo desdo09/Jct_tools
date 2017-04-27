@@ -23,7 +23,7 @@ var DataAccess = {
     /*****************************************************************
     *  This Function will save the data into chrome.storage.local
     ******************************************************************/
-    setData: function (objName, value = null, callBackFunction = null)
+    setData: function (objName, value , callBackFunction)
     {
         // In case that the Database is in used (locked) it will be make a new async function
         if(inUsed)
@@ -45,7 +45,7 @@ var DataAccess = {
         else
         {
             // Creating a new object variable
-            var dataValue = new Object();
+            var dataValue = {};
             // add a value into our dynamic property
             dataValue[objName] = value;
             // Store in chrome
@@ -62,7 +62,7 @@ var DataAccess = {
     /*****************************************************************
     *  This Function will manager an objects inside the dataBase
     ******************************************************************/
-    setObject:function(objName, hash, value = null,callBackFunction = null)
+    setObject:function(objName, hash, value,callBackFunction)
     {
 
         if(inUsed)
@@ -95,7 +95,7 @@ var DataAccess = {
     *   This Function will manager an objects inside another objects
     *  in the dataBase
     ******************************************************************/
-    setObjectInObject:function(objName,hash1, hash2, value = null,callBackFunction = null)
+    setObjectInObject:function(objName,hash1, hash2, value,callBackFunction )
     {
 
 
@@ -148,7 +148,7 @@ var DataAccess = {
     /*****************************************************************
     *  This function delete data from the database
     ******************************************************************/
-    remove:function(objName,hash = null,callBackFunction = null)
+    remove:function(objName,hash,callBackFunction )
     {
         if(inUsed)
            return setTimeout(function(){DataAccess.remove(objName, hash,callBackFunction)},100);

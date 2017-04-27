@@ -101,12 +101,13 @@ function backgroundEvent(eventType)
 		}
 	}
 }
+
 /*****************************************************************
 * FUNCTION
 *    chrome.runtime.onInstalled
 *
 * MEANING
-*	When the extesion install the function will run and set the default
+*	When the extension install the function will run and set the default
 * settings
 **********************************************************************/
 chrome.runtime.onInstalled.addListener(onInstalled);
@@ -1085,13 +1086,10 @@ function getFromMazakTestData()
 						break;
 
 						case 5:
-						sTemp = $(this).find('a').text().trim();
-						if(sTemp == "בטל הרשמה" || sTemp == "בוצעה הרשמה למועד ב")
-							allTests[course]["registerToMoedBet"] = true;
-						else
-							if(allTests[course]["registerToMoedBet"] !=  true)
-								allTests[course]["registerToMoedBet"] = false;
-						break;						
+						sTemp = $(this).text().trim();
+                        if(	allTests[course]["registerToMoedBet"] != true)
+							allTests[course]["registerToMoedBet"] = sTemp == "בטל הרשמה" || sTemp == "בוצעה הרשמה למועד ב"; // (moed == 2 && sTemp && stringDateToDateObject(allTests[course]["moed" + moed + "day" ],allTests[course]["moed" + moed + "time" ])>Date.now());
+							break;
 
 					}
 					i++;
