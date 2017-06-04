@@ -26,8 +26,18 @@ $(document).ready(function () {
 		// The refresh button will initialize the function refreshData
 		$("#Refresh").click(refreshData);
 		$("#updateNotifications").click(setNotifications);
-		$("#updateSettings").click(setAdvanced);
+		$("#updateSettings").click(function(){
+
+            var $this = $(this);
+            $this.button('loading');
+            setAdvanced(function () {
+                $this.button('reset');
+            });
+		});
 		$("#version").text(chrome.runtime.getManifest().version_name);
+		$("#updateCourses").click(function () {
+            notification("המאגר עודכן");
+        })
 
 	});
 });
@@ -70,6 +80,11 @@ function setAccountData(data)
 		document.getElementById("mz").checked = true;
 		document.getElementById("mo").checked = true;
 	}
+
+	$("#anonymous").click(function () {
+		console.log("Clicked " + this.checked);
+        anonymousOptions(this.checked);
+    });
 }
 /*************************************************
 * FUNCTION
@@ -593,13 +608,33 @@ function setAdvancedData(data)
 		$("#limitedHw").attr('checked',false);
 		$("#limitedHwAmount").attr('disabled', 'disabled');
 	}
-	
+
+    if(data.Config.showGrades == undefined || data.Config.showGrades)
+        $("#showGrades").attr('checked',true);
+    else
+        $("#showGrades").attr('checked',false);
+
+    if(data.Config.customGrades == undefined || data.Config.customGrades)
+        $("#customGrades").attr('checked',true);
+    else
+        $("#customGrades").attr('checked',false);
+
+    if(data.Config.coursesOrder == undefined || data.Config.coursesOrder)
+        $("#coursesOrder").attr('checked',true);
+    else
+        $("#coursesOrder").attr('checked',false);
+
+    // if(data.Config.coursesAddToCalendar == undefined || data.Config.coursesAddToCalendar)
+    //     $("#coursesAddToCalendar").attr('checked',true);
+    // else
+    //     $("#coursesAddToCalendar").attr('checked',false);
 
 
 }
 
-function setAdvanced()
+function setAdvanced(callback)
 {
+
 
 	if($("#hwDays") == null || isNaN(parseFloat($("#hwDays").val())) || parseFloat($("#hwDays").val()) < 1)
 	{
@@ -640,12 +675,18 @@ function setAdvanced()
 	DataAccess.setObject("Config","hiddeSameDay",$("#hiddeSameDay").is(':checked'));
 	DataAccess.setObject("Config","limitedHw",limitedHw);
 	DataAccess.setObject("Config","limitedHwAmount",((limitedHw))?($("#limitedHwAmount").val()):(0));
+    DataAccess.setObject("Config","showGrades",$("#showGrades").is(':checked'));
+    DataAccess.setObject("Config","customGrades",$("#customGrades").is(':checked'));
+    DataAccess.setObject("Config","coursesOrder",$("#coursesOrder").is(':checked'));
+    // DataAccess.setObject("Config","coursesAddToCalendar",$("#coursesAddToCalendar").is(':checked'));
 
-		
 
 
-	DataAccess.setObject("Config","style",$("input[name='style']:checked").attr('id'));
-	notification("המאגר עודכן");
+
+    DataAccess.setObject("Config","style",$("input[name='style']:checked").attr('id'),function () {
+        notification("המאגר עודכן");
+        callback();
+    });
 	// until the database will update.
 	setTimeout(function(){chrome.runtime.sendMessage({setBadge:true});},1000);
 
@@ -712,4 +753,10 @@ function onBackgroundEvent(eventType)
 
 	}
 	//	$(progress).attr('value',1);
+}
+
+function anonymousOptions(on) {
+    $("#accountsInput").find("input").prop('disabled', on);
+    $("#checkLogin").prop('disabled', on);
+    $("#checkLogin").prop('checked', !on);
 }

@@ -301,6 +301,7 @@ function setAlarms(data,onstart)
 function createEventNotification(eventId,change)
 {
 
+	console.log("Generate a notification for id: "+ eventId);
 	DataAccess.Data(function(data){
 		if(data.tasks == undefined)
 			return;
@@ -309,7 +310,23 @@ function createEventNotification(eventId,change)
 		if(change != true)
 			for (var i = 0; i < data.tasks.length; i++) {
 				if(data.tasks[i].id == eventId)
+				{
 					event = data.tasks[i];
+					if(data.eventDone[event.id] != null )
+					{
+						if(data.eventDone[event.id].checked == false)
+						{
+                            console.log("Event id " + eventId + ", marked as done" );
+							return false;
+                        }
+						if(data.eventDone[event.id].notifications == false)
+                        {
+                            console.log("Event id " + eventId + ", marked to not receive notification" );
+                            return false;
+                        }
+					}
+					break;
+                }
 			}
 		else
 			event = eventId;
@@ -317,7 +334,6 @@ function createEventNotification(eventId,change)
 		if(event == null)
 			return;
 
-		console.log("createEventNotification");
 
 		if(change == true){
 			chrome.notifications.create(
@@ -693,10 +709,16 @@ function separateHomeworkData(hwdata)
     ***************************************/
     datatemp = $(hwdata).find('.date');
     if(datatemp == undefined || datatemp.length == 0)
-    	return undefined;
+        return undefined;
 
+    datatemp = $(datatemp).text();
+    //For moodle tests
+    if(datatemp.includes("»"))
+	{
+        datatemp = datatemp.substring(datatemp.indexOf("»")+1,datatemp.length);
+	}
 
-    var homeworkDeadLine = stringToDate($(datatemp).text());
+    var homeworkDeadLine = stringToDate(datatemp);
     homeworkDeadLine = homeworkDeadLine.toString();
     if(homeworkDeadLine == undefined)
     	return undefined;
@@ -738,8 +760,8 @@ function stringToDate(date)
 	}
 
 
-	var timeArray = new Array();
-	timeArray = date.split(":");
+
+    var timeArray = date.split(":");
 
 	if(timeArray[1] == undefined)
 		return undefined;

@@ -405,3 +405,7 @@ color:#075E86;
 {
 	color: #fff;
 }
+
+.form-control{
+ display: inline;
+}

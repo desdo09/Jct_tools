@@ -41,17 +41,17 @@
 					אנא הזן את שם המשתמש ואת הסיסמא שלך לאתרים של המרכז האקדמי לב
 				</p>
 				<div id="passiveMode">
-					<input type="checkbox">
+					<input type="checkbox" id="anonymous">
 					<span class="checkboxtext">אנונימי (פונקציות בלבד) </span>
 				</div>
-				<span>
+				<span id="accountsInput">
 					<p class="labelsDown">
 						<label for="un" width="50px">שם המשתמש:</label>
-						<input type="text" id="un"/>
+						<input type="text" id="un" class="form-control"/>
 					</p>
 					<p class="labelsDown">
 						<label for="pw">סיסמה:</label>
-						<input type="password" id="pw"/>
+						<input type="password" id="pw" class="form-control"/>
 						<p>
 						</span>
 						<p class="helper">התחבר אוטומטית ב:</p>
@@ -76,7 +76,8 @@
 				באזור זה ניתן להציג קורסים מסויימים במודל
 			</h2>
 
-			<button id="Refresh" class="btn btn-default" class="Refresh">רענן</button>
+			<button id="Refresh" class="btn btn-default Refresh">רענן</button>
+			<button id="updateCourses" class="btn btn-default Refresh" >עדכן</button>
 			<!--progress doen't work in IE9- -->
 			<progress class="Refresh" value="0" max="2" style="display: none;"></progress>
 			<table id="coursesTable">
@@ -96,16 +97,16 @@
 			<div id="HWNotifications" class="inlines">
 				<span>
 					<input type="checkbox" id="HWfirstAlarm"/>
-					<span  for="HWfirstAlarm" class="checkboxtext">להודיע על שיעורי בית?</span>
+					<span  for="HWfirstAlarm" class="checkboxtext" >להודיע על שיעורי בית?</span>
 					<br/>
 					<label for="HWfirstAlarmTime" style="display: none;">כמה שעות לפני?</label>
-					<input type="number" name="HWfirstAlarmTime" id="HWfirstAlarmTime" min="0.5" step="0.5" value="1" style="display: none;" />
+					<input type="number" name="HWfirstAlarmTime" id="HWfirstAlarmTime" min="0.5" step="0.5" value="1" style="display: none;" class="form-control"/>
 				</span><span>
 				<input type="checkbox" id="HWSecondAlarm"  style="display: none;"/>
 				<span class="checkboxtext" for="HWSecondAlarm" style="display: none;">להודיע פעמיים?</span>
 				<br/>
-				<label for="SecondAlarm" style="display: none;">כמה שעות לפני?</label>
-				<input type="number" name="SecondAlarm" id="HWSecondAlarmTime" min="0.5" step="0.5" value="0.5"   style="display: none;"  />
+				<label for="HWSecondAlarmTime" style="display: none;">כמה שעות לפני?</label>
+				<input type="number" name="SecondAlarm" id="HWSecondAlarmTime" min="0.5" step="0.5" value="0.5"   style="display: none;"  class="form-control"/>
 			</span>
 			</div>
 			<div id="UENotifications" class="inlines">
@@ -113,14 +114,14 @@
 					<input type="checkbox" id="UEfirstAlarm"/>
 					<span class="checkboxtext" for="UEfirstAlarm">להודיע על אירועים?</span>
 					<br/>
-					<label for="firstAlarmTime" style="display: none;">כמה שעות לפני?</label>
-					<input type="number" name="firstAlarmTime" id="UEfirstAlarmTime" min="0.5"  step="0.5" value="1" style="display: none;"/>
+					<label for="UEfirstAlarmTime" style="display: none;">כמה שעות לפני?</label>
+					<input type="number" name="firstAlarmTime" id="UEfirstAlarmTime" min="0.5"  step="0.5" value="1" style="display: none;" class="form-control"/>
 				</span><span>
 				<input type="checkbox" id="UESecondAlarm" style="display: none;"/>
 				<span class="checkboxtext" for="UESecondAlarm" disabled="true" style="display: none;">להודיע פעמיים?</span>
 				<br/>
-				<label for="SecondAlarm" style="display: none;">כמה שעות לפני?</label>
-				<input type="number" name="SecondAlarm" id="UESecondAlarmTime" min="0.5" step="0.5" value="0.5" style="display: none;"/>
+				<label for="UESecondAlarmTime" style="display: none;">כמה שעות לפני?</label>
+				<input type="number" name="SecondAlarm" id="UESecondAlarmTime" min="0.5" step="0.5" value="0.5" style="display: none;" class="form-control"/>
 			</span>
 			</div>
 			<button class="btn btn-default" id="updateNotifications">עדכן</button>
@@ -132,14 +133,14 @@
 				באזור זה ניתן להגדיר הגדרות מתקדמות
 			</h2>
 			<div id="advanced_content" class="panel">
-
-				<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#general">כללי</button>
-				<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#moodle">מודל</button>
-				<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" >לב נט </button>
-				<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#popup">חלון ההתראות</button>
-				<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#theme">סגנונות</button>
-				<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" >צבע</button>
-
+				<span class="buttons">
+					<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#general">כללי</button>
+					<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#moodle">מודל</button>
+					<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#levnet">לב נט </button>
+					<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#popup">חלון ההתראות</button>
+					<!--<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#colors">צבע</button>-->
+					<button class="btn btn-default" data-toggle="collapse" data-parent="#advanced" data-target="#theme">סגנונות</button>
+				</span>
 
 				<div id="general" class="collapse in">
 					<p>
@@ -152,10 +153,10 @@
 					<span class="checkboxtext" style="display:none">מתצוגת לוח-שנה</span>
 
 					<p class="option inline">הצג עד
-						<input type="number" min="1" max="99" step="1" value="3" id="hwDays" />
+						<input type="number" min="1"  max="99" step="1" value="3" id="hwDays" class="form-control" />
 						ימים של שיעורי בית
 						ועדכן כל
-						<input type="number" min="1" max="24" step="1" value="5" id="hwUpdate"/>
+						<input type="number" min="1" max="24" step="1" value="5" id="hwUpdate" class="form-control"/>
 						שעות
 					</p>
 					<p class="option">
@@ -173,6 +174,7 @@
 					<p>
 				</div>
 				<div id="moodle" class="collapse">
+					<p>
 						-------------------------------------מודל-------------------------------------
 					</p>
 					<p class="option">
@@ -203,6 +205,27 @@
 						<input type="checkbox" id="MoodleHiddeUE" />
 						<span class="checkboxtext" >הסתר אירועים</span>
 					</p>
+				</div>
+				<div id="levnet" class="collapse">
+					<p>
+						-------------------------------------לב נט-------------------------------------
+					</p>
+					<p class="option">
+						<input type="checkbox" id="showGrades" />
+						<span class="checkboxtext" > הראה ממוצע בדף הציונים </span>
+					</p>
+					<p class="option">
+						<input type="checkbox" id="customGrades" />
+						<span class="checkboxtext" >הראה האפשרות של שינוי בטבלה </span>
+					</p>
+					<p class="option">
+						<input type="checkbox" id="coursesOrder" />
+						<span class="checkboxtext" > הראה מידע מצורה טבלה בדף הקורסים  </span>
+					</p>
+					<!--<p class="option">
+						<input type="checkbox" id="coursesAddToCalendar" />
+						<span class="checkboxtext" > הראה אפשרות להוסיף  </span>
+					</p>-->
 				</div>
 				<div id="popup" class="collapse">
 					<p>
@@ -237,7 +260,7 @@
 						<input type="checkbox" id="limitedHw" />
 						<span class="checkboxtext" >
 							הראה עד
-							<input type="number" min="1" max="99" step="1" id="limitedHwAmount" />
+							<input type="number" min="1" max="99" step="1" id="limitedHwAmount" class="form-control"/>
 							מטלות של אותו קורס
 						</span>
 					</p>
@@ -263,8 +286,13 @@
 				<br/>
 
 				</div>
+				<div id="colors" class="collapse">
+					<p>
+						-----------------------------------צבעים-----------------------------------
+					</p>
+				</div>
 				<p>
-					<button class="btn btn-default" id="updateSettings">עדכן</button>
+					<button class="btn btn-default" id="updateSettings" data-loading-text="<div class='loader'></div>טוען">עדכן</button>
 				</p>
 			</div>
 		</div>

@@ -182,8 +182,9 @@ figure{
 }
 #account .buttons{
   text-align: right;
-
+  overflow: hidden;
 }
+
 /******************************
 *   courses div styles
 ******************************/
@@ -215,7 +216,12 @@ figure{
 {
   float: right;
   font-size: 21px;
-  margin:0 10px;
+  margin-right:2px;
+}
+#courses .btn
+{
+  float: right;
+
 }
 /******************************
 *   notifications div styles
@@ -262,6 +268,14 @@ figure{
   margin:25px 50px 0 0;
 }
 
+#advanced .buttons
+{
+  display: block;
+  width: 100%;
+  clear: both;
+  overflow: hidden;
+  text-align: center;
+}
 
 /*OVERIDE BOOTSTRAT*/
 
@@ -273,4 +287,25 @@ figure{
 {
   text-align: right;
   margin-right: 50px;
+}
+
+th{
+  text-align: center;
+}
+
+.loader {
+  border: 5px solid #f3f3f3;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+  border-top: 5px solid #555;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  float: right;
+  margin-left: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
