@@ -25,9 +25,11 @@ var DataAccess = {
     ******************************************************************/
     setData: function (objName, value , callBackFunction)
     {
+        console.log("Setting objects");
         // In case that the Database is in used (locked) it will be make a new async function
         if(inUsed)
            return setTimeout(function(){DataAccess.setData(objName,value,callBackFunction)},100);
+
        // Lock the Database
         inUsed = true;
         // Check if object name is an object

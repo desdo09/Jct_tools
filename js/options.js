@@ -73,16 +73,23 @@ function setAccountData(data)
 
 		if(data["mo"] == undefined || data["mo"])
 		 document.getElementById("mo").checked = true;
+
+
+		$('#anonymous').prop('checked', (data.anonymous == true));
+        anonymousOptions((data.anonymous == true));
 	}
 	else
 	{
+
 		document.getElementById("wf").checked = true;
 		document.getElementById("mz").checked = true;
 		document.getElementById("mo").checked = true;
+
 	}
 
+
+
 	$("#anonymous").click(function () {
-		console.log("Clicked " + this.checked);
         anonymousOptions(this.checked);
     });
 }
@@ -107,6 +114,7 @@ function setAccountData(data)
 ******************************************************/
 function setData() {
 
+
 	// in case the user leave the username/password field empty,
 	// means that the user dont want to change it
 	if($("#un").val() != "")
@@ -115,6 +123,8 @@ function setData() {
 	if( $("#pw").val() != "")
 		DataAccess.setData("password",window.btoa($("#pw").val()));
 
+    DataAccess.setData('anonymous',($("#anonymous").is(':checked')));
+
 	//make a new object and send it to the database
 	DataAccess.setData({
 						wf:document.getElementById('wf').checked,
@@ -122,10 +132,12 @@ function setData() {
 						mo:document.getElementById('mo').checked,
 					//	re:document.getElementById('re').checked,
 						enable:true
-						})
+						},null,function () {
+        notification("המאגר עודכן");
+
+    });
 
 	chrome.runtime.sendMessage({changeIcon:true});
-	notification("המאגר עודכן");
 }
 
 
@@ -624,6 +636,13 @@ function setAdvancedData(data)
     else
         $("#coursesOrder").attr('checked',false);
 
+
+    if(data.Config.hiddeSameDay != undefined && data.Config.hiddeSameDay)
+        $("#customAverage").attr('checked',true);
+    else
+        $("#customAverage").attr('checked',false);
+
+
     // if(data.Config.coursesAddToCalendar == undefined || data.Config.coursesAddToCalendar)
     //     $("#coursesAddToCalendar").attr('checked',true);
     // else
@@ -678,6 +697,8 @@ function setAdvanced(callback)
     DataAccess.setObject("Config","showGrades",$("#showGrades").is(':checked'));
     DataAccess.setObject("Config","customGrades",$("#customGrades").is(':checked'));
     DataAccess.setObject("Config","coursesOrder",$("#coursesOrder").is(':checked'));
+    DataAccess.setObject("Config","customAverage",$("#customAverage").is(':checked'));
+
     // DataAccess.setObject("Config","coursesAddToCalendar",$("#coursesAddToCalendar").is(':checked'));
 
 

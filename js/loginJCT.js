@@ -7,16 +7,15 @@ $(document).ready(function () {
 
 
 function onStart(data) {
-    console.log("JCT Tools->Auto login: " + (data.enable && data["wf"]));
+
     // Check if the username and password is not empty
     username = data["username"];
-
     console.log("JCT Tools->Username: " + username);
     // Decrypting the password
     var password = "";
     if (data["password"] != null)
         password = window.atob(data["password"]);
-    console.log("JCT Tools->Current host: " + location.host);
+
     // Check current host
     switch (location.host) {
         case "moodle.jct.ac.il":
@@ -24,20 +23,21 @@ function onStart(data) {
             break;
         case "mazak.jct.ac.il":
         case "levnet.jct.ac.il":
-            if (data["mz"] && data.enable)
-                mazakConnect(password);
+            if ((data["mz"] && data.enable)|| data.anonymous == true)
+                mazakConnect(data);
             break;
         case "1.1.1.1":
         case "10.1.1.1":
         case "wireless-login.jct.ac.il":
         case "captiveportal-login.jct.ac.il":
-            if (data["wf"] && data.enable)
+            if (data["wf"] && data.enable && data.anonymous != true)
                 wifiConnect(password);
             break;
     }
 }
 
 function wifiConnect(pass) {
+
 
 
     if (document.title == "Web Authentication Failure") {
@@ -68,47 +68,46 @@ function wifiConnect(pass) {
 
 }
 
-function mazakConnect(pass) {
+function mazakConnect(data) {
 
     //Courses time as list page
     if (location.pathname.includes("/Student/ScheduleList.aspx")) {
 
-        DataAccess.Data(function (data) {
-            //In case that the user want to, remove the class 'right' from the table in order to fix the table
-            if (data.Config.coursesOrder != undefined && data.Config.coursesOrder != false)
-                $("td").removeClass('right');
 
-          /*  var myCalendar = createCalendar({
-                options: {
-                    class: 'my-class',
+        //In case that the user want to, remove the class 'right' from the table in order to fix the table
+        if (data.Config.coursesOrder != undefined && data.Config.coursesOrder != false)
+            $("td").removeClass('right');
 
-                    // You can pass an ID. If you don't, one will be generated for you
-                    id: 'my-id'
-                },
-                data: {
-                    // Event title
-                    title: 'Get on the front page of HN',
+      /*  var myCalendar = createCalendar({
+            options: {
+                class: 'my-class',
 
-                    // Event start date
-                    start: new Date('June 15, 2013 19:00'),
+                // You can pass an ID. If you don't, one will be generated for you
+                id: 'my-id'
+            },
+            data: {
+                // Event title
+                title: 'Get on the front page of HN',
 
-                    // Event duration (IN MINUTES)
-                    duration: 120,
+                // Event start date
+                start: new Date('June 15, 2013 19:00'),
 
-                    // You can also choose to set an end time
-                    // If an end time is set, this will take precedence over duration
-                    end: new Date('June 15, 2013 23:00'),
+                // Event duration (IN MINUTES)
+                duration: 120,
 
-                    // Event Address
-                    address: 'The internet',
+                // You can also choose to set an end time
+                // If an end time is set, this will take precedence over duration
+                end: new Date('June 15, 2013 23:00'),
 
-                    // Event Description
-                    description: 'Get on the front page of HN, then prepare for world domination.'
-                }
-            });
+                // Event Address
+                address: 'The internet',
 
-            document.querySelector('.courseMultiView').appendChild(myCalendar);*/
+                // Event Description
+                description: 'Get on the front page of HN, then prepare for world domination.'
+            }
         });
+
+        document.querySelector('.courseMultiView').appendChild(myCalendar);*/
 
         return;
     }
@@ -116,17 +115,24 @@ function mazakConnect(pass) {
     //Grades page
     if (location.pathname.includes("Student/Grades.aspx")) {
 
-        DataAccess.Data(function (data) {
-            if(data.Config == null)
-                data.Config ={};
-            gradesButton(data);
-
-        });
+        if(data.Config == null)
+            data.Config ={};
+        gradesButton(data);
         //customGrades();
         return;
     }
 
+    if (!location.pathname.includes("Login.aspx")) {
+        if(data.anonymous == true)
+            chrome.runtime.sendMessage({levnetLoginAndUpdate:true});
+
+        return;
+    }
+
+
     //LOGIN PAGE
+    if(data.anonymous == true)
+        return;
 
     //check if the username input exist (in order to prevent a bug)
     if ($("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_UserName").length == 0) {
@@ -145,18 +151,19 @@ function mazakConnect(pass) {
         }
         return;
     }
+
     //This function is a little hack to replace the chrome autofill.
     $(":input").each(function () {
         if (this.name == "ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$UserName")
             this.value = username;
         if (this.name == "#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password")
-            this.value = pass;
+            this.value = window.atob(data["password"]);
     });
 
     console.log("JCT Tools-> Starting levnet autologin ");
     //This 2 lines is not requiered, but they are in order to prevent a bug
     $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_UserName").attr("value", username);
-    $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password").attr("value", pass);
+    $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password").attr("value", window.atob(data["password"]));
 
     //Submit the form
     $("#aspnetForm input[type='submit']").click();
@@ -168,6 +175,8 @@ function mazakConnect(pass) {
  */
 function gradesButton(data) {
 
+    $("header").append('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
+    $("td").removeClass('right');
 
     //First we check if the user wants this option then
     if (data.Config.customGrades != undefined && data.Config.customGrades != false) {
@@ -202,82 +211,84 @@ function gradesButton(data) {
 
         //Set the checkbox on click to run the function customGrades
         $("#gradeTableOptions").find("input[type=checkbox]").on("click", customGrades);
+        if(data.Config.customAverage == true) {
+            //Append instructions
+            $("#content").find(".mainCaption").after("<div class='filterBox' style='overflow:hidden'><div  style='float:right;margin: 0;padding: 0;margin-left: 5px;'><span class='glyphicon glyphicon-info-sign'></span></div><div style='margin: 0;padding:0;'>ניתן לשנות את הציונים בתצוגה  <b>בלבד  </b>לצורך חישוב הממוצע באמצעות לחיצה כפולה על הציון המבוקש</div></div>")
+            //This function will set the option of double click in a grade
+            $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdGrades_itemPlaceholderContainer").find("tr").each(function () {
+                $(this).dblclick(function () {
 
-        //This function will set the option of double click in a grade
-        $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdGrades_itemPlaceholderContainer").find("tr").each(function () {
-            $(this).dblclick(function () {
+                    var that = this;
 
-                var that = this;
+                    var td = $(this).find("td");
 
-                var td = $(this).find("td");
+                    var grade = $(td)[6];
 
-                var grade = $(td)[6];
+                    var min = $($(td)[5]).text().trim();
 
-                var min = $($(td)[5]).text().trim();
+                    if (isNaN(min)) min = 0;
 
-                if (isNaN(min)) min = 0;
+                    var gradeInput = $(grade).find(":input");
 
-                var gradeInput = $(grade).find(":input");
+                    if ($(gradeInput).length > 0) {
+                        //Writing new grade
+                        var value = $(gradeInput).val().trim();
+                        $(grade).empty();
+                        $(grade).append(value);
+                        customGrades();
 
-                if ($(gradeInput).length > 0) {
-                    //Writing new grade
-                    var value = $(gradeInput).val().trim();
-                    $(grade).empty();
-                    $(grade).append(value);
-                    customGrades();
+                        //Set new class
+                        console.log(value + " " + min);
 
-                    //Set new class
-                    console.log(value + " " + min);
+                        if (isNaN(value) || parseInt(value) > parseInt(min)) {
+                            if ($(this).hasClass("notPassed"))
+                                $(this).removeClass("notPassed ");
+                        } else {
+                            if (!isNaN(value))
+                                if (!$(this).hasClass("notPassed"))
+                                    $(this).addClass("notPassed");
+                        }
 
-                    if (isNaN(value) || parseInt(value) > parseInt(min)) {
-                        if ($(this).hasClass("notPassed"))
-                            $(this).removeClass("notPassed ");
+
                     } else {
-                        if (!isNaN(value))
-                            if (!$(this).hasClass("notPassed"))
-                                $(this).addClass("notPassed");
+                        var tText = $(grade).text().trim();
+                        if (isNaN(tText))
+                            tText = "";
+                        var inputGrade = "<input type='text' value='" + tText + "' style='width: 50px;text-align: center;font-size: 15px;height: 22px;'>";
+                        $(grade).empty();
+                        $(grade).append(inputGrade);
+                        inputGrade = $(grade).find(":input");
+
+
+                        $(inputGrade).keypress(function (e) {
+                            if (e.which == 13) {
+                                var gradeInput = $(grade).find(":input");
+                                var value = $(gradeInput).val().trim();
+                                $(grade).empty();
+                                $(grade).append(value);
+
+                                customGrades();
+
+                                //Set new class
+                                console.log(value + " " + min);
+                                if (isNaN(value) || parseInt(value) > parseInt(min)) {
+                                    if ($(that).hasClass("notPassed"))
+                                        $(that).removeClass("notPassed ");
+                                } else {
+                                    if (!isNaN(value))
+                                        if (!$(that).hasClass("notPassed"))
+                                            $(that).addClass("notPassed");
+                                }
+                            }
+                        });
+
+
                     }
 
 
-                } else {
-                    var tText = $(grade).text().trim();
-                    if (isNaN(tText))
-                        tText = "";
-                    var inputGrade = "<input type='text' value='" + tText + "' style='width: 50px;text-align: center;font-size: 15px;height: 22px;'>";
-                    $(grade).empty();
-                    $(grade).append(inputGrade);
-                    inputGrade = $(grade).find(":input");
-
-
-                    $(inputGrade).keypress(function (e) {
-                        if (e.which == 13) {
-                            var gradeInput = $(grade).find(":input");
-                            var value = $(gradeInput).val().trim();
-                            $(grade).empty();
-                            $(grade).append(value);
-
-                            customGrades();
-
-                            //Set new class
-                            console.log(value + " " + min);
-                            if (isNaN(value) || parseInt(value) > parseInt(min)) {
-                                if ($(that).hasClass("notPassed"))
-                                    $(that).removeClass("notPassed ");
-                            } else {
-                                if (!isNaN(value))
-                                    if (!$(that).hasClass("notPassed"))
-                                        $(that).addClass("notPassed");
-                            }
-                        }
-                    });
-
-
-                }
-
-
+                });
             });
-        });
-
+        }
         //Run the function customGrades in order to refresh the table
         customGrades();
     }
@@ -479,7 +490,7 @@ function moodle(pass, data) {
         return;
     }
 
-    if ($("#login_username").length != 0 && $("#login_password").length != 0) {
+    if (($("#login_username").length != 0 && $("#login_password").length != 0) && data.anonymous != true) {
         if (data["mo"] && data.enable) {
             $("#login_username").val(data.username);
             $("#login_password").val(pass);

@@ -52,8 +52,12 @@ chrome.runtime.onMessage.addListener(
         if(request.levnetLoginAndUpdate)
             DataAccess.Data(function (data) {updateTestDate(data,true)});
 
-        if(request.levnetLogin)
-            DataAccess.Data(function (data) {LevNetLogin(data.username,window.atob(data.password));});
+        if(request.levnetLogin) {
+            DataAccess.Data(function (data) {
+                if(data.anonymous != true)
+                	LevNetLogin(data.username, window.atob(data.password));
+            });
+        }
 
 	    //In case that the request contains changeIcon.
 	    if(request.changeIcon != undefined)
@@ -206,11 +210,15 @@ function onStart(data)
   		setAlarms(data,true);
 }
 
-
+/**
+ * Generate chrome notification list with all tasks (homework's) of the day
+ * @param events (object): The tasks
+ * @param courses (object) : The courses
+ */
 function showTodayEvents(events,courses)
 {
 	if(events == null || events.length ==0 || courses == null || courses.length == 0)
-		return
+		return;
 
 	var today = new Date();
 	var deadline = new Date();
@@ -218,7 +226,7 @@ function showTodayEvents(events,courses)
 	var list = [];
 	for (var i = 0; i < events.length; i++) {
 		if(events[i].type == "userEvent")
-			return
+			return;
 		deadline = new Date(Date.parse(events[i].deadLine));
 
 		if((deadline.getDate() == today.getDate() || deadline.getDate() == (today.getDate() +1)&& deadline.getHours()< 2) &&  deadline.getMonth() == today.getMonth() && Date.parse(deadline)> Date.now())
@@ -232,7 +240,7 @@ function showTodayEvents(events,courses)
 		'todaysHW',{
 			type: "list",
 			title: "ש\"ב להיום",
-			iconUrl:  chrome.extension.getURL('image/icons/jct128.png'),
+			iconUrl:  chrome.extension.getURL('image/icons/today.jpg'),
 			message: "",
 			items: list
 		});
@@ -240,73 +248,90 @@ function showTodayEvents(events,courses)
 }
 
 
-
+/**
+ * This function will set alarms for every course
+ * @param data (object) : DB data
+ * @param onstart (bool) : Is chrome just start?
+ */
 function setAlarms(data,onstart)
 {
-	if(data.Config != undefined && data.Config.hwUpdate != undefined && !isNaN(data.Config.hwUpdate) )
-	{
-		chrome.alarms.create("updateData", {periodInMinutes: (data.Config.hwUpdate*60)});
-	}
-	else
-		console.log("data.Config.hwUpdate is not defined");
+    if (data.Config != undefined && data.Config.hwUpdate != undefined && !isNaN(data.Config.hwUpdate)) {
+        chrome.alarms.create("updateData", {periodInMinutes: (data.Config.hwUpdate * 60)});
+    }
+    else
+        console.log("data.Config.hwUpdate is not defined");
 
-	console.log("Setting alarms")
-	if(data.Config == undefined)
-		return;
-	var events = data.tasks;
-	if(events == undefined)
-		return;
-	console.log("Total events: " +  events.length);
-	//Homework first alarm
-	var hwFirstAlarm = parseFloat(data.Config.HWfirstAlarm);
-	//User event second alarm
-	var ueFirstAlarm = parseFloat(data.Config.UEfirstAlarm);
+    console.log("Setting alarms")
+    if (data.Config == undefined)
+        return;
+    var events = data.tasks;
+    if (events == undefined)
+        return;
+    console.log("Total events: " + events.length);
+    //Homework first alarm
+    var hwFirstAlarm = parseFloat(data.Config.HWfirstAlarm);
+    //User event second alarm
+    var ueFirstAlarm = parseFloat(data.Config.UEfirstAlarm);
 
-	console.log("Homework first alarm: " +  hwFirstAlarm + ", event first alarm: " +  hwFirstAlarm);
-	//Homework first alarm	
-	var hwSecondAlarm = parseFloat(data.Config.HWSecondAlarm);
-	//User event second alarm
-	var ueSecondAlarm = parseFloat(data.Config.UESecondAlarm);
-	console.log("Homework second alarm: " +  hwSecondAlarm + ", event second alarm: " +  ueSecondAlarm );
-	var deadLine = Date.now();
-	for (var i = 0; i < events.length; i++)
-	{
-		//events[i].type == "userEvent"
-		if((events[i].type == "homework" && isNaN(hwFirstAlarm))|| (events[i].type == "userEvent" && isNaN(ueFirstAlarm)))
-			continue;
-		if(data.eventDone != null && data.eventDone[events[i].id] != null && (!data.eventDone[events[i].id].notifications || data.eventDone[events[i].id].done || data.eventDone[events[i].id].checked))
-			continue;
+    console.log("Homework first alarm: " + hwFirstAlarm + ", event first alarm: " + hwFirstAlarm);
+    //Homework first alarm
+    var hwSecondAlarm = parseFloat(data.Config.HWSecondAlarm);
+    //User event second alarm
+    var ueSecondAlarm = parseFloat(data.Config.UESecondAlarm);
+    console.log("Homework second alarm: " + hwSecondAlarm + ", event second alarm: " + ueSecondAlarm);
+    var deadLine = Date.now();
+    for (var i = 0; i < events.length; i++) {
+        //events[i].type == "userEvent"
+        if ((events[i].type == "homework" && isNaN(hwFirstAlarm)) || (events[i].type == "userEvent" && isNaN(ueFirstAlarm)))
+            continue;
+        if (data.eventDone != null && data.eventDone[events[i].id] != null && (!data.eventDone[events[i].id].notifications || data.eventDone[events[i].id].done || data.eventDone[events[i].id].checked))
+            continue;
 
-		if(events[i] == null || (Date.parse(events[i].deadLine) < Date.now()))
-			continue;
+        if (events[i] == null || (Date.parse(events[i].deadLine) < Date.now()))
+            continue;
 
-		deadLine = Date.parse(events[i].deadLine) - ((events[i].type == "homework")?hwFirstAlarm:ueFirstAlarm)*60*60*1000;
-		if(deadLine > Date.parse(new Date()))
-    {
-			chrome.alarms.create(events[i].id + "(1)", {when:deadLine});
-		}
-		if((events[i].type == "homework" && isNaN(hwSecondAlarm))|| (events[i].type == "userEvent" && isNaN(ueSecondAlarm)))
-    		return;
-		deadLine = Date.parse(events[i].deadLine) - ((events[i].type == "homework")?hwSecondAlarm:ueSecondAlarm)*60*60*1000;
-		if( onstart || !onstart && deadLine > Date.parse(new Date()))
-    {
-			 	chrome.alarms.create(events[i].id + "(2)", {when:deadLine});
-		}
-  }
-	setBadge();
+        deadLine = Date.parse(events[i].deadLine) - ((events[i].type == "homework") ? hwFirstAlarm : ueFirstAlarm) * 60 * 60 * 1000;
+        if (deadLine > Date.parse(new Date())) {
+            chrome.alarms.create(events[i].id + "(1)", {when: deadLine});
+        }
+        if ((events[i].type == "homework" && isNaN(hwSecondAlarm)) || (events[i].type == "userEvent" && isNaN(ueSecondAlarm)))
+            return;
+
+        deadLine = Date.parse(events[i].deadLine) - ((events[i].type == "homework") ? hwSecondAlarm : ueSecondAlarm) * 60 * 60 * 1000;
+
+       	//In case of opening the chrome in a time between second alarm and this task dead line show a notification
+		//Otherwise check if the second alarm already expired
+        if (onstart || !onstart && deadLine > Date.parse(new Date())) {
+
+            chrome.alarms.create(events[i].id + "(2)", {when: deadLine});
+            //Note: in case that the [second alarm < date.now] chrome will fire the alarm
+        }
+    }
+    setBadge();
 
 
 }
 
+
+/**
+ * This function will generate a notification
+ * This is used by the alarm
+ * @param eventId (string|object) : The course id/object
+ * @param change (bool) : Is a task (time) change?
+ */
 function createEventNotification(eventId,change)
 {
+
+
 
 	console.log("Generate a notification for id: "+ eventId);
 	DataAccess.Data(function(data){
 		if(data.tasks == undefined)
 			return;
 		var event = null;
+
 		eventId= ((change == true)?eventId:eventId.substring(0, eventId.length - 3));
+
 		if(change != true)
 			for (var i = 0; i < data.tasks.length; i++) {
 				if(data.tasks[i].id == eventId)
@@ -328,14 +353,24 @@ function createEventNotification(eventId,change)
 					break;
                 }
 			}
-		else
-			event = eventId;
+		else {
+			//In case of change, the object 'eventId' is a course object
+            event = eventId;
+        }
 
 		if(event == null)
 			return;
 
+		//Check if the course is part of 'my courses' when the user request to show only homework from 'my courses' in the popup
+        if(data.Config != undefined && data.Config.hiddeNoSelectedCourseInWindows != true && data.moodleCoursesTable != null &&data.moodleCoursesTable[event.id] != true) {
+            console.log("Homework "+ event.name +" of course " +data.courses[event.courseId].name +" is not not in my course list" );
+            return;
+        }
+
+
 
 		if(change == true){
+
 			chrome.notifications.create(
 				  event.id,{
 					type: 'basic',
@@ -344,10 +379,13 @@ function createEventNotification(eventId,change)
 					title: "שינוי בשיעורי בית",
 					message: ((event.name + "\n" + data.courses[event.courseId].name+"\n") + getDate(new Date(Date.parse(event.deadLine))))
 				});
+
 		}else{
+
 			//in case that the alarm its late.
 			if(Date.parse(event.deadLine) < Date.now())
 				return;
+
 			chrome.notifications.create(
 				(event.type == "homework")?eventId:"event " + eventId,{
 					type: 'basic',
@@ -356,6 +394,7 @@ function createEventNotification(eventId,change)
 					title: ("תזכורת" + ((event.type == "homework")?" על שיעורי בית":" אירוע")),
 					message: (event.name + "\n" + ((event.type == "homework")?data.courses[event.courseId].name+"\n":"") + getDate(new Date(Date.parse(event.deadLine))))
 				});
+
 		}
 	});
 }
@@ -377,8 +416,10 @@ function createEventNotification(eventId,change)
 *   post that contains the username and password (received)
 *
 **********************************************************************/
-function login(username, password, asyncType)
+function login(username, password, anonymous)
 {
+
+
     const promise = new Promise(function (resolve, reject) {
 		var request =  $.post( "https://moodle.jct.ac.il/login/index.php",
 			{username:username,password:password} );
@@ -686,9 +727,11 @@ function separateHomeworkData(hwdata)
 		if(homeworkName.length>33)
 			homeworkName =  homeworkName.substring(0,30) + "...";
 
-		datatemp = $(datatemp).attr('href');
+	datatemp = $(datatemp).attr('href');
+
     // Get id from href (ex: http://moodle.jct.ac.il/mod/assign/view.php?id=224301)
     datatemp = datatemp.substring(datatemp.lastIndexOf("id")+3);
+
     // Save the homework id
     var homeworkId = datatemp;
 
@@ -815,6 +858,13 @@ function loginAndUpdate(data)
 	if((data.Config == null || data.Config != null && data.Config.checkLogin != false) && data.username != null && data.password != null)
 	 {
 		 console.log("trying to make a login in moodle");
+
+		 if(data.anonymous == true)
+		 {
+             console.log("Anonymous - updating database");
+             return updateData();
+		 }
+
 		 login(data.username,window.atob(data.password))
 		 .then(function(){
 			 console.log("updating database");
@@ -903,6 +953,7 @@ function setBadge()
 
 	backgroundEvent({type:"setBadge",operationCompleted:true})
 }
+
 /***********************************
 this function change the extension
 icon when the user active/desactive
@@ -963,6 +1014,7 @@ function LevNetLogin(username,password)
             reject();
         });
     });
+
     return promise;
 }
 
@@ -1027,35 +1079,55 @@ function updateTestDate(data, doIt)
 			return;
 	}
 
-	mazakLogin(data.username,window.atob(data.password))
-		.then(function(){
-			return getFromMazakTestData();
-	}).then(function(MazakData)
-	{			
-		DataAccess.setData("testsDate",MazakData);
-	}).catch(function(e) {
-			console.log("getFromMazakTestData promise error: " + e);
-			
-	});
+	if(data.anonymous != true) {
+
+        mazakLogin(data.username, window.atob(data.password))
+            .then(function () {
+                return getFromMazakTestData();
+            }).then(function (MazakData) {
+            DataAccess.setData("testsDate", MazakData);
+        }).catch(function (e) {
+            console.log("getFromMazakTestData promise error: " + e);
+
+        });
+    }else
+	{
+        getFromMazakTestData(false).then(function (MazakData) {
+            DataAccess.setData("testsDate", MazakData);
+        }).catch(function (e) {
+            console.log("Anonymous - getFromMazakTestData promise error: " + e);
+        });
+	}
 
 }
 
-function getFromMazakTestData()
+function getFromMazakTestData(mazak)
 {
 	
 	const promise = new Promise(function (resolve, reject) {
-	    var request =  $.ajax({
-	    	url:"https://mazak.jct.ac.il/Student/Tests.aspx",
- 			
-	    });
+		if(mazak != false) {
+            var request = $.ajax({
+                url: "https://mazak.jct.ac.il/Student/Tests.aspx",
+
+            });
+        }else
+		{
+            var request = $.ajax({
+                url: "https://levnet.jct.ac.il/Student/Tests.aspx",
+
+            });
+		}
 
 	
 	    request.done( function(data){
-		
+
 			var table =$(data).find("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdStudentTests_itemPlaceholderContainer");
 			
-			if($(table).length==0)
-				reject("Table is empty");
+			if($(table).length==0) {
+                reject("Mazak login is required	");
+                backgroundEvent({type:"updateData",operationCompleted:false,error:"נדרש חיבור למזק",request:request});
+                return;
+            }
 			var tr = $(table).find("tr");
 			if($(tr).length==0)
 				reject("tr is empty");
@@ -1257,6 +1329,17 @@ function testNotifications(type)
 				message: (("Test" + "\n" + "Course test" +"\n") + new Date())
 			});
 		break;
+
+		case 3:
+            var list = [{title: "Title 1", message: "Text 1"},{title: "Title 1", message: "Text 1"}, {title: "Title 1", message: "Text 1"}];
+            chrome.notifications.create(
+                'todaysHW',{
+                    type: "list",
+                    title: "ש\"ב להיום",
+                    iconUrl:  chrome.extension.getURL('image/icons/today.jpg'),
+                    message: "",
+                    items: list
+                });
 	}
 }
 

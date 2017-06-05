@@ -26,7 +26,6 @@ function onStart(result)
 	//if the username OR the password are not defined then the extension will open the option page
 	if(!status)
 	{
-		//window.open("options.html", "nuevo", "directories=no, location=no, menubar=no, scrollbars=yes, statusbar=no, tittlebar=no, width=1100, height=900");
 		chrome.runtime.openOptionsPage();
 		setTimeout(function () { window.close(); }, 1);
 		return;
@@ -119,8 +118,13 @@ function themeWithEvents(data)
 	$("#version").text(chrome.runtime.getManifest().version_name);
 	
 	$("#wifiLogin").click(function () {
-        autoWifiLogin();
-    });
+        DataAccess.Data(function () {
+        	if(data.anonymous != true)
+            	autoWifiLogin();
+        	else
+                openInNewTab("http://captiveportal-login.jct.ac.il/auth/index.html/u");
+        });
+	});
 
 	$("#moodleButton").click(function () {
 		DataAccess.Data(showCourses);
@@ -129,8 +133,8 @@ function themeWithEvents(data)
 	$("#levnetButton").click(function () {
         chrome.runtime.sendMessage({levnetLogin:true});
         openWindow("L");
-
     });
+
 	$(levnetWindow).find('div').each(function () {
 		var that = this;
 		$(this).find('a').each(function () {
@@ -480,4 +484,9 @@ function openWindow(type) {
             currentOpen = "U";
             break;
 	}
+}
+
+function openInNewTab(url) {
+    var win = window.open(url, '_blank');
+    win.focus();
 }

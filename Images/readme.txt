@@ -1,0 +1,1 @@
+This folder is used to avoid 404 error from mazak
