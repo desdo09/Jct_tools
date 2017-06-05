@@ -213,7 +213,7 @@ function gradesButton(data) {
         $("#gradeTableOptions").find("input[type=checkbox]").on("click", customGrades);
         if(data.Config.customAverage == true) {
             //Append instructions
-            $("#content").find(".mainCaption").after("<div class='filterBox' style='overflow:hidden'><div  style='float:right;margin: 0;padding: 0;margin-left: 5px;'><span class='glyphicon glyphicon-info-sign'></span></div><div style='margin: 0;padding:0;'>ניתן לשנות את הציונים בתצוגה  <b>בלבד  </b>לצורך חישוב הממוצע באמצעות לחיצה כפולה על הציון המבוקש</div></div>")
+            $("#content").find(".mainCaption").after("<div class='filterBox' style='overflow:hidden'><div  style='float:right;margin: 0;padding: 0;margin-left: 5px;'><span class='glyphicon glyphicon-info-sign'></span></div><div style='margin: 0;padding:0;'>ניתן לשנות את הציונים בתצוגה ( <b>בלבד  </b> ) לצורך חישוב הממוצע באמצעות לחיצה כפולה על הציון המבוקש</div></div>")
             //This function will set the option of double click in a grade
             $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdGrades_itemPlaceholderContainer").find("tr").each(function () {
                 $(this).dblclick(function () {
