@@ -23,7 +23,6 @@ function onStart(data) {
             break;
         case "mazak.jct.ac.il":
         case "levnet.jct.ac.il":
-            if ((data["mz"] && data.enable)|| data.anonymous == true)
                 mazakConnect(data);
             break;
         case "1.1.1.1":
@@ -134,6 +133,10 @@ function mazakConnect(data) {
     if(data.anonymous == true)
         return;
 
+    //Check if the user active the auto login
+    if (data["mz"] != true || data.enable != true)
+        return;
+
     //check if the username input exist (in order to prevent a bug)
     if ($("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_UserName").length == 0) {
         if (location.pathname.includes("Login")) {
@@ -177,6 +180,7 @@ function gradesButton(data) {
 
     $("header").append('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
     $("td").removeClass('right');
+    $("th").css( "text-align", "center" );
 
     //First we check if the user wants this option then
     if (data.Config.customGrades != undefined && data.Config.customGrades != false) {
@@ -240,11 +244,10 @@ function gradesButton(data) {
                         //Set new class
                         console.log(value + " " + min);
 
-                        if (isNaN(value) || parseInt(value) > parseInt(min)) {
+                        if (isNaN(value) || parseInt(value) >= parseInt(min)) {
                             if ($(this).hasClass("notPassed"))
                                 $(this).removeClass("notPassed ");
                         } else {
-                            if (!isNaN(value))
                                 if (!$(this).hasClass("notPassed"))
                                     $(this).addClass("notPassed");
                         }
@@ -271,7 +274,7 @@ function gradesButton(data) {
 
                                 //Set new class
                                 console.log(value + " " + min);
-                                if (isNaN(value) || parseInt(value) > parseInt(min)) {
+                                if (isNaN(value) || parseInt(value) >= parseInt(min)) {
                                     if ($(that).hasClass("notPassed"))
                                         $(that).removeClass("notPassed ");
                                 } else {

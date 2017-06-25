@@ -202,11 +202,14 @@ function onStart(data)
 	
    //Set the icon of the extension status (active/inactive)
    changeIcon(data.enable && data.username != null && data.password != null);
+
    if(data.Config != null && data.Config.hwUpdate != null)
    		chrome.alarms.create("updatedata", {when:(Date.now()),periodInMinutes:60*data.Config.hwUpdate});
+
    if(data.Config != null && data.Config.todaysHW)
-   		showTodayEvents(data.tasks,data.courses);
-   if(data.tasks != undefined && data.Config != null && data.Config.firstAlarm != false);
+   		showTodayEvents(data.tasks,data.courses,data.eventDone,((data.Config != undefined && data.Config.hiddeNoSelectedCourseInWindows == true)?(data.moodleCoursesTable):({})));
+
+   if(data.tasks != undefined && data.Config != null && data.Config.firstAlarm != false)
   		setAlarms(data,true);
 }
 
@@ -214,19 +217,38 @@ function onStart(data)
  * Generate chrome notification list with all tasks (homework's) of the day
  * @param events (object): The tasks
  * @param courses (object) : The courses
+ * @param eventDone (object): Check if the user mark as done
+ * @param moodleCoursesTable (object): The user courses list
  */
-function showTodayEvents(events,courses)
+function showTodayEvents(events,courses,eventDone,moodleCoursesTable)
 {
 	if(events == null || events.length ==0 || courses == null || courses.length == 0)
 		return;
+
+	if(eventDone == undefined)
+        eventDone = {};
+
+	if(moodleCoursesTable != undefined && jQuery.isEmptyObject(moodleCoursesTable))
+        moodleCoursesTable = null;
 
 	var today = new Date();
 	var deadline = new Date();
 	var j = 0;
 	var list = [];
+
 	for (var i = 0; i < events.length; i++) {
+
 		if(events[i].type == "userEvent")
 			return;
+
+        if(eventDone[events[i].id] != null && (eventDone[events[i].id].checked == true || eventDone[events[i].id].notifications == false))
+            continue;
+
+        //Check if the course is part of 'my courses' when the user request to show only homework from 'my courses' in the popup
+        if(moodleCoursesTable != null && moodleCoursesTable[event.id] != true) {
+            continue;
+        }
+
 		deadline = new Date(Date.parse(events[i].deadLine));
 
 		if((deadline.getDate() == today.getDate() || deadline.getDate() == (today.getDate() +1)&& deadline.getHours()< 2) &&  deadline.getMonth() == today.getMonth() && Date.parse(deadline)> Date.now())
@@ -337,19 +359,10 @@ function createEventNotification(eventId,change)
 				if(data.tasks[i].id == eventId)
 				{
 					event = data.tasks[i];
-					if(data.eventDone[event.id] != null )
-					{
-						if(data.eventDone[event.id].checked == false)
-						{
-                            console.log("Event id " + eventId + ", marked as done" );
-							return false;
-                        }
-						if(data.eventDone[event.id].notifications == false)
-                        {
-                            console.log("Event id " + eventId + ", marked to not receive notification" );
-                            return false;
-                        }
-					}
+
+					if(data.eventDone[event.id] != null && (data.eventDone[event.id].checked == true || data.eventDone[event.id].notifications == false))
+						return false;
+
 					break;
                 }
 			}
@@ -358,11 +371,12 @@ function createEventNotification(eventId,change)
             event = eventId;
         }
 
+        //To prevent bug
 		if(event == null)
 			return;
 
 		//Check if the course is part of 'my courses' when the user request to show only homework from 'my courses' in the popup
-        if(data.Config != undefined && data.Config.hiddeNoSelectedCourseInWindows != true && data.moodleCoursesTable != null &&data.moodleCoursesTable[event.id] != true) {
+        if(data.Config != undefined && data.Config.hiddeNoSelectedCourseInWindows == true && data.moodleCoursesTable != null &&data.moodleCoursesTable[event.id] != true) {
             console.log("Homework "+ event.name +" of course " +data.courses[event.courseId].name +" is not not in my course list" );
             return;
         }
@@ -374,7 +388,7 @@ function createEventNotification(eventId,change)
 			chrome.notifications.create(
 				  event.id,{
 					type: 'basic',
-					requireInteraction:(data.Config != undefined && data.Config.hiddeNofication == true)?false:true,
+					requireInteraction:(!(data.Config != undefined && data.Config.hiddeNofication == true)),
 					iconUrl: chrome.extension.getURL('image/icons/change.png'),
 					title: "שינוי בשיעורי בית",
 					message: ((event.name + "\n" + data.courses[event.courseId].name+"\n") + getDate(new Date(Date.parse(event.deadLine))))
