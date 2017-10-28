@@ -245,7 +245,7 @@ function showTodayEvents(events,courses,eventDone,moodleCoursesTable)
             continue;
 
         //Check if the course is part of 'my courses' when the user request to show only homework from 'my courses' in the popup
-        if(moodleCoursesTable != null && moodleCoursesTable[event.id] != true) {
+        if(moodleCoursesTable != null && moodleCoursesTable[event[i].id] != true) {
             continue;
         }
 
@@ -983,25 +983,26 @@ function changeIcon(flag)
 
 function LevNetLogin(username,password)
 {
-    //Mazak inputs
-    var input = {
-        __EVENTARGUMENT:"",
-        __EVENTTARGET:"",
-        __EVENTVALIDATION:"/wEdAAetF+uTdeuF9ad4H3Y1oKlMCW8vdzVzmzgmuoYuqTP+fqct0ueWAA0YL7V6O1AochnANEsgx9K9r/2lixUqPdVYOVB//zNqTaUBR/8dOG4iyLATo2l1y7ugf3AadYP1/o1HSZucqxgKJG9VFVk9Fehc9i5wlba+qpEhMW4syJgKQI9Fcbo=",
-        __SCROLLPOSITIONX:"0",
-        __SCROLLPOSITIONY:"0",
-        __VIEWSTATE:"/wEPDwUJODQ1NTExNDM3ZBgCBR5fX0NvbnRyb2xzUmVxdWlyZVBvc3RCYWNrS2V5X18WAgU4Y3RsMDAkY3RsMDAkQ29udGVudFBsYWNlSG9sZGVyMSRMb2dpblN0YXR1c0NvbnRyb2wkY3RsMDEFOGN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlcjEkTG9naW5TdGF0dXNDb250cm9sJGN0bDAzBSljdGwwMCRjdGwwMCRDb250ZW50UGxhY2VIb2xkZXIxJExvZ2luVmlldw8PZAIBZFaS5PztvvCrKjw5Qdg2KADb8t9m",
-        __VIEWSTATEGENERATOR:"1806D926",
-        ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$LoginButton:"כניסה",
-        ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$Password:password,
-        ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$UserName:username
-    };
-
-
-
 
     const promise = new Promise(function (resolve, reject) {
-        var request =  $.post( "https://levnet.jct.ac.il/Login/Login.aspx",input);
+
+        var request = $.ajax({
+            url: "https://levnet.jct.ac.il/Login/Login.aspx",
+            type: "POST",
+            data: JSON.stringify({
+                action:'Login',
+                password : password,
+                username : username
+            }),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                console.log("success");
+            },
+            error: function (response) {
+                console.log("failed");
+            }
+        });
 
         request.done( function(data){
             // In case the username/password are wrong the moodle return an error that is requiered to
@@ -1017,6 +1018,7 @@ function LevNetLogin(username,password)
             chrome.runtime.sendMessage({message:"login status ok"});
 
             console.log("login status ok");
+            // console.log(data);
             resolve("");
         });
 
@@ -1035,25 +1037,25 @@ function LevNetLogin(username,password)
 function mazakLogin(username,password)
 {
     //Mazak inputs
-    var input = {
-        __EVENTARGUMENT:"",
-        __EVENTTARGET:"",
-        __EVENTVALIDATION:"/wEdAAetF+uTdeuF9ad4H3Y1oKlMCW8vdzVzmzgmuoYuqTP+fqct0ueWAA0YL7V6O1AochnANEsgx9K9r/2lixUqPdVYOVB//zNqTaUBR/8dOG4iyLATo2l1y7ugf3AadYP1/o1HSZucqxgKJG9VFVk9Fehc9i5wlba+qpEhMW4syJgKQI9Fcbo=",
-        __SCROLLPOSITIONX:"0",
-        __SCROLLPOSITIONY:"0",
-        __VIEWSTATE:"/wEPDwUJODQ1NTExNDM3ZBgCBR5fX0NvbnRyb2xzUmVxdWlyZVBvc3RCYWNrS2V5X18WAgU4Y3RsMDAkY3RsMDAkQ29udGVudFBsYWNlSG9sZGVyMSRMb2dpblN0YXR1c0NvbnRyb2wkY3RsMDEFOGN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlcjEkTG9naW5TdGF0dXNDb250cm9sJGN0bDAzBSljdGwwMCRjdGwwMCRDb250ZW50UGxhY2VIb2xkZXIxJExvZ2luVmlldw8PZAIBZFaS5PztvvCrKjw5Qdg2KADb8t9m",
-        __VIEWSTATEGENERATOR:"1806D926",
-        ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$LoginButton:"כניסה",
-        ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$Password:password,
-        ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$UserName:username
-    };
-
-
-
-
     const promise = new Promise(function (resolve, reject) {
-        var request =  $.post( "https://mazak.jct.ac.il/Login/Login.aspx",input);
 
+        var request = $.ajax({
+            url: "https://mazak.jct.ac.il/Login/Login.aspx",
+            type: "POST",
+            data: JSON.stringify({
+                action:'Login',
+                password : password,
+                username : username
+            }),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                console.log("success");
+            },
+            error: function (response) {
+                console.log("failed");
+            }
+        });
         request.done( function(data){
             // In case the username/password are wrong the moodle return an error that is requiered to
             // logout before login a new user
@@ -1135,19 +1137,20 @@ function getFromMazakTestData(mazak)
 	
 	    request.done( function(data){
 
-			var table =$(data).find("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdStudentTests_itemPlaceholderContainer");
+			var table =$(data).find(".table-responsive");
 			
 			if($(table).length==0) {
                 reject("Mazak login is required	");
                 backgroundEvent({type:"updateData",operationCompleted:false,error:"נדרש חיבור למזק",request:request});
                 return;
             }
-			var tr = $(table).find("tr");
+
+			var tr = $(table).find("tbody").find("tr");
 			if($(tr).length==0)
 				reject("tr is empty");
 
-			var test = {}
-			var allTests ={}
+			var test = {};
+			var allTests ={};
 
 			$(tr).each(function()
 			{
@@ -1193,7 +1196,7 @@ function getFromMazakTestData(mazak)
 								allTests[course]["moed" + moed + "time" ] = sTemp.substr(0,sTemp.lastIndexOf(':'));
 						break;
 
-						case 5:
+						case 4:
 						sTemp = $(this).text().trim();
                         if(	allTests[course]["registerToMoedBet"] != true)
 							allTests[course]["registerToMoedBet"] = sTemp == "בטל הרשמה" || sTemp == "בוצעה הרשמה למועד ב"; // (moed == 2 && sTemp && stringDateToDateObject(allTests[course]["moed" + moed + "day" ],allTests[course]["moed" + moed + "time" ])>Date.now());
@@ -1245,7 +1248,7 @@ function getFromMazakregisterMoed3()
 			});
 
 			request.done( function(data){
-					var table =$(data).find("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdTests_itemPlaceholderContainer");
+					var table =$(data).find(".table-responsive");
 					
 				if($(table).length==0)
 					reject("Moed 3 table is empty");
@@ -1360,7 +1363,7 @@ function testNotifications(type)
 function wifiLogin(data)
 {
     console.log("Auto wifi login required")
-	var request =  $.post( "https://captiveportal-login.jct.ac.il/auth/index.html/u",
+	var request =  $.post( "https://securelogin.jct.ac.il/auth/index.html/u",
 			{username:data.username,password:atob(data.password)} );
 
 		request.done( function(data){

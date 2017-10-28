@@ -1,5 +1,5 @@
 var username;
-
+var startCounter = 0;
 $(document).ready(function () {
     DataAccess.Data(onStart);
 
@@ -29,6 +29,7 @@ function onStart(data) {
         case "10.1.1.1":
         case "wireless-login.jct.ac.il":
         case "captiveportal-login.jct.ac.il":
+        case "securelogin.jct.ac.il":
             if (data["wf"] && data.enable && data.anonymous != true)
                 wifiConnect(password);
             break;
@@ -121,14 +122,17 @@ function mazakConnect(data) {
         return;
     }
 
-    if (!location.pathname.includes("Login.aspx")) {
-        if(data.anonymous == true)
-            chrome.runtime.sendMessage({levnetLoginAndUpdate:true});
-
+    if (!location.pathname.includes("Login.aspx") && (data.anonymous == true)) {
+        chrome.runtime.sendMessage({levnetLoginAndUpdate:true});
         return;
     }
 
-
+    //Fix bug in mazak (09.07.2017)
+    //The error show the menubar but its not redirect the student to the main page.
+    if (location.pathname.includes("Login.aspx") && $("ul[role=menubar]").length > 0) {// Check if the menubar, exist in the login page
+        window.location.href = '/Student/Default.aspx';
+        return;
+    }
     //LOGIN PAGE
     if(data.anonymous == true)
         return;
@@ -138,7 +142,7 @@ function mazakConnect(data) {
         return;
 
     //check if the username input exist (in order to prevent a bug)
-    if ($("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_UserName").length == 0) {
+    if ($("#username").length == 0) {
         if (location.pathname.includes("Login")) {
             console.log("JCT Tools-> User name field not found")
 
@@ -147,7 +151,7 @@ function mazakConnect(data) {
     }
 
     //check if the password input exist (in order to prevent a bug)
-    if ($("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password").length == 0) {
+    if ($("#password").length == 0) {
         if (location.pathname.includes("Login")) {
             console.log("JCT Tools-> password field not found");
 
@@ -157,19 +161,28 @@ function mazakConnect(data) {
 
     //This function is a little hack to replace the chrome autofill.
     $(":input").each(function () {
-        if (this.name == "ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$LoginControl$UserName")
+        if (this.name == "username")
             this.value = username;
-        if (this.name == "#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password")
+        if (this.name == "password")
             this.value = window.atob(data["password"]);
     });
 
+    $("#username").val(username);
+    $("#password").val( window.atob(data["password"]));
+
     console.log("JCT Tools-> Starting levnet autologin ");
     //This 2 lines is not requiered, but they are in order to prevent a bug
-    $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_UserName").attr("value", username);
-    $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_LoginControl_Password").attr("value", window.atob(data["password"]));
+    $("#username").attr("value", username);
+    $("#password").attr("value", window.atob(data["password"]));
 
-    //Submit the form
-    $("#aspnetForm input[type='submit']").click();
+    //Submit the form - Angular functions
+    location.href="javascript:console.log('JCT Tools-> trying mazak login');"
+        + "var $scope = angular.element('#username').scope();"
+        + "$scope.login = {username:'"+username+"', password: '"+window.atob(data["password"]) +"'};"
+        + "$scope.loginForm.$valid = true;"
+        + "$scope.tryLogin();";
+
+    // $("#mainForm").submit();
 }
 
 
@@ -178,120 +191,63 @@ function mazakConnect(data) {
  */
 function gradesButton(data) {
 
-    $("header").append('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
-    $("td").removeClass('right');
-    $("th").css( "text-align", "center" );
+    console.log("JCT Tools-> gradesButton() and customGrade are disabled for now")
+    // $("header").append('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
+    // $("td").removeClass('right');
+    // $("th").css( "text-align", "center" );
 
     //First we check if the user wants this option then
     if (data.Config.customGrades != undefined && data.Config.customGrades != false) {
 
+        if(data.Config.gradesOptions == undefined)
+            data.Config.gradesOptions = {};
+
+
+        return;
         //Backup the line
-        var examples = $("#dvGrades").find(".courseColorReader");
-        //Remove the default first line
-        $(examples[0]).find(".notPassed").remove();
-        $(examples[0]).find(".droppedOutPurple").remove();
-        $(examples[0]).find(".notConfirmed").remove();
-        $(examples[0]).find(".lineThrough").remove();
+        var dvGrades = $($("div[data-course-legend]")[0]);
+        //Check if the document is loaded
+        // if($(dvGrades).find("label").length ==0)
+        //     return setTimeout(function(){gradesButton(data)},300);
 
-        var temp = $(examples[0]).find("span");
-        $(examples[0]).empty();
-
-        //Creating custom buttons
-        var select = '<div id="gradeTableOptions" class="courseColorReader bold">' +
-            '<span class="notPassed"><input id="courseNotPassed" type="checkbox" checked>&nbsp;ציון נכשל</span>&nbsp;|&nbsp;' +
-            '<span class="droppedOutPurple"><input id="courseDroppedOutPurple" type="checkbox" >&nbsp; קורס שלא נחשב לממוצע</span>&nbsp;|&nbsp;' +
-            '<span class="notConfirmed"><input id="courseNotConfirmed" type="checkbox" checked>&nbsp; קורס לא מאושר </span>&nbsp;|&nbsp;' +
-            //'<span class="lineThrough"><input id="couseLineThrough" type="checkbox" >&nbsp;לא נחשב לממוצע</span>&nbsp;|&nbsp;'+
-            '<span><input id="couseWithoutPoints" type="checkbox" >&nbsp;קורס ללא נקודות זכות</span>&nbsp;|&nbsp;' +
-            '<span><input id="couseWithoutGrade" type="checkbox" >&nbsp;קורס ללא ציון</span>&nbsp;|&nbsp;' +
-            //	'<span><input id="couseWithoutGrade" type="checkbox" >&nbsp; קורס ללא ציון - סמסטר הנוכחי</span>'+
-
-            '</div>';
-
-
-        //Append the custom button
-        $(examples[0]).append(temp);
-        $("#content").find(".filterBox").append(select);
-
+        //New content
+        //Additional options
+        $($(dvGrades).find('.text-warning')[0]).after('&nbsp;|<label><input id="couseWithoutPoints" type="checkbox" ' + ((data.Config.gradesOptions["couseWithoutPoints"] == true)?"checked":"") +'>&nbsp;קורס ללא נקודות זכות</label>&nbsp;|' +
+            '<label><input id="couseWithoutGrade" type="checkbox" ' + ((data.Config.gradesOptions["couseWithoutGrade"] == true)?"checked":"") +'>&nbsp;קורס ללא ציון</label>');
+        //After insert additional options, the program insert the checkbox
+        var examples = $(dvGrades).find("label");
+        $(examples[0]).prepend('<input id="courseNotPassed" type="checkbox" ' + ((data.Config.gradesOptions["courseNotPassed"] != false )?"checked":"" )+'>&nbsp;');
+        $(examples[1]).prepend('<input id="courseDroppedOutPurple" type="checkbox" ' + ((data.Config.gradesOptions["courseDroppedOutPurple"] == true)?"checked":"") +'>&nbsp;');
+        $(examples[2]).prepend('<input id="courseNotConfirmed" type="checkbox" ' + ((data.Config.gradesOptions["courseNotConfirmed"] != false)?"checked":"") +'>&nbsp;');
         //Set the checkbox on click to run the function customGrades
-        $("#gradeTableOptions").find("input[type=checkbox]").on("click", customGrades);
-        if(data.Config.customAverage == true) {
-            //Append instructions
-            $("#content").find(".mainCaption").after("<div class='filterBox' style='overflow:hidden'><div  style='float:right;margin: 0;padding: 0;margin-left: 5px;'><span class='glyphicon glyphicon-info-sign'></span></div><div style='margin: 0;padding:0;'>ניתן לשנות את הציונים בתצוגה ( <b>בלבד  </b> ) לצורך חישוב הממוצע באמצעות לחיצה כפולה על הציון המבוקש</div></div>")
-            //This function will set the option of double click in a grade
-            $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdGrades_itemPlaceholderContainer").find("tr").each(function () {
-                $(this).dblclick(function () {
+        $(examples).find("input[type=checkbox]").on("click", customGrades);
+        setTimeout(function(){setGradeTableDBClick(data)},1500);
+        //TODO : check if the user change the page and then invoke setGradeTableDBClick function
+        if($(".ui-paging").find("li").length == 0)
+            console.log("ui-paging is empty")
+        else
+            console.log("ui-paging total:" + $(".ui-paging").find("li").length)
 
-                    var that = this;
+        $(".ui-paging").find("li").click(function () {
+            console.log("Table updated");
+            setTimeout(function(){
+                DataAccess.Data(setGradeTableDBClick);
+            },1500);
+        });
+        //Add option to show all grades
+        $($(".table-responsive").find(".ng-binding")[0]).prepend("<button id='showAllGrades' class='btn btn-default'>הראה כל הציונים</button>&nbsp;");
+        $("#showAllGrades").click(function (e) {
+            e.preventDefault();
+            location.href="javascript:var $scope = angular.element('.table-responsive').scope();"
+            +"$scope.$$childHead.pageSize = 9999;"
+            +"$scope.$$childHead.setPage(0)";
+            $(this).remove();
+            setTimeout(function() {
+                customGrades();
+                setGradeTableDBClick(data);
+            },1000);
 
-                    var td = $(this).find("td");
-
-                    var grade = $(td)[6];
-
-                    var min = $($(td)[5]).text().trim();
-
-                    if (isNaN(min)) min = 0;
-
-                    var gradeInput = $(grade).find(":input");
-
-                    if ($(gradeInput).length > 0) {
-                        //Writing new grade
-                        var value = $(gradeInput).val().trim();
-                        $(grade).empty();
-                        $(grade).append(value);
-                        customGrades();
-
-                        //Set new class
-                        console.log(value + " " + min);
-
-                        if (isNaN(value) || parseInt(value) >= parseInt(min)) {
-                            if ($(this).hasClass("notPassed"))
-                                $(this).removeClass("notPassed ");
-                        } else {
-                                if (!$(this).hasClass("notPassed"))
-                                    $(this).addClass("notPassed");
-                        }
-
-
-                    } else {
-                        var tText = $(grade).text().trim();
-                        if (isNaN(tText))
-                            tText = "";
-                        var inputGrade = "<input type='text' value='" + tText + "' style='width: 50px;text-align: center;font-size: 15px;height: 22px;'>";
-                        $(grade).empty();
-                        $(grade).append(inputGrade);
-                        inputGrade = $(grade).find(":input");
-
-
-                        $(inputGrade).keypress(function (e) {
-                            if (e.which == 13) {
-                                var gradeInput = $(grade).find(":input");
-                                var value = $(gradeInput).val().trim();
-                                $(grade).empty();
-                                $(grade).append(value);
-
-                                customGrades();
-
-                                //Set new class
-                                console.log(value + " " + min);
-                                if (isNaN(value) || parseInt(value) >= parseInt(min)) {
-                                    if ($(that).hasClass("notPassed"))
-                                        $(that).removeClass("notPassed ");
-                                } else {
-                                    if (!isNaN(value))
-                                        if (!$(that).hasClass("notPassed"))
-                                            $(that).addClass("notPassed");
-                                }
-                            }
-                        });
-
-
-                    }
-
-
-                });
-            });
-        }
+        });
         //Run the function customGrades in order to refresh the table
         customGrades();
     }
@@ -304,16 +260,16 @@ function gradesButton(data) {
         var customTotal = '<tr id="customTotal" style="background-color:#004184;color:#fff;font-weight: bolder;">' +
             '<th></th>' +
             '<th> סה"כ קורסים:  </th> ' +
-            '<th id="TCourses">10</td>' +
+            '<th id="TCourses">0</td>' +
             '<th colspan="2">סכ"ה נ"ז:</th> ' +
-            '<th id="TNZ">10</th> ' +
+            '<th id="TNZ">0</th> ' +
             '<th>ממוצע:</th> ' +
-            '<th id="TG">10</th> ' +
+            '<th id="TG">-</th> ' +
             '<th colspan="2"></th>' +
             '</tr>';
 
         //append to the tabla
-        $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdGrades_itemPlaceholderContainer").append(customTotal);
+        $(".table-responsive").find("table").append(customTotal);
 
         //Run the function customGrades in order to set the average
         customGrades();
@@ -321,6 +277,87 @@ function gradesButton(data) {
     }
 
 
+}
+
+function setGradeTableDBClick(data) {
+    if(data.Config != null && data.Config.customAverage == true) {
+        //Append instructions
+        if($("#changeGradeWarning").length == 0) {
+            $($("div[data-course-legend]")[0]).prepend("<div id='changeGradeWarning' class='filterBox' style='overflow:hidden;margin: 10px 0'><div  style='float:right;margin: 0;padding: 0;margin-left: 5px;'><span class='glyphicon glyphicon-info-sign'></span></div><div style='margin: 0;padding:0;'>ניתן לשנות את הציונים בתצוגה ( <b>בלבד  </b> ) לצורך חישוב הממוצע באמצעות לחיצה כפולה על הציון המבוקש</div></div>")
+        }
+        console.log($(".table-responsive").find("tr"));
+        //This function will set the option of double click in a grade
+        $(".table-responsive").find("tr").each(function () {
+            $(this).dblclick(function () {
+
+                var that = this;
+
+                var td = $(this).find("td");
+
+                var grade = $(td)[6];
+
+                var min = $($(td)[5]).text().trim();
+
+                if (isNaN(min)) min = 0;
+
+                var gradeInput = $(grade).find(":input");
+
+                if ($(gradeInput).length > 0) {
+                    //Writing new grade
+                    var value = $(gradeInput).val().trim();
+                    $(grade).empty();
+                    $(grade).append(value);
+                    customGrades();
+
+
+                    if (isNaN(value) || parseInt(value) >= parseInt(min)) {
+                        if ($(this).hasClass("notPassed"))
+                            $(this).removeClass("notPassed ");
+                    } else {
+                        if (!$(this).hasClass("notPassed"))
+                            $(this).addClass("notPassed");
+                    }
+
+
+                } else {
+                    var tText = $(grade).text().trim();
+                    if (isNaN(tText))
+                        tText = "";
+                    var inputGrade = "<input type='text' value='" + tText + "' style='width: 50px;text-align: center;font-size: 15px;height: 22px;'>";
+                    $(grade).empty();
+                    $(grade).append(inputGrade);
+                    inputGrade = $(grade).find(":input");
+
+
+                    $(inputGrade).keypress(function (e) {
+                        if (e.which == 13) {
+                            var gradeInput = $(grade).find(":input");
+                            var value = $(gradeInput).val().trim();
+                            $(grade).empty();
+                            $(grade).append(value);
+
+                            customGrades();
+
+                            //Set new class
+                            if (isNaN(value) || parseInt(value) >= parseInt(min)) {
+                                if ($(that).hasClass("notPassed"))
+                                    $(that).removeClass("notPassed ");
+                            } else {
+                                if (!isNaN(value))
+                                    if (!$(that).hasClass("notPassed"))
+                                        $(that).addClass("notPassed");
+                            }
+                        }
+                    });
+
+
+                }
+
+
+            });
+        });
+    }else
+        console.log("JCT Tools-> Double click option is off ");
 }
 
 /**
@@ -339,27 +376,32 @@ function customGrades() {
     var sumNZ = 0;
     var sumGrade = 0;
     console.log("JCT Tools-> customGrades function called ");
-    var customGradeDiv = $("#gradeTableOptions");
+    var customGradeDiv = $($("div[data-course-legend]")[0]).find("label");
+
+
+    var gradesOptions = {};
+    gradesOptions["courseNotPassed"] = $(customGradeDiv).find("#courseNotPassed").is(":checked");
+    gradesOptions["courseDroppedOutPurple"] = $(customGradeDiv).find("#courseDroppedOutPurple").is(":checked");
+    gradesOptions["courseNotConfirmed"] = $(customGradeDiv).find("#courseNotConfirmed").is(":checked");
+    gradesOptions["couseLineThrough"] = $(customGradeDiv).find("#couseLineThrough").is(":checked");
+    gradesOptions["couseWithoutPoints"] = $(customGradeDiv).find("#couseWithoutPoints").is(":checked");
+    gradesOptions["couseWithoutGrade"] = $(customGradeDiv).find("#couseWithoutGrade").is(":checked");
+    DataAccess.setObject("Config","gradesOptions",gradesOptions);
 
     //For every td in the grade table
-    $("#ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1_grdGrades_itemPlaceholderContainer").find("tbody").find("tr").each(function () {
+    $(".table-responsive").find("table").find("tbody").find("tr").each(function () {
 
-        //In case its the first line (that contains the header) continue
-        if (i == 0) {
-            i++;
-            return;
-        }
 
         //Check if this is not the last line (with the average)
         if ($(this).attr("id") == "customTotal")
             return;
 
         //Reset line background color
-        if ($(this).hasClass("alternateOdd"))
+      /*  if ($(this).hasClass("alternateOdd"))
             $(this).removeClass("alternateOdd");
 
         if ($(this).hasClass("alternateEven"))
-            $(this).removeClass("alternateEven");
+            $(this).removeClass("alternateEven");*/
 
 
         //Get all columns of this line
@@ -379,17 +421,17 @@ function customGrades() {
         //This if will check with check box (on first line) is selected and then show/hide the line
         if (
          //For courses that the user didn't pass
-        ($(this).hasClass("notPassed") && !$(customGradeDiv).find("#courseNotPassed").is(":checked")) ||
+        ($(this).hasClass("not-passed") && !gradesOptions["courseNotPassed"]) ||
         //For courses that are exclude
-        ($(this).hasClass("droppedOutPurple") && !$(customGradeDiv).find("#courseDroppedOutPurple").is(":checked")) ||
+        ($(this).hasClass("dropped-out") && !gradesOptions["courseDroppedOutPurple"]) ||
         //For courses that is not confirmed
-        ($(this).hasClass("notConfirmed") && !$(customGradeDiv).find("#courseNotConfirmed").is(":checked")) ||
+        ($(this).hasClass("not-confirmed") && !gradesOptions["courseNotConfirmed"]) ||
         //For courses that are not in the system
-        ($(gradeTd[6]).hasClass("lineThrough") && !$(customGradeDiv).find("#couseLineThrough").is(":checked")) ||
+        ($(gradeTd[6]).hasClass("lineThrough") && !gradesOptions["couseLineThrough"]) ||
         // Check  if the total points are 0
-        (NZ == 0 && !$(customGradeDiv).find("#couseWithoutPoints").is(":checked")) ||
+        (NZ == 0 && !gradesOptions["couseWithoutPoints"]) ||
         //
-        (isNaN(parseFloat(grade)) && !$(customGradeDiv).find("#couseWithoutGrade").is(":checked") && (grade == "חסר" || grade == "עבר"))
+        (isNaN(parseFloat(grade)) && !gradesOptions["couseWithoutGrade"] && (grade == "חסר" || grade == "עבר" || grade == "לא השלים"))
         ) {
             $(this).hide();
 
@@ -406,20 +448,30 @@ function customGrades() {
         }
 
         //With the  object 'i' it possible to check if this line is in even position and insert his class
-        (i % 2 != 0) ? $(this).addClass("alternateOdd") : $(this).addClass("alternateEven");
+        // (i % 2 != 0) ? $(this).addClass("alternateOdd") : $(this).addClass("alternateEven");
 
         i++;
     });
 
     //Get the average
     var average = (sumGrade / sumNZ).toFixed(3);
+    //In case the table is not loaded
+    if(isNaN(average)) {
+        //To prevent a bug
+        if(startCounter++ > 10)
+            return;
 
+        setTimeout(customGrades,1000);
+        return;
+    }
     //Set total courses (by total of active lines)
     $("#TCourses").text((i - 1));
     //Set total of points
     $("#TNZ").text(sumNZ);
     //Set average
     $("#TG").text(average);
+
+
 
 
 }

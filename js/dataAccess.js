@@ -199,6 +199,12 @@ var DataAccess = {
             mo:true,mz:true,wf:true,
             moodleCoursesTable:{}
     	 });
+    },
+
+    print:function () {
+        this.Data(function (data) {
+            console.log(data);
+        })
     }
 
 }
