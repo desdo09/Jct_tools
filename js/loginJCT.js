@@ -287,7 +287,6 @@ function setGradeTableDBClick(data) {
         if($("#changeGradeWarning").length == 0) {
             $($("div[data-lev-course-legend]")[0]).prepend("<div id='changeGradeWarning' class='filterBox' style='overflow:hidden;margin: 10px 0'><div  style='float:right;margin: 0;padding: 0;margin-left: 5px;'><span class='glyphicon glyphicon-info-sign'></span></div><div style='margin: 0;padding:0;'>ניתן לשנות את הציונים בתצוגה ( <b>בלבד  </b> ) לצורך חישוב הממוצע באמצעות לחיצה כפולה על הציון המבוקש</div></div>")
         }
-        console.log($(".table-responsive").find("tr"));
         //This function will set the option of double click in a grade
         $(".table-responsive").find("tr").each(function () {
             $(this).dblclick(function () {
