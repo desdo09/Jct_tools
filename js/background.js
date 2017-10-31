@@ -207,7 +207,7 @@ function onStart(data)
    		chrome.alarms.create("updatedata", {when:(Date.now()),periodInMinutes:60*data.Config.hwUpdate});
 
    if(data.Config != null && data.Config.todaysHW)
-   		showTodayEvents(data.tasks,data.courses,data.eventDone,((data.Config != undefined && data.Config.hiddeNoSelectedCourseInWindows == true)?(data.moodleCoursesTable):({})));
+   		showTodayEvents(data.tasks,data.courses,data.eventDone,((data.Config != undefined && data.Config.hiddeNoSelectedCourseInWindows == true)?(data.moodleCoursesTable):null));
 
    if(data.tasks != undefined && data.Config != null && data.Config.firstAlarm != false)
   		setAlarms(data,true);
@@ -245,7 +245,8 @@ function showTodayEvents(events,courses,eventDone,moodleCoursesTable)
             continue;
 
         //Check if the course is part of 'my courses' when the user request to show only homework from 'my courses' in the popup
-        if(moodleCoursesTable != null && moodleCoursesTable[event[i].id] != true) {
+		console.log("showTodayEvents(): " + events[i].id)
+        if(moodleCoursesTable != null && moodleCoursesTable[events[i].courseId] != true) {
             continue;
         }
 

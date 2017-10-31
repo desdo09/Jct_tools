@@ -190,8 +190,8 @@ function mazakConnect(data) {
  * This function will manager the grades page.
  */
 function gradesButton(data) {
-
-    console.log("JCT Tools-> gradesButton() and customGrade are disabled for now")
+    console.log("JCT Tools-> gradesButton()");
+    // console.log("JCT Tools-> gradesButton() and customGrade are disabled for now")
     // $("header").append('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
     // $("td").removeClass('right');
     // $("th").css( "text-align", "center" );
@@ -203,12 +203,12 @@ function gradesButton(data) {
             data.Config.gradesOptions = {};
 
 
-        return;
+        // return;
         //Backup the line
-        var dvGrades = $($("div[data-course-legend]")[0]);
+        var dvGrades = $($("div[data-lev-course-legend]")[0]);
         //Check if the document is loaded
-        // if($(dvGrades).find("label").length ==0)
-        //     return setTimeout(function(){gradesButton(data)},300);
+        if($(dvGrades).find("label").length ==0)
+            return setTimeout(function(){gradesButton(data)},300);
 
         //New content
         //Additional options
@@ -222,15 +222,17 @@ function gradesButton(data) {
         //Set the checkbox on click to run the function customGrades
         $(examples).find("input[type=checkbox]").on("click", customGrades);
         setTimeout(function(){setGradeTableDBClick(data)},1500);
-        //TODO : check if the user change the page and then invoke setGradeTableDBClick function
-        if($(".ui-paging").find("li").length == 0)
-            console.log("ui-paging is empty")
-        else
-            console.log("ui-paging total:" + $(".ui-paging").find("li").length)
-
+       //Set double cell double click event
         $(".ui-paging").find("li").click(function () {
             console.log("Table updated");
             setTimeout(function(){
+                DataAccess.Data(setGradeTableDBClick);
+            },1500);
+        });
+        //On page change, reset table preferences
+        $("nav[data-on-page-change=pageChange]").click(function () {
+            setTimeout(function () {
+                customGrades();
                 DataAccess.Data(setGradeTableDBClick);
             },1500);
         });
@@ -239,8 +241,7 @@ function gradesButton(data) {
         $("#showAllGrades").click(function (e) {
             e.preventDefault();
             location.href="javascript:var $scope = angular.element('.table-responsive').scope();"
-            +"$scope.$$childHead.pageSize = 9999;"
-            +"$scope.$$childHead.setPage(0)";
+            +"$scope.$$childTail.pageChange({pageSize:9999,current:1});"
             $(this).remove();
             setTimeout(function() {
                 customGrades();
@@ -277,13 +278,14 @@ function gradesButton(data) {
     }
 
 
+
 }
 
 function setGradeTableDBClick(data) {
     if(data.Config != null && data.Config.customAverage == true) {
         //Append instructions
         if($("#changeGradeWarning").length == 0) {
-            $($("div[data-course-legend]")[0]).prepend("<div id='changeGradeWarning' class='filterBox' style='overflow:hidden;margin: 10px 0'><div  style='float:right;margin: 0;padding: 0;margin-left: 5px;'><span class='glyphicon glyphicon-info-sign'></span></div><div style='margin: 0;padding:0;'>ניתן לשנות את הציונים בתצוגה ( <b>בלבד  </b> ) לצורך חישוב הממוצע באמצעות לחיצה כפולה על הציון המבוקש</div></div>")
+            $($("div[data-lev-course-legend]")[0]).prepend("<div id='changeGradeWarning' class='filterBox' style='overflow:hidden;margin: 10px 0'><div  style='float:right;margin: 0;padding: 0;margin-left: 5px;'><span class='glyphicon glyphicon-info-sign'></span></div><div style='margin: 0;padding:0;'>ניתן לשנות את הציונים בתצוגה ( <b>בלבד  </b> ) לצורך חישוב הממוצע באמצעות לחיצה כפולה על הציון המבוקש</div></div>")
         }
         console.log($(".table-responsive").find("tr"));
         //This function will set the option of double click in a grade
@@ -358,6 +360,10 @@ function setGradeTableDBClick(data) {
         });
     }else
         console.log("JCT Tools-> Double click option is off ");
+
+
+
+
 }
 
 /**
@@ -376,7 +382,7 @@ function customGrades() {
     var sumNZ = 0;
     var sumGrade = 0;
     console.log("JCT Tools-> customGrades function called ");
-    var customGradeDiv = $($("div[data-course-legend]")[0]).find("label");
+    var customGradeDiv = $($("div[data-lev-course-legend]")[0]).find("label");
 
 
     var gradesOptions = {};
