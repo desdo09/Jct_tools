@@ -988,10 +988,10 @@ function LevNetLogin(username,password)
     const promise = new Promise(function (resolve, reject) {
 
         var request = $.ajax({
-            url: "https://levnet.jct.ac.il/Login/Login.aspx",
+            url: "https://levnet.jct.ac.il//api/home/login.ashx?action=TryLogin",
             type: "POST",
             data: JSON.stringify({
-                action:'Login',
+                action:'TryLogin',
                 password : password,
                 username : username
             }),
@@ -1041,10 +1041,10 @@ function mazakLogin(username,password)
     const promise = new Promise(function (resolve, reject) {
 
         var request = $.ajax({
-            url: "https://mazak.jct.ac.il/Login/Login.aspx",
+            url: "https://mazak.jct.ac.il/api/home/login.ashx?action=TryLogin",
             type: "POST",
             data: JSON.stringify({
-                action:'Login',
+                action:'TryLogin',
                 password : password,
                 username : username
             }),

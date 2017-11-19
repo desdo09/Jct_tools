@@ -23,7 +23,7 @@ function onStart(data) {
             break;
         case "mazak.jct.ac.il":
         case "levnet.jct.ac.il":
-                mazakConnect(data);
+            mazakConnect(data);
             break;
         case "1.1.1.1":
         case "10.1.1.1":
@@ -37,7 +37,6 @@ function onStart(data) {
 }
 
 function wifiConnect(pass) {
-
 
 
     if (document.title == "Web Authentication Failure") {
@@ -78,36 +77,36 @@ function mazakConnect(data) {
         if (data.Config.coursesOrder != undefined && data.Config.coursesOrder != false)
             $("td").removeClass('right');
 
-      /*  var myCalendar = createCalendar({
-            options: {
-                class: 'my-class',
+        /*  var myCalendar = createCalendar({
+         options: {
+         class: 'my-class',
 
-                // You can pass an ID. If you don't, one will be generated for you
-                id: 'my-id'
-            },
-            data: {
-                // Event title
-                title: 'Get on the front page of HN',
+         // You can pass an ID. If you don't, one will be generated for you
+         id: 'my-id'
+         },
+         data: {
+         // Event title
+         title: 'Get on the front page of HN',
 
-                // Event start date
-                start: new Date('June 15, 2013 19:00'),
+         // Event start date
+         start: new Date('June 15, 2013 19:00'),
 
-                // Event duration (IN MINUTES)
-                duration: 120,
+         // Event duration (IN MINUTES)
+         duration: 120,
 
-                // You can also choose to set an end time
-                // If an end time is set, this will take precedence over duration
-                end: new Date('June 15, 2013 23:00'),
+         // You can also choose to set an end time
+         // If an end time is set, this will take precedence over duration
+         end: new Date('June 15, 2013 23:00'),
 
-                // Event Address
-                address: 'The internet',
+         // Event Address
+         address: 'The internet',
 
-                // Event Description
-                description: 'Get on the front page of HN, then prepare for world domination.'
-            }
-        });
+         // Event Description
+         description: 'Get on the front page of HN, then prepare for world domination.'
+         }
+         });
 
-        document.querySelector('.courseMultiView').appendChild(myCalendar);*/
+         document.querySelector('.courseMultiView').appendChild(myCalendar);*/
 
         return;
     }
@@ -115,15 +114,15 @@ function mazakConnect(data) {
     //Grades page
     if (location.pathname.includes("Student/Grades.aspx")) {
 
-        if(data.Config == null)
-            data.Config ={};
+        if (data.Config == null)
+            data.Config = {};
         gradesButton(data);
         //customGrades();
         return;
     }
 
     if (!location.pathname.includes("Login.aspx") && (data.anonymous == true)) {
-        chrome.runtime.sendMessage({levnetLoginAndUpdate:true});
+        chrome.runtime.sendMessage({levnetLoginAndUpdate: true});
         return;
     }
 
@@ -134,7 +133,7 @@ function mazakConnect(data) {
         return;
     }
     //LOGIN PAGE
-    if(data.anonymous == true)
+    if (data.anonymous == true)
         return;
 
     //Check if the user active the auto login
@@ -168,7 +167,7 @@ function mazakConnect(data) {
     });
 
     $("#username").val(username);
-    $("#password").val( window.atob(data["password"]));
+    $("#password").val(window.atob(data["password"]));
 
     console.log("JCT Tools-> Starting levnet autologin ");
     //This 2 lines is not requiered, but they are in order to prevent a bug
@@ -176,10 +175,11 @@ function mazakConnect(data) {
     $("#password").attr("value", window.atob(data["password"]));
 
     //Submit the form - Angular functions
-    location.href="javascript:console.log('JCT Tools-> trying mazak login');"
+    location.href = "javascript:console.log('JCT Tools-> trying mazak login');"
         + "var $scope = angular.element('#username').scope();"
-        + "$scope.login = {username:'"+username+"', password: '"+window.atob(data["password"]) +"'};"
-        + "$scope.loginForm.$valid = true;"
+        + "$scope.model = {username:'" + username + "', password: '" + window.atob(data["password"]) + "'};"
+        + "$scope.canLogin = function(){return true};"
+        + "$scope.$apply();"
         + "$scope.tryLogin();";
 
     // $("#mainForm").submit();
@@ -191,7 +191,8 @@ function mazakConnect(data) {
  */
 function gradesButton(data) {
     console.log("JCT Tools-> gradesButton()");
-    // console.log("JCT Tools-> gradesButton() and customGrade are disabled for now")
+    console.log("JCT Tools-> gradesButton() and customGrade are disabled for now :(");
+    return;
     // $("header").append('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
     // $("td").removeClass('right');
     // $("th").css( "text-align", "center" );
@@ -199,7 +200,7 @@ function gradesButton(data) {
     //First we check if the user wants this option then
     if (data.Config.customGrades != undefined && data.Config.customGrades != false) {
 
-        if(data.Config.gradesOptions == undefined)
+        if (data.Config.gradesOptions == undefined)
             data.Config.gradesOptions = {};
 
 
@@ -207,46 +208,50 @@ function gradesButton(data) {
         //Backup the line
         var dvGrades = $($("div[data-lev-course-legend]")[0]);
         //Check if the document is loaded
-        if($(dvGrades).find("label").length ==0)
-            return setTimeout(function(){gradesButton(data)},300);
+        if ($(dvGrades).find("label").length == 0)
+            return setTimeout(function () {
+                gradesButton(data)
+            }, 300);
 
         //New content
         //Additional options
-        $($(dvGrades).find('.text-warning')[0]).after('&nbsp;|<label><input id="couseWithoutPoints" type="checkbox" ' + ((data.Config.gradesOptions["couseWithoutPoints"] == true)?"checked":"") +'>&nbsp;קורס ללא נקודות זכות</label>&nbsp;|' +
-            '<label><input id="couseWithoutGrade" type="checkbox" ' + ((data.Config.gradesOptions["couseWithoutGrade"] == true)?"checked":"") +'>&nbsp;קורס ללא ציון</label>');
+        $($(dvGrades).find('.text-warning')[0]).after('&nbsp;|<label><input id="couseWithoutPoints" type="checkbox" ' + ((data.Config.gradesOptions["couseWithoutPoints"] == true) ? "checked" : "") + '>&nbsp;קורס ללא נקודות זכות</label>&nbsp;|' +
+            '<label><input id="couseWithoutGrade" type="checkbox" ' + ((data.Config.gradesOptions["couseWithoutGrade"] == true) ? "checked" : "") + '>&nbsp;קורס ללא ציון</label>');
         //After insert additional options, the program insert the checkbox
         var examples = $(dvGrades).find("label");
-        $(examples[0]).prepend('<input id="courseNotPassed" type="checkbox" ' + ((data.Config.gradesOptions["courseNotPassed"] != false )?"checked":"" )+'>&nbsp;');
-        $(examples[1]).prepend('<input id="courseDroppedOutPurple" type="checkbox" ' + ((data.Config.gradesOptions["courseDroppedOutPurple"] == true)?"checked":"") +'>&nbsp;');
-        $(examples[2]).prepend('<input id="courseNotConfirmed" type="checkbox" ' + ((data.Config.gradesOptions["courseNotConfirmed"] != false)?"checked":"") +'>&nbsp;');
+        $(examples[0]).prepend('<input id="courseNotPassed" type="checkbox" ' + ((data.Config.gradesOptions["courseNotPassed"] != false ) ? "checked" : "" ) + '>&nbsp;');
+        $(examples[1]).prepend('<input id="courseDroppedOutPurple" type="checkbox" ' + ((data.Config.gradesOptions["courseDroppedOutPurple"] == true) ? "checked" : "") + '>&nbsp;');
+        $(examples[2]).prepend('<input id="courseNotConfirmed" type="checkbox" ' + ((data.Config.gradesOptions["courseNotConfirmed"] != false) ? "checked" : "") + '>&nbsp;');
         //Set the checkbox on click to run the function customGrades
         $(examples).find("input[type=checkbox]").on("click", customGrades);
-        setTimeout(function(){setGradeTableDBClick(data)},1500);
-       //Set double cell double click event
+        setTimeout(function () {
+            setGradeTableDBClick(data)
+        }, 1500);
+        //Set double cell double click event
         $(".ui-paging").find("li").click(function () {
             console.log("Table updated");
-            setTimeout(function(){
+            setTimeout(function () {
                 DataAccess.Data(setGradeTableDBClick);
-            },1500);
+            }, 1500);
         });
         //On page change, reset table preferences
         $("nav[data-on-page-change=pageChange]").click(function () {
             setTimeout(function () {
                 customGrades();
                 DataAccess.Data(setGradeTableDBClick);
-            },1500);
+            }, 1500);
         });
         //Add option to show all grades
         $($(".table-responsive").find(".ng-binding")[0]).prepend("<button id='showAllGrades' class='btn btn-default'>הראה כל הציונים</button>&nbsp;");
         $("#showAllGrades").click(function (e) {
             e.preventDefault();
-            location.href="javascript:var $scope = angular.element('.table-responsive').scope();"
-            +"$scope.$$childTail.pageChange({pageSize:9999,current:1});"
+            location.href = "javascript:var $scope = angular.element('.table-responsive').scope();"
+                + "$scope.$$childTail.pageChange({pageSize:9999,current:1});"
             $(this).remove();
-            setTimeout(function() {
+            setTimeout(function () {
                 customGrades();
                 setGradeTableDBClick(data);
-            },1000);
+            }, 1000);
 
         });
         //Run the function customGrades in order to refresh the table
@@ -278,13 +283,12 @@ function gradesButton(data) {
     }
 
 
-
 }
 
 function setGradeTableDBClick(data) {
-    if(data.Config != null && data.Config.customAverage == true) {
+    if (data.Config != null && data.Config.customAverage == true) {
         //Append instructions
-        if($("#changeGradeWarning").length == 0) {
+        if ($("#changeGradeWarning").length == 0) {
             $($("div[data-lev-course-legend]")[0]).prepend("<div id='changeGradeWarning' class='filterBox' style='overflow:hidden;margin: 10px 0'><div  style='float:right;margin: 0;padding: 0;margin-left: 5px;'><span class='glyphicon glyphicon-info-sign'></span></div><div style='margin: 0;padding:0;'>ניתן לשנות את הציונים בתצוגה ( <b>בלבד  </b> ) לצורך חישוב הממוצע באמצעות לחיצה כפולה על הציון המבוקש</div></div>")
         }
         //This function will set the option of double click in a grade
@@ -312,11 +316,11 @@ function setGradeTableDBClick(data) {
 
 
                     if (isNaN(value) || parseInt(value) >= parseInt(min)) {
-                        if ($(this).hasClass("notPassed"))
-                            $(this).removeClass("notPassed ");
+                        if ($(this).hasClass("not-passed"))
+                            $(this).removeClass("not-passed");
                     } else {
-                        if (!$(this).hasClass("notPassed"))
-                            $(this).addClass("notPassed");
+                        if (!$(this).hasClass("not-passed"))
+                            $(this).addClass("not-passed");
                     }
 
 
@@ -357,10 +361,8 @@ function setGradeTableDBClick(data) {
 
             });
         });
-    }else
+    } else
         console.log("JCT Tools-> Double click option is off ");
-
-
 
 
 }
@@ -391,7 +393,7 @@ function customGrades() {
     gradesOptions["couseLineThrough"] = $(customGradeDiv).find("#couseLineThrough").is(":checked");
     gradesOptions["couseWithoutPoints"] = $(customGradeDiv).find("#couseWithoutPoints").is(":checked");
     gradesOptions["couseWithoutGrade"] = $(customGradeDiv).find("#couseWithoutGrade").is(":checked");
-    DataAccess.setObject("Config","gradesOptions",gradesOptions);
+    DataAccess.setObject("Config", "gradesOptions", gradesOptions);
 
     //For every td in the grade table
     $(".table-responsive").find("table").find("tbody").find("tr").each(function () {
@@ -402,30 +404,30 @@ function customGrades() {
             return;
 
         //Reset line background color
-      /*  if ($(this).hasClass("alternateOdd"))
-            $(this).removeClass("alternateOdd");
+        /*  if ($(this).hasClass("alternateOdd"))
+         $(this).removeClass("alternateOdd");
 
-        if ($(this).hasClass("alternateEven"))
-            $(this).removeClass("alternateEven");*/
+         if ($(this).hasClass("alternateEven"))
+         $(this).removeClass("alternateEven");*/
 
 
         //Get all columns of this line
         gradeTd = $(this).find("td");
 
+        //In order to prevent a bug
+        if (gradeTd.length == 0) {
+            return;
+        }
         //Find the column where contains course gradde
         grade = $(gradeTd[6]).text().trim();
 
         //Find the column where contains course total points
         NZ = $(gradeTd[4]).text().trim();
 
-        //In order to prevent a bug
-        if (gradeTd.length == 0) {
-            return;
-        }
 
         //This if will check with check box (on first line) is selected and then show/hide the line
         if (
-         //For courses that the user didn't pass
+            //For courses that the user didn't pass
         ($(this).hasClass("not-passed") && !gradesOptions["courseNotPassed"]) ||
         //For courses that are exclude
         ($(this).hasClass("dropped-out") && !gradesOptions["courseDroppedOutPurple"]) ||
@@ -461,12 +463,12 @@ function customGrades() {
     //Get the average
     var average = (sumGrade / sumNZ).toFixed(3);
     //In case the table is not loaded
-    if(isNaN(average)) {
+    if (isNaN(average)) {
         //To prevent a bug
-        if(startCounter++ > 10)
+        if (startCounter++ > 10)
             return;
 
-        setTimeout(customGrades,1000);
+        setTimeout(customGrades, 1000);
         return;
     }
     //Set total courses (by total of active lines)
@@ -475,8 +477,6 @@ function customGrades() {
     $("#TNZ").text(sumNZ);
     //Set average
     $("#TG").text(average);
-
-
 
 
 }
