@@ -9,6 +9,10 @@ var localData;
 * will set the data in the acount div, then
 * will set all button functions.
 **************************************************/
+function get(name){
+    if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+        return decodeURIComponent(name[1]);
+}
 $(document).ready(function () {
 
 	DataAccess.Data(setAccountData)
@@ -40,6 +44,14 @@ $(document).ready(function () {
         })
 
 	});
+
+	var page = get("page");
+	if(page != undefined)
+    	changediv(page);
+
+	$("#close-my-extension-alert").click(function () {
+        $("#my-extension-alert").slideUp(500);
+	});
 });
 
 /*************************************************
@@ -58,6 +70,13 @@ $(document).ready(function () {
 **************************************************/
 function setAccountData(data)
 {
+
+    $("#accountsInput").find("input").keyup(function(event) {
+        if (event.keyCode === 13) {
+            $("#submit").click();
+        }
+    });
+
 	localData = data;
 	// in case the data object is null (undefined)
 	// meaning that is the first time (or the user make

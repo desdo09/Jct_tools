@@ -193,6 +193,7 @@ function gradesButton(data) {
     console.log("JCT Tools-> gradesButton()");
     console.log("JCT Tools-> gradesButton() and customGrade are disabled for now :(");
     return;
+
     // $("header").append('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
     // $("td").removeClass('right');
     // $("th").css( "text-align", "center" );
