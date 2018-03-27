@@ -798,9 +798,10 @@ function separateHomeworkData(hwdata) {
     }
 
     var homeworkDeadLine = stringToDate(datatemp);
-    homeworkDeadLine = homeworkDeadLine.toString();
     if (homeworkDeadLine == undefined)
         return undefined;
+    homeworkDeadLine = homeworkDeadLine.toString();
+
 
     return {type: "homework", id: homeworkId, name: homeworkName, courseId: courseId, deadLine: homeworkDeadLine}
 }
@@ -828,8 +829,12 @@ function stringToDate(date) {
     else {
         dayArray = date.split("/");
         dayArray[1] = Number(dayArray[1]) - 1;
-        if (dayArray[2] == undefined)
+        if (dayArray[2] == undefined) {
+            if(dayArray.includes(":"))
+                return stringToDate("היום " + dayArray);
+
             return undefined;
+        }
         dayArray[2] = dayArray[2].substring(0, 4);
     }
 
