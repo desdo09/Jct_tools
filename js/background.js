@@ -1096,6 +1096,8 @@ function mazakLogin(username, password) {
     return promise;
 }
 
+
+
 function updateTestDate(data, doIt) {
 
     //Do it only 1 time in 3 days
@@ -1111,6 +1113,9 @@ function updateTestDate(data, doIt) {
 
         mazakLogin(data.username, window.atob(data.password))
             .then(function () {
+                getSemester().then(function (r) {
+                    getMazakCourses(r.selectedAcademicYear,r.selectedSemester);
+                })
                 return getFromMazakTestData();
             }).then(function (MazakData) {
             DataAccess.setData("testsDate", MazakData);
@@ -1301,7 +1306,6 @@ function getFromMazakTestData(mazak) {
      */
 }
 
-
 function getFromMazakregisterMoed3() {
     const promise = new Promise(function (resolve, reject) {
         var request = $.ajax({
@@ -1468,4 +1472,88 @@ function wifiLogin(data) {
         });
         //	reject();
     });
+}
+
+function getSemester()
+{
+    const promise = new Promise(function (resolve, reject) {
+        var request = $.ajax({
+            url: "https://mazak.jct.ac.il/api/student/schedule.ashx?action=LoadFilters",
+            type: "POST",
+            data: JSON.stringify({
+                action: 'LoadFilters'
+            }),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                console.log("getSemester(): request successfully completed");
+                DataAccess.setData("semesterData",response);
+                resolve(response);
+            },
+            error: function (response) {
+                console.log("getSemester(): error");
+                console.log(response);
+            }
+        });
+    });
+
+    return promise;
+}
+
+function getMazakCourses(year,semester) {
+    const promise = new Promise(function (resolve, reject) {
+        var request = $.ajax({
+            url: "https://levnet.jct.ac.il/api/student/schedule.ashx?action=LoadScheduleList&AcademicYearID="+year+"&SemesterID="+semester,
+            type: "POST",
+            data: JSON.stringify({
+                action: 'LoadScheduleList',
+                selectedAcademicYear: year,
+                selectedSemester: semester
+            }),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                console.log("getMazakCourses(): request successfully completed");
+                var courses = {};
+                courses["byname"]={};
+                courses["bynumber"]={};
+                var temp;
+                var item;
+                try {
+                    for (var i = 0; response["groupsWithMeetings"] != undefined && i < response["groupsWithMeetings"].length; i++) {
+                        item = response["groupsWithMeetings"][i];
+                        item["meeting"] = true;
+
+                        courses["byname"][item["courseName"]] = item;
+                        temp = item["groupFullNumber"];
+                        temp = temp.split('.');
+                        courses["bynumber"][temp[0]] = item;
+                    }
+                } catch (e) {
+                }
+
+                try {
+                    for (var j = 0; response["groupsWithoutMeetings"] != undefined && j < response["groupsWithoutMeetings"].length; j++) {
+                        item = response["groupsWithoutMeetings"][j];
+                        item["meeting"] = true;
+
+                        courses["byname"][item["courseName"]] = item;
+                        temp = item["groupFullNumber"];
+                        temp = temp.split('.');
+                        courses["bynumber"][temp[0]] = item;
+                    }
+                } catch (e) {
+                }
+
+                DataAccess.setData("mazakCourses",courses);
+                resolve(response);
+            },
+            error: function (response) {
+                console.log("getMazakCourses(): error");
+                console.log(response);
+            }
+        });
+    });
+
+    return promise;
 }

@@ -391,6 +391,8 @@ function showCourses(data) {
     //Add a button to open moodle
     $(MoodleCourseDiv).append("<a href='http://moodle.jct.ac.il/' target='_blank' style='text-align: center'><span class='options main' >מודל</span></a>");
 
+    //TODO: Check if the user didnt select any course
+
 
     //Get my courses in order
     var courses = orderCourses(data.moodleCoursesTable, data.coursesIndex);

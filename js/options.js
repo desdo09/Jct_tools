@@ -218,6 +218,12 @@ function setTabla(data)
 	//Get all hash values
 	var course = data.courses;
 	var keys = data.coursesIndex;
+	if(data["mazakCourses"] == undefined)
+		data["mazakCourses"] = {byname:{},bynumber:{}};
+
+	var mazakcourse = data["mazakCourses"]["byname"];
+	var item;
+	var style="";
 	for (var i = 0; i < keys.length; i++) {
 
 		 if(i%2 == 0)
@@ -230,14 +236,17 @@ function setTabla(data)
 			input = '<input type="checkbox" course-id="'+course[keys[i]].moodleId+'"   />'
 		// how can I add the <tr> tag? This is an hack
 
+		if(mazakcourse[course[keys[i]].name] != undefined)
+		{
+			style="background-color:#ffb;";
+			delete mazakcourse[course[keys[i]].name];
 
-		$('#coursesTable').find('tbody:last').append(
-			'<td>' +input
-			+
-			'</td><td>' +
-			 course[keys[i]].name+
-			 '</td>'
-		);
+		}else
+            style="";
+
+		item ='<td style='+style+'>' + input+'</td><td style='+style+'>' +course[keys[i]].name+'</td>';
+
+		$('#coursesTable').find('tbody:last').append(item);
 	}
 
 	$('#coursesTable').find("input[type='checkbox']").each(function()
@@ -662,10 +671,10 @@ function setAdvancedData(data)
         $("#customAverage").attr('checked',false);
 
 
-    // if(data.Config.coursesAddToCalendar == undefined || data.Config.coursesAddToCalendar)
-    //     $("#coursesAddToCalendar").attr('checked',true);
-    // else
-    //     $("#coursesAddToCalendar").attr('checked',false);
+    if(data.Config.coursesAddToCalendar == undefined || data.Config.coursesAddToCalendar)
+        $("#coursesAddToCalendar").attr('checked',true);
+    else
+        $("#coursesAddToCalendar").attr('checked',false);
 
 
 }
@@ -718,7 +727,7 @@ function setAdvanced(callback)
     DataAccess.setObject("Config","coursesOrder",$("#coursesOrder").is(':checked'));
     DataAccess.setObject("Config","customAverage",$("#customAverage").is(':checked'));
 
-    // DataAccess.setObject("Config","coursesAddToCalendar",$("#coursesAddToCalendar").is(':checked'));
+    DataAccess.setObject("Config","coursesAddToCalendar",$("#coursesAddToCalendar").is(':checked'));
 
 
 

@@ -77,36 +77,8 @@ function mazakConnect(data) {
         if (data.Config.coursesOrder != undefined && data.Config.coursesOrder != false)
             $("td").removeClass('right');
 
-        /*  var myCalendar = createCalendar({
-         options: {
-         class: 'my-class',
-
-         // You can pass an ID. If you don't, one will be generated for you
-         id: 'my-id'
-         },
-         data: {
-         // Event title
-         title: 'Get on the front page of HN',
-
-         // Event start date
-         start: new Date('June 15, 2013 19:00'),
-
-         // Event duration (IN MINUTES)
-         duration: 120,
-
-         // You can also choose to set an end time
-         // If an end time is set, this will take precedence over duration
-         end: new Date('June 15, 2013 23:00'),
-
-         // Event Address
-         address: 'The internet',
-
-         // Event Description
-         description: 'Get on the front page of HN, then prepare for world domination.'
-         }
-         });
-
-         document.querySelector('.courseMultiView').appendChild(myCalendar);*/
+        if(data.Config.coursesAddToCalendar == undefined || data.Config.coursesAddToCalendar)
+            scheduleListPage();
 
         return;
     }
@@ -535,6 +507,130 @@ function customGradesTable() {
     return customTr;
 
     //allTests
+}
+
+//ScheduleList
+function scheduleListPage() {
+    $(".table-responsive").bind("DOMSubtreeModified", updateScheduleTable);
+    updateScheduleTable();
+
+}
+
+function updateScheduleTable() {
+    $(".table-responsive").find("tr").each(function () {
+        if ($(this).find(".cal").length == 0)
+            if ($(this).find("th").length == 0) {
+
+                if ($(this).text().includes("{{")) // Angular processing variables
+                    return;
+                $(this).append("<td class='cal'>" + generateCourseCalendar(this) + "</td>");
+            }
+            else
+                $(this).append("<th class='cal' style='min-width: 200px;'>הוספה ליומן</th>");
+    })
+}
+
+function generateCourseCalendar(row) {
+
+    var tds = $(row).find("td").map(function () {
+        return $(this).text().trim();
+    });
+    var course = {};
+    course["id"] = tds[1];
+    course["name"] = tds[2];
+    course["type"] = tds[3];
+    course["teacher"] = tds[4];
+    course["frequency"] = tds[5];
+    course["details"]  = tds[6];
+    course["note"] = tds[7];
+
+    //Get date
+    course["room"] = course["details"].split(',')[1];
+    course["time"] = course["details"].split(',')[0];
+    course["date"] = getScheduleCourseFirstTime(course["time"]);
+    jQuery.extend(course,getScheduleCourseDuration(course["date"], course["time"]));
+
+    course["description"] = "מרצה: " + course["teacher"];
+    if(course["note"].trim().length>0)
+        course["description"] +="<br/>" + course["note"];
+
+    console.log(course);
+    return $(createCalendar({
+        options: {
+            class: 'my-class',
+            // You can pass an ID. If you don't, one will be generated for you
+            id: null
+        },
+        data: {
+            // Event title
+            title:course["name"] + " - " +course["type"],  //'Get on the front page of HN',
+
+            // Event start date
+            start:course["start"], //new Date('June 15, 2013 19:00'),
+
+            // Event duration (IN MINUTES)
+            duration: course["duration"],//120,
+
+            // You can also choose to set an end time
+            // If an end time is set, this will take precedence over duration
+            end: course["end"],//new Date('June 15, 2013 23:00'),
+
+            // Event Address
+            address: course["room"],//'The internet',
+
+            // Event Description
+            description: course["description"]
+        }
+    })).html();
+}
+
+function getScheduleCourseFirstTime(stringTime) {
+    var hebrewDay = stringTime.split(':')[0].split(" ")[1].trim();
+    var weekday;
+    switch (hebrewDay)
+    {
+        case 'א' :
+            weekday = 0;
+            break;
+        case 'ב' :
+            weekday = 1;
+            break;
+        case 'ג' :
+            weekday = 2;
+            break;
+        case 'ד' :
+            weekday = 3;
+            break;
+        case 'ה' :
+            weekday = 4;
+            break;
+        case 'ו' :
+            weekday = 5;
+            break;
+        case 'ז' :
+            weekday = 6;
+            break;
+    }
+    //console.log("Hebrew date: " + hebrewDay + ", week day: " + weekday);
+    var d = new Date();
+    d.setDate(d.getDate() + (weekday + 7 - d.getDay()) % 7);
+    return d;
+}
+
+function getScheduleCourseDuration(date,stringTime) {
+    var hours = stringTime.substr(stringTime.indexOf(":")+1).trim();
+    var start = hours.split("-")[0];
+    var end = hours.split("-")[1];
+
+    var dateStart = new Date(date);
+    dateStart.setHours(start.split(":")[0],start.split(":")[1],0);
+
+    var dateEnd = new Date(date);
+    dateEnd.setHours(end.split(":")[0],end.split(":")[1],0);
+
+
+    return {start:dateStart,end:dateEnd ,duration:Math.floor((Math.abs(dateEnd - dateStart)/1000)/60)}
+
 }
 
 
