@@ -695,7 +695,7 @@ function moodle(pass, data) {
                     if (courseId == undefined || courseId.length == 0)
                         return undefined;
                     courseId = $(courseId).attr('href');
-                    // Get id from href (ex: http://moodle.jct.ac.il/course/view.php?id=28513)
+                    // Get id from href (ex: https://moodle.jct.ac.il/course/view.php?id=28513)
                     courseId = courseId.substring(courseId.lastIndexOf("id") + 3);
                     if (data.moodleCoursesTable[courseId] != true) {
                         console.log("JCT Tools->Homework with course id: " + courseId + " deleted");

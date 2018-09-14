@@ -267,7 +267,7 @@ function insertEvents(data) {
 
 
         if (events[i].type == "homework")
-            event += "<a href='http://moodle.jct.ac.il/mod/assign/view.php?id=" + events[i].id + "' target='_blank'><span class='eventDetails'>" + "<p class='name'>" + events[i].name + "</p>";
+            event += "<a href='https://moodle.jct.ac.il/mod/assign/view.php?id=" + events[i].id + "' target='_blank'><span class='eventDetails'>" + "<p class='name'>" + events[i].name + "</p>";
         else
             event += "<span class='eventDetails'>" + "<p class='name'>" + events[i].name + "</p>";
 
@@ -389,7 +389,7 @@ function showCourses(data) {
     $(MoodleCourseDiv).find(".options").remove();
 
     //Add a button to open moodle
-    $(MoodleCourseDiv).append("<a href='http://moodle.jct.ac.il/' target='_blank' style='text-align: center'><span class='options main' >מודל</span></a>");
+    $(MoodleCourseDiv).append("<a href='https://moodle.jct.ac.il/' target='_blank' style='text-align: center'><span class='options main' >מודל</span></a>");
 
     //TODO: Check if the user didnt select any course
 
@@ -407,7 +407,7 @@ function showCourses(data) {
         //Get course details
         course = data.courses[courses[i]];
         //Set span
-        courseSpan = "<a href='http://moodle.jct.ac.il/course/view.php?id=" + course.moodleId + "' target='_blank'><span class='options navigator' >" + course.id + " - " + course.name + "</span></a>";
+        courseSpan = "<a href='https://moodle.jct.ac.il/course/view.php?id=" + course.moodleId + "' target='_blank'><span class='options navigator' >" + course.id + " - " + course.name + "</span></a>";
         //Add to the div
         $(MoodleCourseDiv).append(courseSpan);
     }

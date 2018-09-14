@@ -195,7 +195,7 @@ chrome.notifications.onClicked.addListener(function (id) {
     if (id.includes("event") || id.includes("updateData") || id.includes("update") || id.includes("todaysHW"))
         return;
 
-    window.open("http://moodle.jct.ac.il/mod/assign/view.php?id=" + id);
+    window.open("https://moodle.jct.ac.il/mod/assign/view.php?id=" + id);
 });
 
 
@@ -541,7 +541,7 @@ function updateData(asyncType) {
 
     const promise = new Promise(function (resolve, reject) {
         var request = $.ajax({
-            url: "http://moodle.jct.ac.il",
+            url: "https://moodle.jct.ac.il",
             type: 'GET',
             async: asyncType,
 
@@ -711,7 +711,7 @@ function separateCoursesData(data) {
 function getAllHomeworks(html) {
     var data = [];
     var i = 0;
-    $(html).children().each(function () {
+    $(html).find(".event").each(function () {
         var homeworkDetails;
 
         if ($(this).find("img").attr("alt") == "אירוע משתמש")
@@ -756,7 +756,7 @@ function separateHomeworkData(hwdata) {
     /**************************************
      * Search the homework id and name
      ***************************************/
-    var datatemp = ($(hwdata).find("a"))[0];
+    var datatemp = $(hwdata).find("a[data-type=event]");//($(hwdata).find("a"))[0];
     if (datatemp == undefined || datatemp.length == 0)
         return undefined;
     // Save the homework name
@@ -764,25 +764,13 @@ function separateHomeworkData(hwdata) {
     if (homeworkName.length > 33)
         homeworkName = homeworkName.substring(0, 30) + "...";
 
-    datatemp = $(datatemp).attr('href');
-
-    // Get id from href (ex: http://moodle.jct.ac.il/mod/assign/view.php?id=224301)
-    datatemp = datatemp.substring(datatemp.lastIndexOf("id") + 3);
-
-    // Save the homework id
-    var homeworkId = datatemp;
+    var homeworkId = $(datatemp).attr("data-event-id");//datatemp;
 
     /**************************************
      * Search the homework course id
      ***************************************/
-    datatemp = $(hwdata).find('.course').find('a');
-    if (datatemp == undefined || datatemp.length == 0)
-        return undefined;
-    datatemp = $(datatemp).attr('href');
-    // Get id from href (ex: http://moodle.jct.ac.il/course/view.php?id=28513)
-    datatemp = datatemp.substring(datatemp.lastIndexOf("id") + 3);
-    // Save the course id
-    var courseId = datatemp;
+    // Get course id from href (ex: https://moodle.jct.ac.il/calendar/view.php?view=day&amp;course=38721&amp;time=1537299000#event_176935)
+    var courseId = new URLSearchParams((new URL($(datatemp).attr("href"))).search).get("course");
 
     /**************************************
      * Search the homework dead line
