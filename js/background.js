@@ -2,7 +2,7 @@
  *                           Created By
  *                        David Aben Athar
  *
- * Last update: 30/07/2016               email: abenatha@jct.ac.il
+ * Last update: 21/10/2018               email: abenatha@jct.ac.il
  ******************************************************************/
 /*****************************************************************
  * FUNCTION
@@ -122,7 +122,7 @@ function backgroundEvent(eventType) {
 chrome.runtime.onInstalled.addListener(onInstalled);
 function onInstalled(reason) {
     reason = reason["reason"];
-    console.log("onInstalled("+reason+")");
+    console.log("onInstalled(" + reason + ")");
 
     if (reason == "install") {
         DataAccess.setData({
@@ -578,27 +578,22 @@ function updateData(asyncType) {
             var courses = html.find(".courses");
             //  wrapAllAttributes(courses);
             var coursesObject = getAllCourses(courses);
-            // Get homework list
-            var homework = html.find("#inst121811").find(".content");
-            var homeworkObject = getAllHomeworks(homework);
-            console.log("New data:");
-            console.log({courses: coursesObject.data, coursesIndex: coursesObject.index, tasks: homeworkObject});
-            checkChanges(homeworkObject).then(function () {
-                DataAccess.setData({
-                    courses: coursesObject.data,
-                    coursesIndex: coursesObject.index,
-                    tasks: homeworkObject
-                })
-            }).then(function () {
-                console.log("updateData setting new alarms");
-                DataAccess.Data(setAlarms);
-                backgroundEvent({type: "updateData", operationCompleted: true});
-                setBadge();
+            getAllHomeWorksFromCalendar().then(function (homeworkObject) {
+
+                checkChanges(homeworkObject).then(function () {
+                    var data = {courses: coursesObject.data, coursesIndex: coursesObject.index, tasks: homeworkObject};
+                    console.log("New data:");
+                    console.log(data);
+                    DataAccess.setData(data)
+                }).then(function () {
+                    console.log("updateData setting new alarms");
+                    DataAccess.Data(setAlarms);
+                    backgroundEvent({type: "updateData", operationCompleted: true});
+                    setBadge();
+                    resolve();
+                    // Reset the alarms
+                });
             });
-
-            resolve();
-
-            // Reset the alarms
 
         });
 
@@ -690,6 +685,75 @@ function separateCoursesData(data) {
     return {id: idNumber, name: name}
 }
 
+function getAllHomeWorksFromCalendar() {
+    const promise = new Promise(function (resolve, reject) {
+        var request = $.ajax({
+            url: "https://moodle.jct.ac.il/calendar/view.php?view=upcoming",
+            type: 'GET'
+
+        });
+
+        request.done(function (html) {
+            var hws = [];
+            $(html).find(".eventlist").find(".event").each(function () {
+                try {
+                    var event = {};
+                    var temp;
+
+                    //Getting type by icon img alt attribute
+                    temp = $(this).find("img.icon");
+                    //Ignore attendance events
+                    if ($(temp).length > 0 && $(temp).attr("src").includes("attendance"))
+                        return;
+                    //Getting alt attribute
+                    temp = $(temp).attr("alt")
+                    if (temp == "ארועי פעילויות")
+                        event["type"] = "homework";
+                    else if (temp == "אירוע משתמש")
+                        event["type"] = "userEvent";
+                    else
+                        return // Prevent bug;
+
+                    //Getting course id from attribute
+                    event["courseId"] = $(this).attr("data-course-id");
+
+                    //Getting date (timestamp) from <a> ex https://moodle.jct.ac.il/calendar/view.php?view=day&amp;time=1540155600
+                    temp = $(this).find(".date").find("a").attr("href");
+                    // Add a 000 in order to convert to miliseconds
+                    event["deadLine"] = (new Date(parseInt(temp.substring(temp.lastIndexOf("=") + 1) + "000"))).toString();
+
+                    // Getting id from url ex : https://moodle.jct.ac.il/mod/assign/view.php?id=336730;
+                    temp = $(this).find(".description").find("a").attr("href");
+                    event["id"] = parseInt(temp.substring(temp.lastIndexOf("=") + 1));
+
+                    //Getting name from title
+                    temp = $(this).find(".name").text();
+                    // Try to remove text "יש להגיש את" with regex
+                    if (temp.includes("יש להגיש"))
+                        temp = temp.match("יש להגיש את \'([^)]+)\'")[1];
+                    //In case that title is too big, remove part of it
+                    event["name"] = (temp.length > 33 ? (temp.substring(0, 30) + "...") : temp );
+
+                    hws.push(event);
+                } catch (e) {
+                    console.error(e)
+                }
+            })
+
+            resolve(hws);
+        });
+
+        request.fail(function (data) {
+            console.log("HomeWorksFromCalendar - request failed");
+            console.log(data);
+            reject();
+        });
+    });
+    return promise;
+}
+
+
+
 /*****************************************************************
  * FUNCTION
  *   getAllHomeworks
@@ -708,7 +772,7 @@ function separateCoursesData(data) {
  *   This function help the updateData function
  *
  **********************************************************************/
-function getAllHomeworks(html) {
+function getAllHomeworks(html) { // DEPRECATE
     var data = [];
     var i = 0;
     $(html).find(".event").each(function () {
@@ -728,8 +792,7 @@ function getAllHomeworks(html) {
             //check if the i is not in use
             while (data[i] != undefined) {
                 i++
-            }
-            ;
+            };
 
             homeworkDetails.id = i;
             data[i] = homeworkDetails;
@@ -738,6 +801,7 @@ function getAllHomeworks(html) {
     });
     return data;
 }
+
 /***************************************
  * Separe data from homework div
  *
@@ -769,7 +833,7 @@ function separateHomeworkData(hwdata) {
     /**************************************
      * Search the homework course id
      ***************************************/
-    // Get course id from href (ex: https://moodle.jct.ac.il/calendar/view.php?view=day&amp;course=38721&amp;time=1537299000#event_176935)
+        // Get course id from href (ex: https://moodle.jct.ac.il/calendar/view.php?view=day&amp;course=38721&amp;time=1537299000#event_176935)
     var courseId = new URLSearchParams((new URL($(datatemp).attr("href"))).search).get("course");
 
     /**************************************
@@ -818,7 +882,7 @@ function stringToDate(date) {
         dayArray = date.split("/");
         dayArray[1] = Number(dayArray[1]) - 1;
         if (dayArray[2] == undefined) {
-            if(dayArray.includes(":"))
+            if (dayArray.includes(":"))
                 return stringToDate("היום " + dayArray);
 
             return undefined;
@@ -1085,13 +1149,11 @@ function mazakLogin(username, password) {
 }
 
 
-
 function updateTestDate(data, doIt) {
 
     //Do it only 1 time in 3 days
     if (data.testsDate != undefined && data.testsDate["Last update"] != undefined) {
-        if (doIt != true && (data.testsDate["Last update"]+86400000*3) > Date.now())
-        {
+        if (doIt != true && (data.testsDate["Last update"] + 86400000 * 3) > Date.now()) {
             console.log("Tests time are updated");
             return;
         }
@@ -1102,7 +1164,7 @@ function updateTestDate(data, doIt) {
         mazakLogin(data.username, window.atob(data.password))
             .then(function () {
                 getSemester().then(function (r) {
-                    getMazakCourses(r.selectedAcademicYear,r.selectedSemester);
+                    getMazakCourses(r.selectedAcademicYear, r.selectedSemester);
                 })
                 return getFromMazakTestData();
             }).then(function (MazakData) {
@@ -1123,51 +1185,50 @@ function updateTestDate(data, doIt) {
 
 function getFromMazakTestData(mazak) {
     console.log("getFromMazakTestData()")
-    return getTestsFromApi().then(function (data) {
-        var serverAllTest = data["items"];
-        if (serverAllTest == undefined)
-            return;
-        var allTests = {};
-        var test;
-        var moed;
-        var course;
-        var testTime;
-        for (var i = 0; i < serverAllTest.length; i++) {
-            test = serverAllTest[i];
-            //course id
-            course = test["courseFullNumber"].split('.')[0];
-            //Create object if not exist
-            if (allTests[course] == undefined)
-                allTests[course] = {};
+    return new Promise(function (resolve, reject) {
+        getTestsFromApi().then(function (data) {
+            var serverAllTest = data["items"];
+            if (serverAllTest == undefined)
+                return;
+            var allTests = {};
+            var test;
+            var moed;
+            var course;
+            var testTime;
+            for (var i = 0; i < serverAllTest.length; i++) {
+                test = serverAllTest[i];
+                //course id
+                course = test["courseFullNumber"].split('.')[0];
+                //Create object if not exist
+                if (allTests[course] == undefined)
+                    allTests[course] = {};
 
-            //Save test id
-            allTests[course]["server_id"] = test["id"];
+                //Save test id
+                allTests[course]["server_id"] = test["id"];
 
-            //moed Type
-            if (test["testTimeTypeName"] == "מועד א")
-                moed = 1;
-            if (test["testTimeTypeName"] == "מועד ב")
-                moed = 2;
-            if (test["testTimeTypeName"] == "מועד ג")
-                moed = 3;
+                //moed Type
+                if (test["testTimeTypeName"] == "מועד א")
+                    moed = 1;
+                if (test["testTimeTypeName"] == "מועד ב")
+                    moed = 2;
+                if (test["testTimeTypeName"] == "מועד ג")
+                    moed = 3;
 
-            //TODO: Implement this
-            if (moed == 2)
-                allTests[course]["registerToMoedBet"] = true;
+                //TODO: Implement this
+                if (moed == 2)
+                    allTests[course]["registerToMoedBet"] = true;
 
-            //Set time
-            testTime = Date.parse(test["startDate"]);
-            if (testTime < Date.now())
-                continue; // Test already gone
-            testTime = new Date(testTime);
-            allTests[course]["moed" + moed + "day"] = zeroIsRequiered(testTime.getDate()) + "/" + zeroIsRequiered((testTime.getMonth() + 1)) + "/" + zeroIsRequiered(testTime.getFullYear());
-            allTests[course]["moed" + moed + "time"] = zeroIsRequiered(testTime.getHours()) + ":" + zeroIsRequiered(testTime.getMinutes());
+                //Set time
+                testTime = Date.parse(test["startDate"]);
+                testTime = new Date(testTime);
+                allTests[course]["moed" + moed + "day"] = zeroIsRequiered(testTime.getDate()) + "/" + zeroIsRequiered((testTime.getMonth() + 1)) + "/" + zeroIsRequiered(testTime.getFullYear());
+                allTests[course]["moed" + moed + "time"] = zeroIsRequiered(testTime.getHours()) + ":" + zeroIsRequiered(testTime.getMinutes());
 
-        }
-        allTests["Last update"] = Date.now();
-        console.log("Test updated");
-        console.log(allTests);
-        return new Promise(function (resolve, reject) {
+            }
+            allTests["Last update"] = Date.now();
+            console.log("Test updated");
+            console.log(allTests);
+
             resolve(allTests)
         })
 
@@ -1375,27 +1436,26 @@ function getTestsFromApi() {
 
     //Mazak inputs
     const promise = new Promise(function (resolve, reject) {
-
         var request = $.ajax({
-            url: "https://mazak.jct.ac.il/Student/Tests.aspx?action=searchquery",
+            url: "https://mazak.jct.ac.il/api/student/Tests.ashx?action=LoadTests",
             type: "POST",
             data: JSON.stringify({
-                action: 'searchquery',
-                current: 1,
-                selectedAcademicYear: null,
-                selectedSemester: null
+                action: 'LoadFilters'
             }),
             dataType: "json",
-            contentType: "application/json; charset=utf-8"
-        });
-        request.done(function (data) {
-            resolve(data)
-        });
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                console.log("getTest(): request successfully completed");
 
-        request.fail(function (xhr, status, error) {
-            reject();
+                resolve(response);
+            },
+            error: function (response) {
+                console.log("getTest(): error");
+                console.log(response);
+            }
         });
     });
+
     return promise;
 }
 
@@ -1462,8 +1522,7 @@ function wifiLogin(data) {
     });
 }
 
-function getSemester()
-{
+function getSemester() {
     const promise = new Promise(function (resolve, reject) {
         var request = $.ajax({
             url: "https://mazak.jct.ac.il/api/student/schedule.ashx?action=LoadFilters",
@@ -1475,7 +1534,7 @@ function getSemester()
             contentType: "application/json; charset=utf-8",
             success: function (response) {
                 console.log("getSemester(): request successfully completed");
-                DataAccess.setData("semesterData",response);
+                DataAccess.setData("semesterData", response);
                 resolve(response);
             },
             error: function (response) {
@@ -1488,10 +1547,10 @@ function getSemester()
     return promise;
 }
 
-function getMazakCourses(year,semester) {
+function getMazakCourses(year, semester) {
     const promise = new Promise(function (resolve, reject) {
         var request = $.ajax({
-            url: "https://levnet.jct.ac.il/api/student/schedule.ashx?action=LoadScheduleList&AcademicYearID="+year+"&SemesterID="+semester,
+            url: "https://levnet.jct.ac.il/api/student/schedule.ashx?action=LoadScheduleList&AcademicYearID=" + year + "&SemesterID=" + semester,
             type: "POST",
             data: JSON.stringify({
                 action: 'LoadScheduleList',
@@ -1503,8 +1562,8 @@ function getMazakCourses(year,semester) {
             success: function (response) {
                 console.log("getMazakCourses(): request successfully completed");
                 var courses = {};
-                courses["byname"]={};
-                courses["bynumber"]={};
+                courses["byname"] = {};
+                courses["bynumber"] = {};
                 var temp;
                 var item;
                 try {
@@ -1533,7 +1592,7 @@ function getMazakCourses(year,semester) {
                 } catch (e) {
                 }
 
-                DataAccess.setData("mazakCourses",courses);
+                DataAccess.setData("mazakCourses", courses);
                 resolve(response);
             },
             error: function (response) {
