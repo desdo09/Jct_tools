@@ -1,8 +1,8 @@
 Conditions:
 
- * The data stored in this extension does not have strong encryption, so we are not responsible for the information (such as username and password).
+ * The data stored in this extension does not have strong encryption, so we are not responsible for any data (such as username and password).
 
- * We do not store any data on our servers, only in Chrome database where the extension is installed.
+ * We do not store any data on our servers, only in the user Chrome database, where the extension is installed.
 
  * This extension has access only to sites related to the institution (eg moodle.jct.ac.il, 10.1.1.1).
 
