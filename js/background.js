@@ -453,13 +453,24 @@ function login(username, password, anonymous) {
 
 
     const promise = new Promise(function (resolve, reject) {
-        var request = $.post("https://moodle.jct.ac.il/login/index.php",
-            {username: username, password: password});
+        getLoginToken().then(function (logintoken){
+            if(logintoken == null){
+                onLogin(null);
+                return;
+            }
+            var request = $.post("https://moodle.jct.ac.il/login/index.php",
+                {username: username, password: password,logintoken:logintoken,anchor:""});
 
-        request.done(function (data) {
+            request.done(onLogin);
+
+            request.fail(onLoginFailed);
+        });
+
+
+        function onLogin(data) {
             // In case the username/password are wrong the moodle return an error that is requiered to
             // logout before login a new user
-            if ($(data).find('#notice').length > 0) {
+            if (data != null && $(data).find('#notice').length > 0) {
                 console.log("wrong password");
                 backgroundEvent({type: "login", operationCompleted: false, error: "שם המשתמש או הסיסמה שהזנת שגויים"});
                 reject();
@@ -467,17 +478,31 @@ function login(username, password, anonymous) {
             }
             console.log("login status ok");
             resolve();
-        });
+        }
 
-        request.fail(function (xhr, status, error) {
+        function onLoginFailed(xhr, status, error) {
             setBadge();
             console.log("login status failed, status: " + xhr.status);
             backgroundEvent({type: "login", operationCompleted: false, error: "אין חיבור למודל"});
             reject();
-        });
+        }
     });
 
+
+
+
+
     return promise;
+}
+
+function getLoginToken(){
+    return  new Promise(function (resolve, reject) {
+        $.get("https://moodle.jct.ac.il/login/index.php", function (data) {
+            var loginToken = $(data).find("input[name=logintoken]").val();
+            console.log("loginToken: "+loginToken)
+            resolve(loginToken)
+        });
+    });
 }
 
 /*****************************************************************
