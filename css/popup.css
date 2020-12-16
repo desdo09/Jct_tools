@@ -247,6 +247,9 @@ color:#075E86;
 	padding: 0 15px;
 	font-size: 14px;
 }
+#styleWithHW #Homeworks .event.event-test{
+	background-color: #ff7c00;
+}
 #styleWithHW #Homeworks .event:hover,.options:hover,.usefulSite:hover {
 	background: #fff ;
 	color:#075E86;
