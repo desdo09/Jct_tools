@@ -191,6 +191,8 @@ function change(flag) {
 function insertEvents(data) {
     $(".event").remove();
     var events = data.tasks;
+    if(data.testsTasksDate != null)
+        events = events.concat(data.testsTasksDate).sort(function (t1,t2) {return Date.parse(t1.deadLine)- Date.parse(t2.deadLine)});
     if (events == undefined)
         return;
     var event;
@@ -258,7 +260,7 @@ function insertEvents(data) {
             checked = "";
 
         // Create a new object
-        event = "<span class='event'>";
+        event = "<span class='event "+(events[i].type == "test" ? "event-test" : "")+"'>";
 
         if (events[i].type == "homework")
             event += "<input type='checkbox' class='done' courseId='" + events[i].id + "' + " + checked + " />";
@@ -268,12 +270,16 @@ function insertEvents(data) {
 
         if (events[i].type == "homework")
             event += "<a href='https://moodle.jct.ac.il/mod/assign/view.php?id=" + events[i].id + "' target='_blank'><span class='eventDetails'>" + "<p class='name'>" + events[i].name + "</p>";
+        else if (events[i].type == "test")
+            event += "<span class='eventDetails'>" + "<p class='name'><a href='https://levnet.jct.ac.il/Student/TestRooms.aspx' target='_blank'>" + events[i].name + "</a></p>";
         else
             event += "<span class='eventDetails'>" + "<p class='name'>" + events[i].name + "</p>";
 
 
         if (events[i].type == "homework")
             event += "<p class='courseName'>" + data.courses[events[i].courseId].name + "</p>";
+        if (events[i].type == "test")
+            event += "<p class='courseName'>" + events[i].courseName + "</p>";
 
         event += "<p class='deadLine'>" + getDate(new Date(Date.parse(events[i].deadLine))) + "</p>" +
             "</span>";
@@ -281,11 +287,12 @@ function insertEvents(data) {
         if (events[i].type == "homework")
             event += "</a>";
 
-        if (data.eventDone != undefined && data.eventDone[events[i].id] != null && data.eventDone[events[i].id].notifications == false)
-            event += "<img src='image/popup/timbreOff.png' class='notifi'  courseId='" + events[i].id + "'>";
-        else
-            event += "<img src='image/popup/timbre.png' class='notifi'  courseId='" + events[i].id + "'>";
-
+        if (events[i].type != "test") {
+            if (data.eventDone != undefined && data.eventDone[events[i].id] != null && data.eventDone[events[i].id].notifications == false)
+                event += "<img src='image/popup/timbreOff.png' class='notifi'  courseId='" + events[i].id + "'>";
+            else
+                event += "<img src='image/popup/timbre.png' class='notifi'  courseId='" + events[i].id + "'>";
+        }
 
         event += "</span>";
         $("#homeworksContent").append(event);

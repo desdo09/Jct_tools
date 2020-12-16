@@ -72,6 +72,7 @@ figure{
     width: 450px;
 }
 
+
 /******************************
 *   Menu div styles
 ******************************/
@@ -102,6 +103,7 @@ figure{
 {
   margin-left: 0;
 }
+
 #menu .option:hover
 {
   background: #000;
@@ -118,6 +120,8 @@ figure{
 {
  margin: 0;
 }
+
+
 /******************************
 *   Conteiner div styles
 ******************************/
@@ -249,6 +253,9 @@ figure{
 {
   text-align: right;
   margin: 20px 50px 10px 0
+}
+#advanced .option.disabled{
+  color: #ccc;
 }
 #advanced figure img{
   width: 250px;

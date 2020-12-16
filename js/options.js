@@ -84,8 +84,7 @@ function setAccountData(data)
 	// account div will be checked
 	if(data != null)
 	{
-		if(data["wf"] == undefined || data["wf"])
-		document.getElementById("wf").checked = true;
+
 
 		if(data["mz"] == undefined || data["mz"])
 		 document.getElementById("mz").checked = true;
@@ -100,7 +99,7 @@ function setAccountData(data)
 	else
 	{
 
-		document.getElementById("wf").checked = true;
+
 		document.getElementById("mz").checked = true;
 		document.getElementById("mo").checked = true;
 
@@ -146,7 +145,7 @@ function setData() {
 
 	//make a new object and send it to the database
 	DataAccess.setData({
-						wf:document.getElementById('wf').checked,
+
 						mz:document.getElementById('mz').checked ,
 						mo:document.getElementById('mo').checked,
 					//	re:document.getElementById('re').checked,

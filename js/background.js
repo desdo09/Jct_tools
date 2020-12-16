@@ -778,7 +778,6 @@ function getAllHomeWorksFromCalendar() {
 }
 
 
-
 /*****************************************************************
  * FUNCTION
  *   getAllHomeworks
@@ -817,7 +816,8 @@ function getAllHomeworks(html) { // DEPRECATE
             //check if the i is not in use
             while (data[i] != undefined) {
                 i++
-            };
+            }
+            ;
 
             homeworkDetails.id = i;
             data[i] = homeworkDetails;
@@ -974,6 +974,8 @@ function loginAndUpdate(data) {
             .then(function () {
                 console.log("updating database");
                 return updateData();
+            },function (error) {
+                console.error("loginAndUpdate() error:",error);
             });
     }
 
@@ -1176,9 +1178,9 @@ function mazakLogin(username, password) {
 
 function updateTestDate(data, doIt) {
 
-    //Do it only 1 time in 3 days
+    //Do it only 1 time in 1
     if (data.testsDate != undefined && data.testsDate["Last update"] != undefined) {
-        if (doIt != true && (data.testsDate["Last update"] + 86400000 * 3) > Date.now()) {
+        if (doIt != true && (data.testsDate["Last update"] + 86400000) > Date.now()) {
             console.log("Tests time are updated");
             return;
         }
@@ -1186,15 +1188,24 @@ function updateTestDate(data, doIt) {
 
     if (data.anonymous != true) {
 
-        mazakLogin(data.username, window.atob(data.password))
+        var p = mazakLogin(data.username, window.atob(data.password))
             .then(function () {
                 getSemester().then(function (r) {
                     getMazakCourses(r.selectedAcademicYear, r.selectedSemester);
                 })
                 return getFromMazakTestData();
-            }).then(function (MazakData) {
+            });
+
+        p.then(getFromMazakTestDates).then(function (MazakData) {
+
+            DataAccess.setData("testsTasksDate", MazakData);
+        });
+
+        p.then(function (MazakData) {
+
             DataAccess.setData("testsDate", MazakData);
-        }).catch(function (e) {
+        });
+        p.catch(function (e) {
             console.log("getFromMazakTestData promise error: " + e);
 
         });
@@ -1380,6 +1391,41 @@ function getFromMazakTestData(mazak) {
      */
 }
 
+function getFromMazakTestDates(mazak) {
+    console.log("getFromMazakTestData()")
+    return new Promise(function (resolve, reject) {
+        getTestsDatesFromApi().then(function (tests) {
+            /**
+             * courseId: "43389"
+             deadLine: "Thu Feb 06 2020 23:55:00 GMT+0200 (hora estándar de Israel)"
+             id: 393870
+             name: "הגשת תרגיל מס' 8"
+             type: "homework"
+             */
+            var tasks = []
+            tests.forEach(function (test) {
+                var testObj = {type:"test",deadLine:"" +(new Date(Date.parse(test["testDate"]))),courseName:test["courseName"],id:"test_"+test["id"]}
+                if(test["roomName"] == null)
+                    testObj["name"] = "מבחן";
+                else
+                    testObj["name"] =  "מבחן - " + test["buildingName"] + " " + test["roomName"];
+                /**
+                 * courseName: "הנדסת תכנה"
+                 studentTestTimeTypeName: "מועד א"
+                 testDate: "2020-02-05T09:00:00+02:00"
+                 roomName: "203"
+                 buildingName: "ישראל"
+                 buildingCampusName: "לב"
+                 isCourseConfirmed: true
+                 */
+                tasks.push(testObj);
+            });
+            console.log("getFromMazakTestData()", {tests:tests,tasks:tasks});
+            resolve(tasks);
+        })
+    });
+}
+
 function getFromMazakregisterMoed3() {
     const promise = new Promise(function (resolve, reject) {
         var request = $.ajax({
@@ -1484,6 +1530,34 @@ function getTestsFromApi() {
     return promise;
 }
 
+
+function getTestsDatesFromApi() {
+
+
+    //Mazak inputs
+    const promise = new Promise(function (resolve, reject) {
+        var request = $.ajax({
+            url: "https://mazak.jct.ac.il/api/student/TestReg.ashx?action=LoadFutureTestsForStudent",
+            type: "POST",
+            data: JSON.stringify({
+                action: 'LoadFutureTestsForStudent'
+            }),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                console.log("getTestsDatesFromApi(): request successfully completed");
+
+                resolve(response["tests"]);
+            },
+            error: function (response) {
+                console.log("getTest(): error");
+                console.log(response);
+            }
+        });
+    });
+
+    return promise;
+}
 function testNotifications(type) {
     switch (type) {
         case 1:
