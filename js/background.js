@@ -31,55 +31,54 @@
  *    backgroundEvent
  **********************************************************************/
 
-chrome.runtime.onMessage.addListener(
-    function (request, sender, sendResponse) {
-        console.log("External request");
-        console.log(request);
+chrome.runtime.onMessage.addListener(messageListener);
+function messageListener(request, sender, sendResponse) {
+    console.log("External request");
+    console.log(request);
 
-        //In case that the request is null or not an object return Invalid Parameter
-        if (request == null || typeof request != "object") {
-            backgroundEvent({
-                type: "Format error",
-                operationCompleted: false,
-                error: "Invalid Parameter",
-                request: request
-            });
-            return;
-        }
+    //In case that the request is null or not an object return Invalid Parameter
+    if (request == null || typeof request != "object") {
+        backgroundEvent({
+            type: "Format error",
+            operationCompleted: false,
+            error: "Invalid Parameter",
+            request: request
+        });
+        return;
+    }
 
-        //In case that the request is to update the data
-        if (request.updatedata)
-            DataAccess.Data(loginAndUpdate);
+    //In case that the request is to update the data
+    if (request.updatedata)
+        DataAccess.Data(loginAndUpdate);
 
-        if (request.wifiLogin)
-            DataAccess.Data(wifiLogin);
+    if (request.wifiLogin)
+        DataAccess.Data(wifiLogin);
 
-        if (request.levnetLoginAndUpdate)
-            DataAccess.Data(function (data) {
-                updateTestDate(data, true)
-            });
+    if (request.levnetLoginAndUpdate)
+        DataAccess.Data(function (data) {
+            updateTestDate(data, true)
+        });
 
-        if (request.levnetLogin) {
-            DataAccess.Data(function (data) {
-                if (data.anonymous != true)
-                    LevNetLogin(data.username, window.atob(data.password));
-            });
-        }
+    if (request.levnetLogin) {
+        DataAccess.Data(function (data) {
+            if (data.anonymous != true)
+                LevNetLogin(data.username, window.atob(data.password));
+        });
+    }
 
-        //In case that the request contains changeIcon.
-        if (request.changeIcon != undefined)
-            changeIcon(request.changeIcon);
+    //In case that the request contains changeIcon.
+    if (request.changeIcon != undefined)
+        changeIcon(request.changeIcon);
 
-        //setBadge
-        if (request.setBadge != undefined)
-            setBadge();
+    //setBadge
+    if (request.setBadge != undefined)
+        setBadge();
 
-        if (typeof request.message == "string") {
-            console.log("External message: " + request.message);
-            backgroundEvent({type: "ExternalMessage", operationCompleted: true});
-        }
-    });
-
+    if (typeof request.message == "string") {
+        console.log("External message: " + request.message);
+        backgroundEvent({type: "ExternalMessage", operationCompleted: true});
+    }
+}
 /*****************************************************************
  * FUNCTION
  *    backgroundEvent
@@ -560,8 +559,7 @@ function wrapAllAttributes(html) {
  **********************************************************************/
 function updateData(asyncType) {
     console.log("Updating data");
-    if (typeof asyncType == undefined)
-        asyncType = true;
+    asyncType = asyncType || true;
     // async: false
 
     const promise = new Promise(function (resolve, reject) {
@@ -599,10 +597,9 @@ function updateData(asyncType) {
                 });
                 return;
             }
-            // Get courses list
-            var courses = html.find(".courses");
+
             //  wrapAllAttributes(courses);
-            var coursesObject = getAllCourses(courses);
+            var coursesObject = getAllCourses(html);
             getAllHomeWorksFromCalendar().then(function (homeworkObject) {
 
                 checkChanges(homeworkObject).then(function () {
@@ -658,22 +655,27 @@ function getAllCourses(html) {
     var data = {};
     var index = [];
     var i = 0;
-    $(html).children().each(function () {
+    $(html).find(".courses .class-box-courseview").each(function () {
         // Find the url of the course (where is contain all data)
-        var courseLink = $(this).find('a');
+        var courseDetails = {};
+        var courseLink = $(this).find('a.coursestyle2url');
+
+        if (courseLink.length === 0)
+            return true;
+
         // Find the course id
-        var id = $(this).attr("data-courseid");
+        courseDetails.Url = courseLink.attr('href');
+        var id = getUrlParam('id',courseDetails.Url);
 
         // if there is an error just stop
-        if (courseLink.length == 0 || id == undefined || id.length == 0)
+        if(id == null || id.length === 0)
             return true;
 
         // copy the text of the url
-        var text = courseLink.text();
+        var text = $(this).find('h3').text();
         // Separe the data by id and name
-        var courseDetails = separateCoursesData(text);
+        separateCoursesData(text, courseDetails);
         // Save the url
-        courseDetails.Url = courseLink.attr('href');
         // Save the moodle id
         courseDetails.moodleId = id;
         // Save the current place of the course in moodle
@@ -693,7 +695,7 @@ function getAllCourses(html) {
  * save it as id and then take the rest
  * and save as name
  *****************************************/
-function separateCoursesData(data) {
+function separateCoursesData(data, courseDetails) {
     var idNumber = "";
     var character;
     for (var i = 0; i < data.length; i++) {
@@ -707,7 +709,8 @@ function separateCoursesData(data) {
     // check if is a course
     var name = data.substring((idNumber.length > 0) ? (idNumber.length + 3) : 0);
 
-    return {id: idNumber, name: name}
+    courseDetails.id= idNumber;
+    courseDetails.name= name;
 }
 
 function getAllHomeWorksFromCalendar() {
@@ -958,27 +961,10 @@ function checkChanges(newHomeworks) {
     });
 }
 
+//Login deprecated
 function loginAndUpdate(data) {
-    if (data == null)
-        return;
-
-    if ((data.Config == null || data.Config != null && data.Config.checkLogin != false) && data.username != null && data.password != null) {
-        console.log("trying to make a login in moodle");
-
-        if (data.anonymous == true) {
-            console.log("Anonymous - updating database");
-            return updateData();
-        }
-
-        login(data.username, window.atob(data.password))
-            .then(function () {
-                console.log("updating database");
-                return updateData();
-            },function (error) {
-                console.error("loginAndUpdate() error:",error);
-            });
-    }
-
+    console.log("updating database");
+    return updateData();
 }
 
 function setBadge() {//showBadge
@@ -1702,4 +1688,14 @@ function getMazakCourses(year, semester) {
     });
 
     return promise;
+}
+
+
+function getUrlParam( name, url ){
+    if (!url) url = location.href;
+    name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+    var regexS = "[\\?&]"+name+"=([^&#]*)";
+    var regex = new RegExp( regexS );
+    var results = regex.exec( url );
+    return results == null ? null : results[1];
 }

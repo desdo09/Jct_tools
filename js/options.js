@@ -281,8 +281,8 @@ function refreshData()
 
 	DataAccess.Data(function (data)
 	{
-		if((data["username"] == undefined) || (data["password"] == undefined))
-			return notification("שם משתמש או סיסמא אינו מוגדר","error")
+		// if((data["username"] == undefined) || (data["password"] == undefined))
+		// 	return notification("שם משתמש או סיסמא אינו מוגדר","error")
 		var progress = $('#courses').find("progress");
 		//show the progress bar
 		$(progress).show();
@@ -523,7 +523,7 @@ function setAdvancedData(data)
 		$("#portal").prop('checked',true);
 		notification("מתצוגת לוח-שנה: "+"אנחנו עובדים על זה","warning");
 	});
-	
+
 	$("#checkLogin").change(function(){
 		if(this.checked == false)
 			notification("זְהִירוּת: "+"\n"+" נדרש להיות מחובר למודל כדי לעדכן את הנתונים.","warning");
@@ -534,8 +534,8 @@ function setAdvancedData(data)
 			$( "#limitedHwAmount" ).removeAttr( "disabled" );
 		else
 			$("#limitedHwAmount").attr('disabled', 'disabled');
-			
-			
+
+
 	});
 	if(data.Config == undefined)
 		data.Config = {}
@@ -641,7 +641,7 @@ function setAdvancedData(data)
 	{
 		$("#limitedHw").attr('checked',true);
 		$("#limitedHwAmount").val(data.Config.limitedHwAmount);
-	}	
+	}
 	else
 	{
 		$("#limitedHw").attr('checked',false);
@@ -759,7 +759,7 @@ function setAdvanced(callback)
 ******************************************************/
 function notification(message, type)
 {
-	
+
 	if(type == "error")
 		$.notify(message,{position:"top right", className: 'error'} );
 
