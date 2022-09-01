@@ -1,11 +1,11 @@
 var username;
 var startCounter = 0;
 $(document).ready(function () {
-    DataAccess.Data(onStart);
-
+   // DataAccess.Data(onStart);
 });
 
 
+//Deprecated - disabled
 function onStart(data) {
 
     // Check if the username and password is not empty

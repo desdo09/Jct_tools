@@ -13,24 +13,7 @@ $(document).ready(function () {
 
 
 function onStart(result) {
-
-
-    /* Check if the username and password is defined */
-    var status = false;
-    if (result != null)
-        status = (result["username"] != undefined) && (result["password"] != undefined);
-
-
-    //var status = true;
-    //if the username OR the password are not defined then the extension will open the option page
-    if (!status) {
-        chrome.runtime.openOptionsPage();
-        setTimeout(function () {
-            window.close();
-        }, 1);
-        return;
-    }
-
+    
     if (result.Config != null && result.Config.style == "classic")
         classicTheme(result);
     else

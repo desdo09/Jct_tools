@@ -122,7 +122,6 @@ chrome.runtime.onInstalled.addListener(onInstalled);
 function onInstalled(reason) {
     reason = reason["reason"];
     console.log("onInstalled(" + reason + ")");
-
     if (reason == "install") {
         DataAccess.setData({
             Config: {
@@ -140,7 +139,8 @@ function onInstalled(reason) {
                 todaysHW: true,
                 updateOnPopup: true
             },
-            mo: true, mz: true, wf: true,
+            enable:true,
+            mo: false, mz: false, wf: false,
             moodleCoursesTable: {}
         });
 
@@ -164,7 +164,7 @@ function onInstalled(reason) {
                         todaysHW: true,
                         updateOnPopup: true
                     },
-                    mo: true, mz: true, wf: true,
+                    mo: false, mz: false, wf: false,
                     moodleCoursesTable: {}
                 });
             }
