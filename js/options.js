@@ -524,10 +524,7 @@ function setAdvancedData(data)
 		notification("מתצוגת לוח-שנה: "+"אנחנו עובדים על זה","warning");
 	});
 
-	$("#checkLogin").change(function(){
-		if(this.checked == false)
-			notification("זְהִירוּת: "+"\n"+" נדרש להיות מחובר למודל כדי לעדכן את הנתונים.","warning");
-	});
+
 
 	$("#limitedHw").change(function(){
 		if( $("#limitedHw").is(':checked'))
@@ -540,10 +537,6 @@ function setAdvancedData(data)
 	if(data.Config == undefined)
 		data.Config = {}
 
-	if(data.Config.checkLogin == undefined || data.Config.checkLogin)
-		$("#checkLogin").attr('checked',true);
-	else
-		$("#checkLogin").attr('checked',false);
 
 	if(data.Config.moodleTopic != undefined && data.Config.moodleTopic)
 		$("#moodleTopic").attr('checked',true);
@@ -699,7 +692,6 @@ function setAdvanced(callback)
 		return;
 	}
 
-	DataAccess.setObject("Config","checkLogin",$("#checkLogin").is(':checked'));
 	DataAccess.setObject("Config","hiddeModdelHelp",$("#hiddeModdelHelp").is(':checked'));
 	DataAccess.setObject("Config","hiddeNofication",$("#hiddeNofication").is(':checked'));
 	DataAccess.setObject("Config","hiddeNoSelectedCourseInWindows",$("#hiddeNoSelectedCourseInWindows").is(':checked'));
@@ -805,6 +797,4 @@ function onBackgroundEvent(eventType)
 
 function anonymousOptions(on) {
     $("#accountsInput").find("input").prop('disabled', on);
-    $("#checkLogin").prop('disabled', on);
-    $("#checkLogin").prop('checked', !on);
 }
