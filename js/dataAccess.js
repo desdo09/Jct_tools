@@ -25,7 +25,7 @@ var DataAccess = {
     ******************************************************************/
     setData: function (objName, value , callBackFunction)
     {
-        console.log("Setting objects");
+        console.log("JCT Tools -> Setting objects");
         // In case that the Database is in used (locked) it will be make a new async function
         if(inUsed)
            return setTimeout(function(){DataAccess.setData(objName,value,callBackFunction)},100);
@@ -268,11 +268,11 @@ function stringDateToDateObject(day,time)
     var DateArray = day.split('/');
     if(time == null)
         return new Date(DateArray[2],DateArray[1]-1,DateArray[0],0,0,0,0);
-    
+
     var timeArray = time.split(':');
-    
+
     return new Date(DateArray[2],DateArray[1]-1,DateArray[0],timeArray[0],timeArray[1],0,0);
-    
+
 
 }
 

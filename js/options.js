@@ -281,8 +281,8 @@ function refreshData()
 
 	DataAccess.Data(function (data)
 	{
-		if((data["username"] == undefined) || (data["password"] == undefined))
-			return notification("שם משתמש או סיסמא אינו מוגדר","error")
+		// if((data["username"] == undefined) || (data["password"] == undefined))
+		// 	return notification("שם משתמש או סיסמא אינו מוגדר","error")
 		var progress = $('#courses').find("progress");
 		//show the progress bar
 		$(progress).show();
@@ -523,27 +523,20 @@ function setAdvancedData(data)
 		$("#portal").prop('checked',true);
 		notification("מתצוגת לוח-שנה: "+"אנחנו עובדים על זה","warning");
 	});
-	
-	$("#checkLogin").change(function(){
-		if(this.checked == false)
-			notification("זְהִירוּת: "+"\n"+" נדרש להיות מחובר למודל כדי לעדכן את הנתונים.","warning");
-	});
+
+
 
 	$("#limitedHw").change(function(){
 		if( $("#limitedHw").is(':checked'))
 			$( "#limitedHwAmount" ).removeAttr( "disabled" );
 		else
 			$("#limitedHwAmount").attr('disabled', 'disabled');
-			
-			
+
+
 	});
 	if(data.Config == undefined)
 		data.Config = {}
 
-	if(data.Config.checkLogin == undefined || data.Config.checkLogin)
-		$("#checkLogin").attr('checked',true);
-	else
-		$("#checkLogin").attr('checked',false);
 
 	if(data.Config.moodleTopic != undefined && data.Config.moodleTopic)
 		$("#moodleTopic").attr('checked',true);
@@ -641,7 +634,7 @@ function setAdvancedData(data)
 	{
 		$("#limitedHw").attr('checked',true);
 		$("#limitedHwAmount").val(data.Config.limitedHwAmount);
-	}	
+	}
 	else
 	{
 		$("#limitedHw").attr('checked',false);
@@ -699,7 +692,6 @@ function setAdvanced(callback)
 		return;
 	}
 
-	DataAccess.setObject("Config","checkLogin",$("#checkLogin").is(':checked'));
 	DataAccess.setObject("Config","hiddeModdelHelp",$("#hiddeModdelHelp").is(':checked'));
 	DataAccess.setObject("Config","hiddeNofication",$("#hiddeNofication").is(':checked'));
 	DataAccess.setObject("Config","hiddeNoSelectedCourseInWindows",$("#hiddeNoSelectedCourseInWindows").is(':checked'));
@@ -759,7 +751,7 @@ function setAdvanced(callback)
 ******************************************************/
 function notification(message, type)
 {
-	
+
 	if(type == "error")
 		$.notify(message,{position:"top right", className: 'error'} );
 
@@ -805,6 +797,4 @@ function onBackgroundEvent(eventType)
 
 function anonymousOptions(on) {
     $("#accountsInput").find("input").prop('disabled', on);
-    $("#checkLogin").prop('disabled', on);
-    $("#checkLogin").prop('checked', !on);
 }

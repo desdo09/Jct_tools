@@ -2,7 +2,6 @@ var username;
 var startCounter = 0;
 $(document).ready(function () {
     DataAccess.Data(onStart);
-
 });
 
 
@@ -10,7 +9,7 @@ function onStart(data) {
 
     // Check if the username and password is not empty
     username = data["username"];
-    console.log("JCT Tools->Username: " + username);
+    console.log("JCT Tools -> injection started");
     // Decrypting the password
     var password = "";
     if (data["password"] != null)
@@ -20,52 +19,16 @@ function onStart(data) {
     switch (location.host) {
         case "moodle.jct.ac.il":
             moodle(password, data);
+            checkAndUpdateHW(data);
             break;
         case "mazak.jct.ac.il":
         case "levnet.jct.ac.il":
             mazakConnect(data);
-            break;
-        case "1.1.1.1":
-        case "10.1.1.1":
-        case "wireless-login.jct.ac.il":
-        case "captiveportal-login.jct.ac.il":
-        case "securelogin.jct.ac.il":
-            if (data["wf"] && data.enable && data.anonymous != true)
-                wifiConnect(password);
+            retrieveDataFromLevNet()
             break;
     }
 }
 
-function wifiConnect(pass) {
-
-
-    if (document.title == "Web Authentication Failure") {
-        alert("Web Authentication Failure!\nare you already online?\nWrong username or password?")
-        window.close();
-        return;
-    }
-    var err = $("input[name='err_flag']");
-    if (err != null && $(err).attr("value") == "1")
-        return;
-    $("input[name='username']").attr("value", username);
-    $("input[name='password']").attr("value", pass);
-
-    var submitButton = $("#frmLogin #btnSubmit_6");
-
-    if ($(submitButton).length > 0) {
-
-        //New wifi login (01/02/2017)
-        $(submitButton).click();
-    } else {
-        //old wifi login
-        var actualCode = "submitAction();";
-        var script = document.createElement('script');
-        script.textContent = actualCode;
-        (document.head || document.documentElement).appendChild(script);
-        script.parentNode.removeChild(script);
-    }
-
-}
 
 function mazakConnect(data) {
 
@@ -77,7 +40,7 @@ function mazakConnect(data) {
         if (data.Config.coursesOrder != undefined && data.Config.coursesOrder != false)
             $("td").removeClass('right');
 
-        if(data.Config.coursesAddToCalendar == undefined || data.Config.coursesAddToCalendar)
+        if (data.Config.coursesAddToCalendar == undefined || data.Config.coursesAddToCalendar)
             scheduleListPage();
 
         return;
@@ -192,7 +155,7 @@ function gradesButton(data) {
             '<label><input id="couseWithoutGrade" type="checkbox" ' + ((data.Config.gradesOptions["couseWithoutGrade"] == true) ? "checked" : "") + '>&nbsp;קורס ללא ציון</label>');
         //After insert additional options, the program insert the checkbox
         var examples = $(dvGrades).find("label");
-        $(examples[0]).prepend('<input id="courseNotPassed" type="checkbox" ' + ((data.Config.gradesOptions["courseNotPassed"] != false ) ? "checked" : "" ) + '>&nbsp;');
+        $(examples[0]).prepend('<input id="courseNotPassed" type="checkbox" ' + ((data.Config.gradesOptions["courseNotPassed"] != false) ? "checked" : "") + '>&nbsp;');
         $(examples[1]).prepend('<input id="courseDroppedOutPurple" type="checkbox" ' + ((data.Config.gradesOptions["courseDroppedOutPurple"] == true) ? "checked" : "") + '>&nbsp;');
         $(examples[2]).prepend('<input id="courseNotConfirmed" type="checkbox" ' + ((data.Config.gradesOptions["courseNotConfirmed"] != false) ? "checked" : "") + '>&nbsp;');
         //Set the checkbox on click to run the function customGrades
@@ -202,7 +165,7 @@ function gradesButton(data) {
         }, 1500);
         //Set double cell double click event
         $(".ui-paging").find("li").click(function () {
-            console.log("Table updated");
+            console.log("JCT Tools ->  Table updated");
             setTimeout(function () {
                 DataAccess.Data(setGradeTableDBClick);
             }, 1500);
@@ -401,17 +364,17 @@ function customGrades() {
         //This if will check with check box (on first line) is selected and then show/hide the line
         if (
             //For courses that the user didn't pass
-        ($(this).hasClass("not-passed") && !gradesOptions["courseNotPassed"]) ||
-        //For courses that are exclude
-        ($(this).hasClass("dropped-out") && !gradesOptions["courseDroppedOutPurple"]) ||
-        //For courses that is not confirmed
-        ($(this).hasClass("not-confirmed") && !gradesOptions["courseNotConfirmed"]) ||
-        //For courses that are not in the system
-        ($(gradeTd[6]).hasClass("lineThrough") && !gradesOptions["couseLineThrough"]) ||
-        // Check  if the total points are 0
-        (NZ == 0 && !gradesOptions["couseWithoutPoints"]) ||
-        //
-        (isNaN(parseFloat(grade)) && !gradesOptions["couseWithoutGrade"] && (grade == "חסר" || grade == "עבר" || grade == "לא השלים"))
+            ($(this).hasClass("not-passed") && !gradesOptions["courseNotPassed"]) ||
+            //For courses that are exclude
+            ($(this).hasClass("dropped-out") && !gradesOptions["courseDroppedOutPurple"]) ||
+            //For courses that is not confirmed
+            ($(this).hasClass("not-confirmed") && !gradesOptions["courseNotConfirmed"]) ||
+            //For courses that are not in the system
+            ($(gradeTd[6]).hasClass("lineThrough") && !gradesOptions["couseLineThrough"]) ||
+            // Check  if the total points are 0
+            (NZ == 0 && !gradesOptions["couseWithoutPoints"]) ||
+            //
+            (isNaN(parseFloat(grade)) && !gradesOptions["couseWithoutGrade"] && (grade == "חסר" || grade == "עבר" || grade == "לא השלים"))
         ) {
             $(this).hide();
 
@@ -500,7 +463,7 @@ function customGradesTable() {
         customTr += "<tr>" + customTd + "</tr>";
 
     });
-    console.log(customTr);
+    console.log("JCT Tools ->", customTr);
 
     customTr += "</table>";
 
@@ -524,8 +487,7 @@ function updateScheduleTable() {
                 if ($(this).text().includes("{{")) // Angular processing variables
                     return;
                 $(this).append("<td class='cal'>" + generateCourseCalendar(this) + "</td>");
-            }
-            else
+            } else
                 $(this).append("<th class='cal' style='min-width: 200px;'>הוספה ליומן</th>");
     })
 }
@@ -541,20 +503,20 @@ function generateCourseCalendar(row) {
     course["type"] = tds[3];
     course["teacher"] = tds[4];
     course["frequency"] = tds[5];
-    course["details"]  = tds[6];
+    course["details"] = tds[6];
     course["note"] = tds[7];
 
     //Get date
     course["room"] = course["details"].split(',')[1];
     course["time"] = course["details"].split(',')[0];
     course["date"] = getScheduleCourseFirstTime(course["time"]);
-    jQuery.extend(course,getScheduleCourseDuration(course["date"], course["time"]));
+    jQuery.extend(course, getScheduleCourseDuration(course["date"], course["time"]));
 
     course["description"] = "מרצה: " + course["teacher"];
-    if(course["note"].trim().length>0)
-        course["description"] +="<br/>" + course["note"];
+    if (course["note"].trim().length > 0)
+        course["description"] += "<br/>" + course["note"];
 
-    console.log(course);
+    console.log("JCT Tools -> ", course);
     return $(createCalendar({
         options: {
             class: 'my-class',
@@ -563,10 +525,10 @@ function generateCourseCalendar(row) {
         },
         data: {
             // Event title
-            title:course["name"] + " - " +course["type"],  //'Get on the front page of HN',
+            title: course["name"] + " - " + course["type"],  //'Get on the front page of HN',
 
             // Event start date
-            start:course["start"], //new Date('June 15, 2013 19:00'),
+            start: course["start"], //new Date('June 15, 2013 19:00'),
 
             // Event duration (IN MINUTES)
             duration: course["duration"],//120,
@@ -587,8 +549,7 @@ function generateCourseCalendar(row) {
 function getScheduleCourseFirstTime(stringTime) {
     var hebrewDay = stringTime.split(':')[0].split(" ")[1].trim();
     var weekday;
-    switch (hebrewDay)
-    {
+    switch (hebrewDay) {
         case 'א' :
             weekday = 0;
             break;
@@ -617,19 +578,19 @@ function getScheduleCourseFirstTime(stringTime) {
     return d;
 }
 
-function getScheduleCourseDuration(date,stringTime) {
-    var hours = stringTime.substr(stringTime.indexOf(":")+1).trim();
+function getScheduleCourseDuration(date, stringTime) {
+    var hours = stringTime.substr(stringTime.indexOf(":") + 1).trim();
     var start = hours.split("-")[0];
     var end = hours.split("-")[1];
 
     var dateStart = new Date(date);
-    dateStart.setHours(start.split(":")[0],start.split(":")[1],0);
+    dateStart.setHours(start.split(":")[0], start.split(":")[1], 0);
 
     var dateEnd = new Date(date);
-    dateEnd.setHours(end.split(":")[0],end.split(":")[1],0);
+    dateEnd.setHours(end.split(":")[0], end.split(":")[1], 0);
 
 
-    return {start:dateStart,end:dateEnd ,duration:Math.floor((Math.abs(dateEnd - dateStart)/1000)/60)}
+    return {start: dateStart, end: dateEnd, duration: Math.floor((Math.abs(dateEnd - dateStart) / 1000) / 60)}
 
 }
 
@@ -648,114 +609,107 @@ function moodle(pass, data) {
     }
 
     if (($("#login_username").length != 0 && $("#login_password").length != 0) && data.anonymous != true) {
-        if (data["mo"] && data.enable) {
-            $("#login_username").val(data.username);
-            $("#login_password").val(pass);
-            $("#login input[value='התחברות'][type='submit']").click();
-        }
+        return;
     }
-    else {
-        console.log("JCT Tools->" + "Moodle hide user events: " + data.Config["MoodleHiddeUE"]);
+
+    console.log("JCT Tools-> Moodle hide user events: " + data.Config["MoodleHiddeUE"]);
 
 
-        if (undefined == data)
-            data = {};
+    if (undefined == data)
+        data = {};
 
-        if (data.Config == undefined)
-            data.Config = {};
+    if (data.Config == undefined)
+        data.Config = {};
 
-        hideCourses(data.moodleCoursesTable, data.Config.hiddeModdelHelp);
-
-        if (!data["mo"] || !data.enable)
-            return;
+    hideCourses(data.moodleCoursesTable, data.Config.hiddeModdelHelp);
 
 
-        var courseId;
-        $(".event").each(function () {
+    var courseId;
+    $(".event").each(function () {
 
-            if ($(this).find("img").attr("alt") == "אירוע משתמש") {
-                if (data.Config["MoodleHiddeUE"])
+        if ($(this).find("img").attr("alt") == "אירוע משתמש") {
+            if (data.Config["MoodleHiddeUE"])
+                $(this).remove();
+        } else {
+
+            /********** Delete homeworks done***************
+             homeworkId = ($(this).find("a"))[0];
+             homeworkId = $(homeworkId).attr('href');
+             homeworkId = homeworkId.substring(homeworkId.lastIndexOf("id")+3);
+             if(data.eventDone[homeworkId] != null && data.eventDone[homeworkId].checked)
+             $(this).remove();
+             ************************************************/
+
+            if (data.Config.hiddeNoSelectedCourseInMoodle) {
+                /**************************************
+                 * Search the homework course id
+                 ***************************************/
+                //data.Config.hiddeNoSelectedCourseInWindows == true &&
+                courseId = $(this).find('.course').find('a');
+                if (courseId == undefined || courseId.length == 0)
+                    return undefined;
+                courseId = $(courseId).attr('href');
+                // Get id from href (ex: https://moodle.jct.ac.il/course/view.php?id=28513)
+                courseId = courseId.substring(courseId.lastIndexOf("id") + 3);
+                if (data.moodleCoursesTable[courseId] != true) {
+                    console.log("JCT Tools->Homework with course id: " + courseId + " deleted");
+                    $(this).next("hr").remove();
                     $(this).remove();
-            } else {
-
-                /********** Delete homeworks done***************
-                 homeworkId = ($(this).find("a"))[0];
-                 homeworkId = $(homeworkId).attr('href');
-                 homeworkId = homeworkId.substring(homeworkId.lastIndexOf("id")+3);
-                 if(data.eventDone[homeworkId] != null && data.eventDone[homeworkId].checked)
-                 $(this).remove();
-                 ************************************************/
-
-                if (data.Config.hiddeNoSelectedCourseInMoodle) {
-                    /**************************************
-                     * Search the homework course id
-                     ***************************************/
-                    //data.Config.hiddeNoSelectedCourseInWindows == true &&
-                    courseId = $(this).find('.course').find('a');
-                    if (courseId == undefined || courseId.length == 0)
-                        return undefined;
-                    courseId = $(courseId).attr('href');
-                    // Get id from href (ex: https://moodle.jct.ac.il/course/view.php?id=28513)
-                    courseId = courseId.substring(courseId.lastIndexOf("id") + 3);
-                    if (data.moodleCoursesTable[courseId] != true) {
-                        console.log("JCT Tools->Homework with course id: " + courseId + " deleted");
-                        $(this).next("hr").remove();
-                        $(this).remove();
-                    }
                 }
-
             }
 
-        });
-
-        if (data.Config["moodleTopic"])
-            $(".sitetopic").remove();
-
-        if (data.Config["eventsOnTop"] && data["mo"] && data.enable) {
-            $("#inst121811").find(".block_action").remove();
-            var eventsDiv = $("#inst121811");
-            $("#inst121811").remove();
-            $("#block-region-side-post").prepend(eventsDiv);
         }
 
+    });
 
-        if (data.testsDate != undefined && data.Config.showTestDay != false) {
+    if (data.Config["moodleTopic"])
+        $(".sitetopic").remove();
 
-            //var to save all courses in "mycourses"
-            var mycourses = Object.keys(data.moodleCoursesTable);
-            //var to save the current course
-            var courseTest;
-            //save the course test in html format
-            var courseHtml;
-            // Save the place where the extension will save insert the data
-            var li;
-
-            for (var i = 0; i < mycourses.length; i++) {
-
-                courseTest = data.courses[mycourses[i]];
-
-                if (courseTest == undefined || courseTest.id == undefined)
-                    continue;
-
-                console.log("JCT Tools-> Course id: " + courseTest.id);
-
-                courseTest = data.testsDate[courseTest.id.split('.')[0]];
-                if (courseTest == undefined)
-                    continue;
+    if (data.Config["eventsOnTop"] && data["mo"] && data.enable) {
+        $("#inst121811").find(".block_action").remove();
+        var eventsDiv = $("#inst121811");
+        $("#inst121811").remove();
+        $("#block-region-side-post").prepend(eventsDiv);
+    }
 
 
-                courseHtml = getCourseSpan(courseTest);
-                if (courseHtml == null)
-                    continue;
+    if (data.testsDate != undefined && data.Config.showTestDay != false) {
 
-                li = $("[data-courseid=" + mycourses[i] + "]").find(".moreinfo");
-                $(li).append(courseHtml);
-                $(li).css({"text-align": "center", "color": "#0070a8", "font-weight": "bold", "margin-left": "15px"});
-            }
+        //var to save all courses in "mycourses"
+        var mycourses = Object.keys(data.moodleCoursesTable);
+        //var to save the current course
+        var courseTest;
+        //save the course test in html format
+        var courseHtml;
+        // Save the place where the extension will save insert the data
+        var li;
 
+        for (var i = 0; i < mycourses.length; i++) {
+
+            courseTest = data.courses[mycourses[i]];
+
+            if (courseTest == undefined || courseTest.id == undefined)
+                continue;
+
+            console.log("JCT Tools-> Course id: " + courseTest.id);
+
+            courseTest = data.testsDate[courseTest.id.split('.')[0]];
+            if (courseTest == undefined)
+                continue;
+
+
+            courseHtml = getCourseSpan(courseTest);
+            if (courseHtml == null)
+                continue;
+
+            li = $("[data-courseid=" + mycourses[i] + "]").find(".moreinfo");
+            $(li).append(courseHtml);
+            $(li).css({"text-align": "center", "color": "#0070a8", "font-weight": "bold", "margin-left": "15px"});
         }
 
     }
+
+
 }
 
 function getCourseSpan(courseTest) {
@@ -772,8 +726,7 @@ function getCourseSpan(courseTest) {
         testDateHtml = "מועד א";
         testDateHtml += "<br/>";
         testDateHtml += courseTest["moed1day"] + " - " + courseTest["moed1time"];
-    }
-    else {
+    } else {
 
         if (courseTest["moed2day"] == undefined || courseTest["moed2time"] == undefined) {
             return null;
@@ -789,8 +742,7 @@ function getCourseSpan(courseTest) {
                 testDateHtml += courseTest["moed2day"] + " - " + courseTest["moed2time"];
             }
 
-        }
-        else if (courseTest["registerToMoed3"] == true) {
+        } else if (courseTest["registerToMoed3"] == true) {
             moed = stringDateToDateObject(courseTest["moed3day"], courseTest["moed3time"]);
             console.log("JCT Tools-> Moed 3: " + courseTest["moed3day"]);
 
@@ -805,6 +757,7 @@ function getCourseSpan(courseTest) {
     return testDateHtml;
 
 }
+
 function checkHW() {
     console.log("JCT Tools->" + " Cheking homework status");
 
@@ -865,4 +818,269 @@ function addTestDate(data) {
     $("#user-notifications").append(div);
 }
 
+function checkAndUpdateHW(data) {
+    let lastHWUpdate = data.lastHWUpdate || 0;
+    if (Date.now() - lastHWUpdate > 300 * 1000) { // 5 minutes
+        chrome.runtime.sendMessage({updatedata: true});
+    } else {
+        console.log("JCT Tools-> Hw are updated");
 
+    }
+}
+
+//Retrieve LevNet Data
+
+function retrieveDataFromLevNet() {
+    DataAccess.Data(function (data) {
+        updateTestDate(data, true)
+    });
+}
+
+function updateTestDate(data, doIt) {
+
+    //Do it only 1 time in 1
+    if (data.testsDate != null && data.testsDate["Last update"] != null) {
+        if (doIt != true && (data.testsDate["Last update"] + 86400000) > Date.now()) {
+            console.log("JCT Tools -> Tests time are updated");
+            return;
+        }
+    }
+
+    getSemester().then(function (r) {
+        getMazakCourses(r.selectedAcademicYear, r.selectedSemester);
+    })
+    getFromMazakTestData().then(function (MazakData) {
+        DataAccess.setData("testsDate", MazakData);
+    });
+
+    getFromMazakTestDates().then(function (MazakData) {
+        DataAccess.setData("testsTasksDate", MazakData);
+    });
+
+
+}
+
+function getFromMazakTestData(mazak) {
+    console.log("JCT Tools -> getFromMazakTestData()")
+    return new Promise(function (resolve, reject) {
+        getTestsFromApi().then(function (data) {
+            var serverAllTest = data["items"];
+            if (serverAllTest == null)
+                return;
+            var allTests = {};
+            var test;
+            var moed;
+            var course;
+            var testTime;
+            for (var i = 0; i < serverAllTest.length; i++) {
+                test = serverAllTest[i];
+                //course id
+                course = test["courseFullNumber"].split('.')[0];
+                //Create object if not exist
+                if (allTests[course] == null)
+                    allTests[course] = {};
+
+                //Save test id
+                allTests[course]["server_id"] = test["id"];
+
+                //moed Type
+                if (test["testTimeTypeName"] == "מועד א")
+                    moed = 1;
+                if (test["testTimeTypeName"] == "מועד ב")
+                    moed = 2;
+                if (test["testTimeTypeName"] == "מועד ג")
+                    moed = 3;
+
+                //TODO: Implement this
+                if (moed == 2)
+                    allTests[course]["registerToMoedBet"] = true;
+
+                //Set time
+                testTime = Date.parse(test["startDate"]);
+                testTime = new Date(testTime);
+                allTests[course]["moed" + moed + "day"] = zeroIsRequiered(testTime.getDate()) + "/" + zeroIsRequiered((testTime.getMonth() + 1)) + "/" + zeroIsRequiered(testTime.getFullYear());
+                allTests[course]["moed" + moed + "time"] = zeroIsRequiered(testTime.getHours()) + ":" + zeroIsRequiered(testTime.getMinutes());
+
+            }
+            allTests["Last update"] = Date.now();
+            console.log("JCT Tools ->  Test updated", {allTests, retrieveData: data["items"]});
+
+            resolve(allTests)
+        })
+
+    });
+
+}
+
+function getFromMazakTestDates() {
+    console.log("JCT Tools -> getFromMazakTestData()")
+    return new Promise(function (resolve, reject) {
+        getTestsDatesFromApi().then(function (tests) {
+            /**
+             * courseId: "43389"
+             deadLine: "Thu Feb 06 2020 23:55:00 GMT+0200 (hora estándar de Israel)"
+             id: 393870
+             name: "הגשת תרגיל מס' 8"
+             type: "homework"
+             */
+            var tasks = []
+            tests.forEach(function (test) {
+                var testObj = {
+                    type: "test",
+                    deadLine: "" + (new Date(Date.parse(test["testDate"]))),
+                    courseName: test["courseName"],
+                    id: "test_" + test["id"]
+                }
+                if (test["roomName"] == null)
+                    testObj["name"] = "מבחן";
+                else
+                    testObj["name"] = "מבחן - " + test["buildingName"] + " " + test["roomName"];
+                /**
+                 * courseName: "הנדסת תכנה"
+                 studentTestTimeTypeName: "מועד א"
+                 testDate: "2020-02-05T09:00:00+02:00"
+                 roomName: "203"
+                 buildingName: "ישראל"
+                 buildingCampusName: "לב"
+                 isCourseConfirmed: true
+                 */
+                tasks.push(testObj);
+            });
+            console.log("JCT Tools -> getFromMazakTestData()", {tests: tests, tasks: tasks});
+            resolve(tasks);
+        })
+    });
+}
+
+function getTestsFromApi() {
+    //Mazak inputs
+    const promise = new Promise(function (resolve, reject) {
+        var request = $.ajax({
+            url: "/api/student/Tests.ashx?action=LoadTests",
+            type: "POST",
+            data: JSON.stringify({
+                action: 'LoadFilters'
+            }),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                console.log("JCT Tools -> getTest(): request successfully completed", response);
+
+                resolve(response);
+            },
+            error: function (response) {
+                console.log("JCT Tools -> getTest(): error", response);
+            }
+        });
+    });
+
+    return promise;
+}
+
+
+function getTestsDatesFromApi() {
+
+
+    //Mazak inputs
+    const promise = new Promise(function (resolve, reject) {
+        var request = $.ajax({
+            url: "/api/student/TestReg.ashx?action=LoadFutureTestsForStudent",
+            type: "POST",
+            data: JSON.stringify({
+                action: 'LoadFutureTestsForStudent'
+            }),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                console.log("JCT Tools -> getTestsDatesFromApi(): request successfully completed");
+
+                resolve(response["tests"]);
+            },
+            error: function (response) {
+                console.log("JCT Tools ->  getTest(): error", response);
+            }
+        });
+    });
+
+    return promise;
+}
+
+
+function getSemester() {
+    const promise = new Promise(function (resolve, reject) {
+        var request = $.ajax({
+            url: "/api/student/schedule.ashx?action=LoadFilters",
+            type: "POST",
+            data: JSON.stringify({
+                action: 'LoadFilters'
+            }),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                console.log("JCT Tools -> getSemester(): request successfully completed");
+                DataAccess.setData("semesterData", response);
+                resolve(response);
+            },
+            error: function (response) {
+                console.log("JCT Tools -> getSemester(): error", response);
+            }
+        });
+    });
+
+    return promise;
+}
+
+function getMazakCourses(year, semester) {
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: "/api/student/schedule.ashx?action=LoadScheduleList&AcademicYearID=" + year + "&SemesterID=" + semester,
+            type: "POST",
+            data: JSON.stringify({
+                action: 'LoadScheduleList',
+                selectedAcademicYear: year,
+                selectedSemester: semester
+            }),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                console.log("JCT Tools -> getMazakCourses(): request successfully completed");
+                var courses = {};
+                courses["byname"] = {};
+                courses["bynumber"] = {};
+                var temp;
+                var item;
+                try {
+                    for (var i = 0; response["groupsWithMeetings"] != null && i < response["groupsWithMeetings"].length; i++) {
+                        item = response["groupsWithMeetings"][i];
+                        item["meeting"] = true;
+
+                        courses["byname"][item["courseName"]] = item;
+                        temp = item["groupFullNumber"];
+                        temp = temp.split('.');
+                        courses["bynumber"][temp[0]] = item;
+                    }
+                } catch (e) {
+                }
+
+                try {
+                    for (var j = 0; response["groupsWithoutMeetings"] != null && j < response["groupsWithoutMeetings"].length; j++) {
+                        item = response["groupsWithoutMeetings"][j];
+                        item["meeting"] = true;
+
+                        courses["byname"][item["courseName"]] = item;
+                        temp = item["groupFullNumber"];
+                        temp = temp.split('.');
+                        courses["bynumber"][temp[0]] = item;
+                    }
+                } catch (e) {
+                }
+
+                DataAccess.setData("mazakCourses", courses);
+                resolve(response);
+            },
+            error: function (response) {
+                console.log("JCT Tools -> getMazakCourses(): error", response);
+            }
+        });
+    });
+}
