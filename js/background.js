@@ -14,8 +14,8 @@
  *
  * PARAMETERS
  *   request - an object with contain:
- *             + updatedata  = (true/false/undefined)
- *             + changeIcon  = (true/false/undefined)
+ *             + updatedata  = (true/false/null)
+ *             + changeIcon  = (true/false/null)
  *
  *   This function will get the request maded by anothers
  *  pages in the extension and execute backgroundEvent function
@@ -51,8 +51,6 @@ function messageListener(request, sender, sendResponse) {
     if (request.updatedata)
         DataAccess.Data(loginAndUpdate);
 
-    if (request.wifiLogin)
-        DataAccess.Data(wifiLogin);
 
     if (request.levnetLoginAndUpdate)
         DataAccess.Data(function (data) {
@@ -67,11 +65,11 @@ function messageListener(request, sender, sendResponse) {
     }
 
     //In case that the request contains changeIcon.
-    if (request.changeIcon != undefined)
+    if (request.changeIcon != null)
         changeIcon(request.changeIcon);
 
     //setBadge
-    if (request.setBadge != undefined)
+    if (request.setBadge != null)
         setBadge();
 
     if (typeof request.message == "string") {
@@ -173,7 +171,7 @@ function onInstalled(reason) {
     }
 
     DataAccess.Data(function (data) {
-        if ((data["username"] == undefined) && (data["password"] == undefined))
+        if ((data["username"] == null) && (data["password"] == null))
             chrome.runtime.openOptionsPage();
     });
 }
@@ -220,15 +218,15 @@ function onStart(data) {
     loginAndUpdate(data);
 
     //Set the icon of the extension status (active/inactive)
-    changeIcon(data.enable && data.username != null && data.password != null);
+    changeIcon(data.enable);
 
     if (data.Config != null && data.Config.hwUpdate != null)
         chrome.alarms.create("updatedata", {when: (Date.now()), periodInMinutes: 60 * data.Config.hwUpdate});
 
     if (data.Config != null && data.Config.todaysHW)
-        showTodayEvents(data.tasks, data.courses, data.eventDone, ((data.Config != undefined && data.Config.hiddeNoSelectedCourseInWindows == true) ? (data.moodleCoursesTable) : null));
+        showTodayEvents(data.tasks, data.courses, data.eventDone, ((data.Config != null && data.Config.hiddeNoSelectedCourseInWindows == true) ? (data.moodleCoursesTable) : null));
 
-    if (data.tasks != undefined && data.Config != null && data.Config.firstAlarm != false)
+    if (data.tasks != null && data.Config != null && data.Config.firstAlarm != false)
         setAlarms(data, true);
 
 }
@@ -245,10 +243,10 @@ function showTodayEvents(events, courses, eventDone, moodleCoursesTable) {
     if (events == null || events.length == 0 || courses == null || courses.length == 0)
         return;
 
-    if (eventDone == undefined)
+    if (eventDone == null)
         eventDone = {};
 
-    if (moodleCoursesTable != undefined && jQuery.isEmptyObject(moodleCoursesTable))
+    if (moodleCoursesTable != null && jQuery.isEmptyObject(moodleCoursesTable))
         moodleCoursesTable = null;
 
     var today = new Date();
@@ -299,17 +297,17 @@ function showTodayEvents(events, courses, eventDone, moodleCoursesTable) {
  * @param onstart (bool) : Is chrome just start?
  */
 function setAlarms(data, onstart) {
-    if (data.Config != undefined && data.Config.hwUpdate != undefined && !isNaN(data.Config.hwUpdate)) {
+    if (data.Config != null && data.Config.hwUpdate != null && !isNaN(data.Config.hwUpdate)) {
         chrome.alarms.create("updateData", {periodInMinutes: (data.Config.hwUpdate * 60)});
     }
     else
         console.log("data.Config.hwUpdate is not defined");
 
     console.log("Setting alarms")
-    if (data.Config == undefined)
+    if (data.Config == null)
         return;
     var events = data.tasks;
-    if (events == undefined)
+    if (events == null)
         return;
     console.log("Total events: " + events.length);
     //Homework first alarm
@@ -368,7 +366,7 @@ function createEventNotification(eventId, change) {
 
     console.log("Generate a notification for id: " + eventId);
     DataAccess.Data(function (data) {
-        if (data.tasks == undefined)
+        if (data.tasks == null)
             return;
         var event = null;
 
@@ -395,7 +393,7 @@ function createEventNotification(eventId, change) {
             return;
 
         //Check if the course is part of 'my courses' when the user request to show only homework from 'my courses' in the popup
-        if (data.Config != undefined && data.Config.hiddeNoSelectedCourseInWindows == true && data.moodleCoursesTable != null && data.moodleCoursesTable[event.id] != true) {
+        if (data.Config != null && data.Config.hiddeNoSelectedCourseInWindows == true && data.moodleCoursesTable != null && data.moodleCoursesTable[event.id] != true) {
             console.log("Homework " + event.name + " of course " + data.courses[event.courseId].name + " is not not in my course list");
             return;
         }
@@ -406,7 +404,7 @@ function createEventNotification(eventId, change) {
             chrome.notifications.create(
                 event.id, {
                     type: 'basic',
-                    requireInteraction: (!(data.Config != undefined && data.Config.hiddeNofication == true)),
+                    requireInteraction: (!(data.Config != null && data.Config.hiddeNofication == true)),
                     iconUrl: chrome.extension.getURL('image/icons/change.png'),
                     title: "שינוי בשיעורי בית",
                     message: ((event.name + "\n" + data.courses[event.courseId].name + "\n") + getDate(new Date(Date.parse(event.deadLine))))
@@ -504,43 +502,6 @@ function getLoginToken(){
     });
 }
 
-/*****************************************************************
- * FUNCTION
- *   wrapAllAttributes
- *
- * RETURN VALUE
- *   This function doesn't return nothing
- *
- * PARAMETERS
- *   html - An html document
- *
- * MEANING
- *    This function wrap all attribute from the html
- *
- * ATTENTION
- *   This function is not in use
- *
- **********************************************************************/
-function wrapAllAttributes(html) {
-    //delete attributes from the main div
-    $(html).each(function () {
-        var attributes = this.attributes;
-        var i = attributes.length;
-        while (i--) {
-            this.removeAttributeNode(attributes[i]);
-        }
-    });
-    //delete all attributes from the children of main div
-    $(html).children().each(function () {
-        $(this).each(function () {
-            var attributes = this.attributes;
-            var i = attributes.length;
-            while (i--) {
-                this.removeAttributeNode(attributes[i]);
-            }
-        });
-    });
-}
 
 /*****************************************************************
  * FUNCTION
@@ -572,7 +533,7 @@ function updateData(asyncType) {
 
         request.done(function (data) {
             console.log("request successfully completed");
-            if (undefined == data || 0 == data.length) {
+            if (null == data || 0 == data.length) {
                 console.log("Error:Data is null");
                 backgroundEvent({
                     type: "updateData",
@@ -603,7 +564,7 @@ function updateData(asyncType) {
             getAllHomeWorksFromCalendar().then(function (homeworkObject) {
 
                 checkChanges(homeworkObject).then(function () {
-                    var data = {courses: coursesObject.data, coursesIndex: coursesObject.index, tasks: homeworkObject};
+                    var data = {courses: coursesObject.data, coursesIndex: coursesObject.index, tasks: homeworkObject, lastHWUpdate: Date.now()};
                     console.log("New data:");
                     console.log(data);
                     DataAccess.setData(data)
@@ -674,6 +635,7 @@ function getAllCourses(html) {
         // copy the text of the url
         var text = $(this).find('h3').text();
         // Separe the data by id and name
+        courseDetails.fullName = text;
         separateCoursesData(text, courseDetails);
         // Save the url
         // Save the moodle id
@@ -726,18 +688,18 @@ function getAllHomeWorksFromCalendar() {
             $(html).find(".eventlist").find(".event").each(function () {
                 try {
                     var event = {};
-                    var temp;
+                    var iconHtml;
 
                     //Getting type by icon img alt attribute
-                    temp = $(this).find("img.icon");
+                    iconHtml = $(this).find(".card-header div:not(.commands) .icon");
                     //Ignore attendance events
-                    if ($(temp).length > 0 && $(temp).attr("src").includes("attendance"))
+                    if ($(iconHtml).length > 0 && $(iconHtml).attr("title").includes("attendance"))
                         return;
-                    //Getting alt attribute
-                    temp = $(temp).attr("alt")
-                    if (temp == "ארועי פעילויות")
+                    //Getting tilte attribute
+                    iconHtml = $(iconHtml).attr("title")
+                    if (iconHtml === "ארועי פעילויות")
                         event["type"] = "homework";
-                    else if (temp == "אירוע משתמש")
+                    else if (iconHtml === "אירוע משתמש")
                         event["type"] = "userEvent";
                     else
                         return // Prevent bug;
@@ -746,21 +708,21 @@ function getAllHomeWorksFromCalendar() {
                     event["courseId"] = $(this).attr("data-course-id");
 
                     //Getting date (timestamp) from <a> ex https://moodle.jct.ac.il/calendar/view.php?view=day&amp;time=1540155600
-                    temp = $(this).find(".date").find("a").attr("href");
+                    let dateLink = $(this).find(".description").find("a").attr("href");
                     // Add a 000 in order to convert to miliseconds
-                    event["deadLine"] = (new Date(parseInt(temp.substring(temp.lastIndexOf("=") + 1) + "000"))).toString();
+                    event["deadLine"] = (new Date(parseInt(dateLink.substring(dateLink.lastIndexOf("=") + 1) + "000"))).toString();
 
                     // Getting id from url ex : https://moodle.jct.ac.il/mod/assign/view.php?id=336730;
-                    temp = $(this).find(".description").find("a").attr("href");
-                    event["id"] = parseInt(temp.substring(temp.lastIndexOf("=") + 1));
+                    let idLink = $(this).find(".description").find("a").attr("href");
+                    event["id"] = parseInt(idLink.substring(idLink.lastIndexOf("=") + 1));
 
                     //Getting name from title
-                    temp = $(this).find(".name").text();
+                    let eventName = $(this).find("h3").text();
                     // Try to remove text "יש להגיש את" with regex
-                    if (temp.includes("יש להגיש"))
-                        temp = temp.match("יש להגיש את \'([^)]+)\'")[1];
+                    if (eventName.includes("יש להגיש"))
+                        eventName = eventName.match("יש להגיש את \'([^)]+)\'")[1];
                     //In case that title is too big, remove part of it
-                    event["name"] = (temp.length > 33 ? (temp.substring(0, 30) + "...") : temp );
+                    event["name"] = (eventName.length > 33 ? (eventName.substring(0, 30) + "...") : eventName );
 
                     hws.push(event);
                 } catch (e) {
@@ -781,55 +743,6 @@ function getAllHomeWorksFromCalendar() {
 }
 
 
-/*****************************************************************
- * FUNCTION
- *   getAllHomeworks
- *
- * RETURN VALUE
- *    Return an object that contains all homeworks data
- *
- * PARAMETERS
- *   html - An html document
- *
- * MEANING
- *   This function will take the homeworks div in the moodle, then insert
- *   evey course in an object (with name, id,deadline, type)
- *
- *  ATTENTION
- *   This function help the updateData function
- *
- **********************************************************************/
-function getAllHomeworks(html) { // DEPRECATE
-    var data = [];
-    var i = 0;
-    $(html).find(".event").each(function () {
-        var homeworkDetails;
-
-        if ($(this).find("img").attr("alt") == "אירוע משתמש")
-            homeworkDetails = userEventData(this);
-        else
-            homeworkDetails = separateHomeworkData(this);
-
-        if (homeworkDetails == undefined)
-            return true;
-
-        if (homeworkDetails.id != undefined)
-            data[i] = homeworkDetails;
-        else {
-            //check if the i is not in use
-            while (data[i] != undefined) {
-                i++
-            }
-            ;
-
-            homeworkDetails.id = i;
-            data[i] = homeworkDetails;
-        }
-        i++;
-    });
-    return data;
-}
-
 /***************************************
  * Separe data from homework div
  *
@@ -849,8 +762,8 @@ function separateHomeworkData(hwdata) {
      * Search the homework id and name
      ***************************************/
     var datatemp = $(hwdata).find("a[data-type=event]");//($(hwdata).find("a"))[0];
-    if (datatemp == undefined || datatemp.length == 0)
-        return undefined;
+    if (datatemp == null || datatemp.length == 0)
+        return null;
     // Save the homework name
     var homeworkName = $(datatemp).text();
     if (homeworkName.length > 33)
@@ -868,8 +781,8 @@ function separateHomeworkData(hwdata) {
      * Search the homework dead line
      ***************************************/
     datatemp = $(hwdata).find('.date');
-    if (datatemp == undefined || datatemp.length == 0)
-        return undefined;
+    if (datatemp == null || datatemp.length == 0)
+        return null;
 
     datatemp = $(datatemp).text();
     //For moodle tests
@@ -878,8 +791,8 @@ function separateHomeworkData(hwdata) {
     }
 
     var homeworkDeadLine = stringToDate(datatemp);
-    if (homeworkDeadLine == undefined)
-        return undefined;
+    if (homeworkDeadLine == null)
+        return null;
     homeworkDeadLine = homeworkDeadLine.toString();
 
 
@@ -909,11 +822,11 @@ function stringToDate(date) {
     else {
         dayArray = date.split("/");
         dayArray[1] = Number(dayArray[1]) - 1;
-        if (dayArray[2] == undefined) {
+        if (dayArray[2] == null) {
             if (dayArray.includes(":"))
                 return stringToDate("היום " + dayArray);
 
-            return undefined;
+            return null;
         }
         dayArray[2] = dayArray[2].substring(0, 4);
     }
@@ -921,8 +834,8 @@ function stringToDate(date) {
 
     var timeArray = date.split(":");
 
-    if (timeArray[1] == undefined)
-        return undefined;
+    if (timeArray[1] == null)
+        return null;
 
     timeArray[0] = timeArray[0].substring(timeArray[0].length - 2);
 
@@ -938,7 +851,7 @@ function checkChanges(newHomeworks) {
             return;
         if (typeof newHomeworks != "object")
             return;
-        if (data.tasks == undefined)
+        if (data.tasks == null)
             return;
         console.log("Checking changes on homework");
         for (var i = 0; i < newHomeworks.length; i++) {
@@ -976,7 +889,7 @@ function setBadge() {//showBadge
         var deadLine = new Date();
         var checked;
         var duplicate = {}
-        if (events != undefined && data.Config != null && data.Config.showBadge != false)
+        if (events != null && data.Config != null && data.Config.showBadge != false)
             for (var i = 0; i <= events.length; i++) {
 
                 // Check if the event already finish
@@ -984,7 +897,7 @@ function setBadge() {//showBadge
                     continue;
 
                 // Check if the user want to show user events
-                if (data.Config != undefined) {
+                if (data.Config != null) {
 
                     if (events[i].type == "userEvent")
                         continue;
@@ -1025,7 +938,7 @@ function setBadge() {//showBadge
                     }
                 }
                 // Check if the user already did the homework
-                if (data.eventDone != undefined && data.eventDone[events[i].id] != null && (data.eventDone[events[i].id]["checked"] || data.eventDone[events[i].id]["notifications"] == false ))
+                if (data.eventDone != null && data.eventDone[events[i].id] != null && (data.eventDone[events[i].id]["checked"] || data.eventDone[events[i].id]["notifications"] == false ))
                     continue;
 
 
@@ -1165,7 +1078,7 @@ function mazakLogin(username, password) {
 function updateTestDate(data, doIt) {
 
     //Do it only 1 time in 1
-    if (data.testsDate != undefined && data.testsDate["Last update"] != undefined) {
+    if (data.testsDate != null && data.testsDate["Last update"] != null) {
         if (doIt != true && (data.testsDate["Last update"] + 86400000) > Date.now()) {
             console.log("Tests time are updated");
             return;
@@ -1210,7 +1123,7 @@ function getFromMazakTestData(mazak) {
     return new Promise(function (resolve, reject) {
         getTestsFromApi().then(function (data) {
             var serverAllTest = data["items"];
-            if (serverAllTest == undefined)
+            if (serverAllTest == null)
                 return;
             var allTests = {};
             var test;
@@ -1222,7 +1135,7 @@ function getFromMazakTestData(mazak) {
                 //course id
                 course = test["courseFullNumber"].split('.')[0];
                 //Create object if not exist
-                if (allTests[course] == undefined)
+                if (allTests[course] == null)
                     allTests[course] = {};
 
                 //Save test id
@@ -1256,125 +1169,6 @@ function getFromMazakTestData(mazak) {
 
     });
 
-
-    /* @Deprecated
-     const promise = new Promise(function (resolve, reject) {
-     if(mazak != false) {
-     var request = $.ajax({
-     url: "https://mazak.jct.ac.il/Student/Tests.aspx",
-
-     });
-     }else
-     {
-     var request = $.ajax({
-     url: "https://levnet.jct.ac.il/Student/Tests.aspx",
-
-     });
-     }
-
-
-     request.done( function(data){
-
-     var table =$(data).find(".table-responsive");
-
-     if($(table).length==0) {
-     reject("Mazak login is required	");
-     backgroundEvent({type:"updateData",operationCompleted:false,error:"נדרש חיבור למזק",request:request});
-     return;
-     }
-
-     var tr = $(table).find("tbody").find("tr");
-     if($(tr).length==0)
-     reject("tr is empty");
-
-     var test = {};
-     var allTests ={};
-
-     $(tr).each(function()
-     {
-     var i=0;
-     var sTemp = "";
-     var iTemp = 0;
-     var saTemp;
-     var course = "";
-     var moed =0;
-     $(this).find("td").each(function()
-     {
-
-     switch(i)
-     {
-     case 0:
-     sTemp = $(this).text().trim();
-     saTemp = sTemp.split('.');
-
-     course = saTemp[0];
-     if(allTests[course] == undefined)
-     {
-     allTests[course]={};
-     allTests[course]["courseYear"]=saTemp[2];
-     }
-     break;
-
-     case 2:
-     if($(this).text().trim() == "מועד א")
-     moed = 1;
-     if($(this).text().trim() == "מועד ב")
-     moed = 2;
-     if($(this).text().trim() == "מועד ג")
-     moed = 3;
-     break;
-
-     case 3:
-     sTemp = $(this).text().trim();
-     iTemp = sTemp.indexOf(' ');
-     if(allTests[course]["moed" + moed + "day" ] != undefined && Date.parse(stringDateToDateObject(allTests[course]["moed" + moed + "day" ] ,sTemp.substr(iTemp+1)))>Date.now())
-     return false;
-     allTests[course]["moed" + moed + "day" ] = sTemp.substr(0,iTemp);
-     sTemp = sTemp.substr(iTemp+1);
-     allTests[course]["moed" + moed + "time" ] = sTemp.substr(0,sTemp.lastIndexOf(':'));
-     break;
-
-     case 4:
-     sTemp = $(this).text().trim();
-     if(	allTests[course]["registerToMoedBet"] != true)
-     allTests[course]["registerToMoedBet"] = sTemp == "בטל הרשמה" || sTemp == "בוצעה הרשמה למועד ב"; // (moed == 2 && sTemp && stringDateToDateObject(allTests[course]["moed" + moed + "day" ],allTests[course]["moed" + moed + "time" ])>Date.now());
-     break;
-
-     }
-     i++;
-     })
-     });
-     var date = new Date();
-     allTests["Last update"] = date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();
-     getFromMazakregisterMoed3().then(function(moed3)
-     {
-     if(typeof moed3 == "object")
-     {
-     $.each(moed3, function(key, value){
-
-     $.each(moed3[key], function(key2, value2){
-     allTests[key][key2]= moed3[key][key2];
-     });
-
-     });
-     }
-     resolve(allTests);
-     }).catch(function(e) {
-     console.log("getFromMazakregisterMoed3 promise error: " + e);
-     resolve(allTests);
-     });
-
-
-
-     });
-
-     request.fail(function (data) {
-     reject("Test page conection error");
-     });
-
-     });
-     return promise;
-     */
 }
 
 function getFromMazakTestDates(mazak) {
@@ -1446,7 +1240,7 @@ function getFromMazakregisterMoed3() {
                             break;
 
                         case 5:
-                            if (allTests[course] == undefined)
+                            if (allTests[course] == null)
                                 allTests[course] = {}
                             else {
                                 if (allTests[course]["registerToMoed3"] == true)
@@ -1457,7 +1251,7 @@ function getFromMazakregisterMoed3() {
                             iTemp = sTemp.indexOf(' ');
 
 
-                            if (course == undefined || sTemp == undefined || iTemp == undefined)
+                            if (course == null || sTemp == null || iTemp == null)
                                 return false;
                             saTemp = sTemp.substr(0, iTemp);
                             saTemp = saTemp.substr(0, sTemp.lastIndexOf('/') + 1) + 20 + saTemp.substr(saTemp.lastIndexOf('/') + 1);//2017 and not 17
@@ -1584,28 +1378,6 @@ function testNotifications(type) {
     }
 }
 
-function wifiLogin(data) {
-    console.log("Auto wifi login required")
-    var request = $.post("https://securelogin.jct.ac.il/auth/index.html/u",
-        {username: data.username, password: atob(data.password)});
-
-    request.done(function (data) {
-
-        console.log("login status ok");
-        backgroundEvent({type: "wifiLogin", operationCompleted: true});
-
-    });
-    request.fail(function (xhr, status, error) {
-        setBadge();
-        console.log("login status failed, status: " + xhr.status);
-        backgroundEvent({
-            type: "wifiLogin",
-            operationCompleted: false,
-            error: "שגיא " + xhr.status + ": אין חיבור לוויפי"
-        });
-        //	reject();
-    });
-}
 
 function getSemester() {
     const promise = new Promise(function (resolve, reject) {
@@ -1652,7 +1424,7 @@ function getMazakCourses(year, semester) {
                 var temp;
                 var item;
                 try {
-                    for (var i = 0; response["groupsWithMeetings"] != undefined && i < response["groupsWithMeetings"].length; i++) {
+                    for (var i = 0; response["groupsWithMeetings"] != null && i < response["groupsWithMeetings"].length; i++) {
                         item = response["groupsWithMeetings"][i];
                         item["meeting"] = true;
 
@@ -1665,7 +1437,7 @@ function getMazakCourses(year, semester) {
                 }
 
                 try {
-                    for (var j = 0; response["groupsWithoutMeetings"] != undefined && j < response["groupsWithoutMeetings"].length; j++) {
+                    for (var j = 0; response["groupsWithoutMeetings"] != null && j < response["groupsWithoutMeetings"].length; j++) {
                         item = response["groupsWithoutMeetings"][j];
                         item["meeting"] = true;
 

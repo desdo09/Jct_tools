@@ -13,7 +13,7 @@ $(document).ready(function () {
 
 
 function onStart(result) {
-    
+
     if (result.Config != null && result.Config.style == "classic")
         classicTheme(result);
     else
@@ -282,6 +282,7 @@ function insertEvents(data) {
     } 		//notifications
 
     $("#eventsTotal").text($(".event").length);
+    $("#lastHwUpdate").text(formatDate(data.lastHWUpdate));
     $(".notifi").click(function () {
         var currentUrl = $(this).attr("src");
         if (currentUrl == "image/popup/timbre.png") {
@@ -474,4 +475,30 @@ function openWindow(type) {
 function openInNewTab(url) {
     var win = window.open(url, '_blank');
     win.focus();
+}
+
+function formatDate(timespan){
+    if(timespan == null || isNaN(timespan) || timespan <= 0){
+        return "-"
+    }
+    let date = new Date(timespan)
+    let dateStr = date.toLocaleString('en-GB',{hour12: false})
+    let dateStrArr = dateStr.split(",")
+    if(sameDay(date,new Date())) {
+        return getTime(dateStrArr[1]);
+    }else {
+        return getTime(dateStrArr[1]) + " " + dateStrArr[0];
+    }
+
+}
+
+function sameDay(d1, d2) {
+    return d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
+}
+
+function getTime(time){
+    let lastIndex = time.lastIndexOf(":");
+    return lastIndex >= 0 ? time.substr(0,lastIndex) : time;
 }

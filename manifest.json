@@ -2,8 +2,8 @@
 
    "name"          : "כלים לסטודנטים של המרכז האקדמי לב",
    "short_name"    : "Jct tools",
-   "version"       : "4.4.4",
-   "version_name"  : "4.4.4",
+   "version"       : "4.5.0",
+   "version_name"  : "4.5.0",
    "description"   : "הודעות וחיבור לאתרים של המרכז האקדמי לב - מכון לב",
    "author"        : "David Aben Athar",
 
@@ -17,9 +17,7 @@
       "open_in_tab":true
    },
 
-   "permissions": [   "storage","alarms", "notifications",
-         "*://*.jct.ac.il/*"
-      ],
+   "permissions": ["storage","alarms", "notifications", "*://*.jct.ac.il/*"],
    "update_url": "https://clients2.google.com/service/update2/crx",
    "background": {"page": "background.html"},
    "content_scripts":
