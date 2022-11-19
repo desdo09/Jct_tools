@@ -832,15 +832,16 @@ function checkAndUpdateHW(data) {
 
 function retrieveDataFromLevNet() {
     DataAccess.Data(function (data) {
-        updateTestDate(data, true)
+        updateTestDate(data)
     });
 }
 
-function updateTestDate(data, doIt) {
+
+function updateTestDate(data) {
 
     //Do it only 1 time in 1
     if (data.testsDate != null && data.testsDate["Last update"] != null) {
-        if (doIt != true && (data.testsDate["Last update"] + 86400000) > Date.now()) {
+        if ((data.testsDate["Last update"] + 86400000) > Date.now()) {
             console.log("JCT Tools -> Tests time are updated");
             return;
         }
@@ -848,16 +849,13 @@ function updateTestDate(data, doIt) {
 
     getSemester().then(function (r) {
         getMazakCourses(r.selectedAcademicYear, r.selectedSemester);
+        getFromMazakTestData().then(function (MazakData) {
+            DataAccess.setData("testsDate", MazakData);
+        });
+        getFromMazakTestDates().then(function (MazakData) {
+            DataAccess.setData("testsTasksDate", MazakData);
+        });
     })
-    getFromMazakTestData().then(function (MazakData) {
-        DataAccess.setData("testsDate", MazakData);
-    });
-
-    getFromMazakTestDates().then(function (MazakData) {
-        DataAccess.setData("testsTasksDate", MazakData);
-    });
-
-
 }
 
 function getFromMazakTestData(mazak) {

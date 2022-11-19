@@ -707,9 +707,12 @@ function getAllHomeWorksFromCalendar() {
                     event["deadLine"] = (new Date(parseInt(dateLink.substring(dateLink.lastIndexOf("=") + 1) + "000"))).toString();
 
                     // Getting id from url ex : https://moodle.jct.ac.il/mod/assign/view.php?id=336730;
-                    let idLink = $(this).find(".description").find("a").attr("href");
-                    event["id"] = parseInt(idLink.substring(idLink.lastIndexOf("=") + 1));
-
+                    let idLink = $(this).find(".card-footer").find("a").attr("href");
+                    if(idLink != null && idLink !== "") {
+                        let params = idLink.substring(idLink.lastIndexOf("?") + 1);
+                        params = params.split("&")[0];
+                        event["id"] = parseInt(params.substring(params.lastIndexOf("=") + 1));
+                    }
                     //Getting name from title
                     let eventName = $(this).find("h3").text();
                     // Try to remove text "יש להגיש את" with regex
