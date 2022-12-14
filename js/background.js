@@ -32,6 +32,7 @@
  **********************************************************************/
 
 chrome.runtime.onMessage.addListener(messageListener);
+
 function messageListener(request, sender, sendResponse) {
     console.log("External request");
     console.log(request);
@@ -51,6 +52,9 @@ function messageListener(request, sender, sendResponse) {
     if (request.updatedata)
         DataAccess.Data(loginAndUpdate);
 
+    if (request.userData) {
+        DataAccess.Data(getUserDataFromMoodle);
+    }
 
 
     if (request.levnetLogin) {
@@ -73,6 +77,7 @@ function messageListener(request, sender, sendResponse) {
         backgroundEvent({type: "ExternalMessage", operationCompleted: true});
     }
 }
+
 /*****************************************************************
  * FUNCTION
  *    backgroundEvent
@@ -113,6 +118,7 @@ function backgroundEvent(eventType) {
  * settings
  **********************************************************************/
 chrome.runtime.onInstalled.addListener(onInstalled);
+
 function onInstalled(reason) {
     reason = reason["reason"];
     console.log("onInstalled(" + reason + ")");
@@ -133,13 +139,12 @@ function onInstalled(reason) {
                 todaysHW: true,
                 updateOnPopup: true
             },
-            enable:true,
+            enable: true,
             mo: false, mz: false, wf: false,
             moodleCoursesTable: {}
         });
 
-    }
-    else {
+    } else {
         DataAccess.Data(function (data) {
             if (data.Config == null) {
                 DataAccess.setData({
@@ -165,8 +170,11 @@ function onInstalled(reason) {
         })
     }
 
+    DataAccess.setObject("Config","hiddeTasksDone",true);
+    DataAccess.setObject("Config","hiddeNoSelectedCourseInWindows",true);
+
     DataAccess.Data(function (data) {
-        if ((data["username"] == null) && (data["password"] == null))
+        if ((data.moodleUser == null))
             chrome.runtime.openOptionsPage();
     });
 }
@@ -174,8 +182,7 @@ function onInstalled(reason) {
 chrome.alarms.onAlarm.addListener(function (alarm) {
     if (alarm.name != "updateData") {
         createEventNotification(alarm.name);
-    }
-    else {
+    } else {
         console.log("Alarm of updateData fired at: " + (new Date));
         DataAccess.Data(loginAndUpdate);
     }
@@ -195,6 +202,7 @@ chrome.notifications.onClicked.addListener(function (id) {
  ********************************************************/
 chrome.alarms.clearAll();
 DataAccess.Data(onStart);
+
 /******************************************************/
 function onStart(data) {
 
@@ -293,8 +301,7 @@ function showTodayEvents(events, courses, eventDone, moodleCoursesTable) {
 function setAlarms(data, onstart) {
     if (data.Config != null && data.Config.hwUpdate != null && !isNaN(data.Config.hwUpdate)) {
         chrome.alarms.create("updateData", {periodInMinutes: (data.Config.hwUpdate * 60)});
-    }
-    else
+    } else
         console.log("data.Config.hwUpdate is not defined");
 
     console.log("Setting alarms")
@@ -444,13 +451,13 @@ function login(username, password, anonymous) {
 
 
     const promise = new Promise(function (resolve, reject) {
-        getLoginToken().then(function (logintoken){
-            if(logintoken == null){
+        getLoginToken().then(function (logintoken) {
+            if (logintoken == null) {
                 onLogin(null);
                 return;
             }
             var request = $.post("https://moodle.jct.ac.il/login/index.php",
-                {username: username, password: password,logintoken:logintoken,anchor:""});
+                {username: username, password: password, logintoken: logintoken, anchor: ""});
 
             request.done(onLogin);
 
@@ -480,17 +487,14 @@ function login(username, password, anonymous) {
     });
 
 
-
-
-
     return promise;
 }
 
-function getLoginToken(){
-    return  new Promise(function (resolve, reject) {
+function getLoginToken() {
+    return new Promise(function (resolve, reject) {
         $.get("https://moodle.jct.ac.il/login/index.php", function (data) {
             var loginToken = $(data).find("input[name=logintoken]").val();
-            console.log("loginToken: "+loginToken)
+            console.log("loginToken: " + loginToken)
             resolve(loginToken)
         });
     });
@@ -512,16 +516,15 @@ function getLoginToken(){
  *   database
  *
  **********************************************************************/
-function updateData(asyncType) {
+function updateData(store) {
     console.log("Updating data");
-    asyncType = asyncType || true;
     // async: false
 
     const promise = new Promise(function (resolve, reject) {
         var request = $.ajax({
             url: "https://moodle.jct.ac.il",
             type: 'GET',
-            async: asyncType,
+            async: true,
 
         });
 
@@ -553,12 +556,29 @@ function updateData(asyncType) {
                 return;
             }
 
+            if(store.moodleUser != null){
+                console.log("update data, validating user",{user:store.moodleUser})
+                var logininfo = html.find(".logininfo > a");
+                var id = getUrlParam("id", $(logininfo[0]).attr("href"));
+                if(id !== store.moodleUser.id){
+                    console.error("user data is not the same as saved in db, data ignored!")
+                    return;
+                }
+            }else {
+                console.warn("user data for moodle not set!")
+            }
+
             //  wrapAllAttributes(courses);
             var coursesObject = getAllCourses(html);
             getAllHomeWorksFromCalendar().then(function (homeworkObject) {
 
                 checkChanges(homeworkObject).then(function () {
-                    var data = {courses: coursesObject.data, coursesIndex: coursesObject.index, tasks: homeworkObject, lastHWUpdate: Date.now()};
+                    var data = {
+                        courses: coursesObject.data,
+                        coursesIndex: coursesObject.index,
+                        tasks: homeworkObject,
+                        lastHWUpdate: Date.now()
+                    };
                     console.log("New data:");
                     console.log(data);
                     DataAccess.setData(data)
@@ -579,6 +599,71 @@ function updateData(asyncType) {
             console.log(data);
             setBadge();
             backgroundEvent({type: "updateData", operationCompleted: false, error: data, request: request});
+            reject()
+        });
+    });
+
+    return promise;
+
+}
+
+
+function getUserDataFromMoodle() {
+    console.log("Getting user data");
+    // async: false
+
+    const promise = new Promise(function (resolve, reject) {
+        var request = $.ajax({
+            url: "https://moodle.jct.ac.il",
+            type: 'GET',
+            async: true,
+        });
+
+        request.done(function (data) {
+            console.log("request successfully completed");
+            if (null == data || 0 === data.length) {
+                console.log("Error:Data is null");
+                backgroundEvent({
+                    type: "userData",
+                    operationCompleted: false,
+                    error: "Data is null",
+                    request: request
+                });
+                reject();
+                return;
+            }
+
+            // Get htm with div
+            var html = jQuery('<div>').html(data);
+            var logininfo = html.find(".logininfo > a");
+            if (logininfo.length == 0) {
+                reject();
+                console.log("No logininfo found");
+                backgroundEvent({
+                    type: "userData",
+                    operationCompleted: false,
+                    error: "נדרש חיבור למודל",
+                    request: request
+                });
+                return;
+            }
+            let userData = {
+                id: getUrlParam("id", $(logininfo[0]).attr("href")),
+                name: $(logininfo[0]).text(),
+            };
+            console.log("logininfo", {logininfo,userData})
+            backgroundEvent({
+                type: "userData",
+                operationCompleted: true,
+                data: userData,
+            });
+        });
+
+        request.fail(function (data) {
+            console.log("request failed");
+            console.log(data);
+            setBadge();
+            backgroundEvent({type: "userData", operationCompleted: false, error: data, request: request});
             reject()
         });
     });
@@ -620,10 +705,10 @@ function getAllCourses(html) {
 
         // Find the course id
         courseDetails.Url = courseLink.attr('href');
-        var id = getUrlParam('id',courseDetails.Url);
+        var id = getUrlParam('id', courseDetails.Url);
 
         // if there is an error just stop
-        if(id == null || id.length === 0)
+        if (id == null || id.length === 0)
             return true;
 
         // copy the text of the url
@@ -643,6 +728,7 @@ function getAllCourses(html) {
     });
     return {data: data, index: index};
 }
+
 /***************************************
  * Separe data from courses
  * Example 120221.3.5776 - אלגברה לינארית ב
@@ -665,8 +751,8 @@ function separateCoursesData(data, courseDetails) {
     // check if is a course
     var name = data.substring((idNumber.length > 0) ? (idNumber.length + 3) : 0);
 
-    courseDetails.id= idNumber;
-    courseDetails.name= name;
+    courseDetails.id = idNumber;
+    courseDetails.name = name;
 }
 
 function getAllHomeWorksFromCalendar() {
@@ -708,7 +794,7 @@ function getAllHomeWorksFromCalendar() {
 
                     // Getting id from url ex : https://moodle.jct.ac.il/mod/assign/view.php?id=336730;
                     let idLink = $(this).find(".card-footer").find("a").attr("href");
-                    if(idLink != null && idLink !== "") {
+                    if (idLink != null && idLink !== "") {
                         let params = idLink.substring(idLink.lastIndexOf("?") + 1);
                         params = params.split("&")[0];
                         event["id"] = parseInt(params.substring(params.lastIndexOf("=") + 1));
@@ -719,7 +805,7 @@ function getAllHomeWorksFromCalendar() {
                     if (eventName.includes("יש להגיש"))
                         eventName = eventName.match("יש להגיש את \'([^)]+)\'")[1];
                     //In case that title is too big, remove part of it
-                    event["name"] = (eventName.length > 33 ? (eventName.substring(0, 30) + "...") : eventName );
+                    event["name"] = (eventName.length > 33 ? (eventName.substring(0, 30) + "...") : eventName);
 
                     hws.push(event);
                 } catch (e) {
@@ -753,6 +839,7 @@ function userEventData(usData) {
     deadLine = deadLine.toString();
     return {type: "userEvent", name: name, deadLine: deadLine}
 }
+
 //
 function separateHomeworkData(hwdata) {
     /**************************************
@@ -815,8 +902,7 @@ function stringToDate(date) {
         dayArray[0] = today.getDate();
         dayArray[1] = today.getMonth();
         dayArray[2] = today.getFullYear();
-    }
-    else {
+    } else {
         dayArray = date.split("/");
         dayArray[1] = Number(dayArray[1]) - 1;
         if (dayArray[2] == null) {
@@ -874,7 +960,7 @@ function checkChanges(newHomeworks) {
 //Login deprecated
 function loginAndUpdate(data) {
     console.log("updating database");
-    return updateData();
+    return updateData(data);
 }
 
 function setBadge() {//showBadge
@@ -935,7 +1021,7 @@ function setBadge() {//showBadge
                     }
                 }
                 // Check if the user already did the homework
-                if (data.eventDone != null && data.eventDone[events[i].id] != null && (data.eventDone[events[i].id]["checked"] || data.eventDone[events[i].id]["notifications"] == false ))
+                if (data.eventDone != null && data.eventDone[events[i].id] != null && (data.eventDone[events[i].id]["checked"] || data.eventDone[events[i].id]["notifications"] == false))
                     continue;
 
 
@@ -1020,7 +1106,6 @@ function LevNetLogin(username, password) {
 }
 
 
-
 function testNotifications(type) {
     switch (type) {
         case 1:
@@ -1062,11 +1147,11 @@ function testNotifications(type) {
 }
 
 
-function getUrlParam( name, url ){
+function getUrlParam(name, url) {
     if (!url) url = location.href;
-    name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
-    var regexS = "[\\?&]"+name+"=([^&#]*)";
-    var regex = new RegExp( regexS );
-    var results = regex.exec( url );
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regexS = "[\\?&]" + name + "=([^&#]*)";
+    var regex = new RegExp(regexS);
+    var results = regex.exec(url);
     return results == null ? null : results[1];
 }

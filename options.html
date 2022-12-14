@@ -45,7 +45,23 @@
             <p style="color:#f7ecb5">
                 בשל העדכון האחרון של Moodle, אנא ודא שאתה מחובר למערכת
             </p>
-
+            <div id="accountsInput">
+                <p class="labelsDown">
+                    <label for="userId" style="width: 250px">זיהות המשתמש:</label>
+                    <input type="text" id="userId" class="form-control" readonly/>
+                </p>
+                <p class="labelsDown">
+                    <label for="userRealName" style="width: 250px">שם :</label>
+                    <input type="text" id="userRealName" class="form-control" readonly/>
+                </p>
+                <p class="text-muted" style="font-size: 14px; margin: 0">
+                    פרטי המשתמש ישמשו על מנת למנוע מהתוסף לאחזר נתונים ממשתמשים אחרים
+                </p>
+                <div>
+                    <button id="updateUserData" class="btn btn-warning" style="width: 200px">עדכון פרטים </button>
+                    <button id="setUserData" class="btn btn-success" style="width: 200px">שמור פרטים</button>
+                </div>
+            </div>
             <div class="activeWeb" style="display: none;visibility: hidden">
 
                 <input type="checkbox" id="mo"/>

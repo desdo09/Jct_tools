@@ -23,8 +23,8 @@ $(document).ready(function () {
 		// All links in menu will be set to go to the funcion "changediv",
 		// and the parameter will be the content of the attribute "div-id"
 		$('#menu').find('a').click(function(){changediv($(this).attr('div-id'));});
-		// The refresh button will initialize the function setdata
-		$("#submit").click(setData);
+		$("#updateUserData").click(()=>chrome.runtime.sendMessage({userData:true}))
+		$("#setUserData").click(setData)
 		// The reset data button will initialize the function reset in the dataBase
 		$("#reset_Data").click(DataAccess.reset);
 		// The refresh button will initialize the function refreshData
@@ -71,45 +71,10 @@ $(document).ready(function () {
 function setAccountData(data)
 {
 
-    $("#accountsInput").find("input").keyup(function(event) {
-        if (event.keyCode === 13) {
-            $("#submit").click();
-        }
-    });
 
 	localData = data;
-	// in case the data object is null (undefined)
-	// meaning that is the first time (or the user make
-	// a reset data), so by default all "checkbox" in
-	// account div will be checked
-	if(data != null)
-	{
-
-
-		if(data["mz"] == undefined || data["mz"])
-		 document.getElementById("mz").checked = true;
-
-		if(data["mo"] == undefined || data["mo"])
-		 document.getElementById("mo").checked = true;
-
-
-		$('#anonymous').prop('checked', (data.anonymous == true));
-        anonymousOptions((data.anonymous == true));
-	}
-	else
-	{
-
-
-		document.getElementById("mz").checked = true;
-		document.getElementById("mo").checked = true;
-
-	}
-
-
-
-	$("#anonymous").click(function () {
-        anonymousOptions(this.checked);
-    });
+	$("#userId").attr('value',data.moodleUser.id);
+	$("#userRealName").attr('value',data.moodleUser.name);
 }
 /*************************************************
 * FUNCTION
@@ -132,27 +97,20 @@ function setAccountData(data)
 ******************************************************/
 function setData() {
 
-
+	let user = {};
 	// in case the user leave the username/password field empty,
 	// means that the user dont want to change it
-	if($("#un").val() != "")
-		DataAccess.setData("username",$("#un").val());
+	user.id = $("#userId").val()
+	user.name = $("#userRealName").val()
 
-	if( $("#pw").val() != "")
-		DataAccess.setData("password",window.btoa($("#pw").val()));
-
-    DataAccess.setData('anonymous',($("#anonymous").is(':checked')));
+	if (user.id == null || user.id == ""){
+		notification("פרטי משתמש שגוי!","error");
+		return;
+	}
 
 	//make a new object and send it to the database
-	DataAccess.setData({
-
-						mz:document.getElementById('mz').checked ,
-						mo:document.getElementById('mo').checked,
-					//	re:document.getElementById('re').checked,
-						enable:true
-						},null,function () {
+	DataAccess.setData("moodleUser", user,function () {
         notification("המאגר עודכן");
-
     });
 
 	chrome.runtime.sendMessage({changeIcon:true});
@@ -776,6 +734,13 @@ function onBackgroundEvent(eventType)
 			if(eventType.operationCompleted == false)
 				notification(eventType.error,"error");
 		break;
+		case "userData":
+			if(eventType.operationCompleted == false)
+				notification(eventType.error,"error");
+			else {
+				$("#userId").attr('value',eventType.data.id);
+				$("#userRealName").attr('value',eventType.data.name);
+			}
 		case "updateData":
 			var progress = $('#courses').find("progress");
 			if(	$(progress).attr('value') != "1" )
