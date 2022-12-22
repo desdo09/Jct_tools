@@ -41,13 +41,18 @@
 <div id="contenedor">
     <div id="account">
         <div id="form">
-            <h2> פרטי חשבון של אתרים של המרכז האקדמי לב</h2>
-            <p style="color:#f7ecb5">
-                בשל העדכון האחרון של Moodle, אנא ודא שאתה מחובר למערכת
+            <h2 style="margin: 0"> פרטי חשבון MOODLE של המרכז האקדמי לב</h2>
+            <p style="color:#f7ecb5;margin-top: 10px; margin-bottom: 0; font-size: 21px">
+                בשל העדכון האחרון של Moodle, אנא ודא שאתם מחוברים למערכת
+            </p>
+            <p style="margin-top: 10px; font-size: 21px">
+                לאחר הכניסה, נדרש ללחוץ על כפתור "עדכן פרטים" כדי למשוך את נתוני ההתחברות שלך,
+                <br/>
+                 ואם הנתונים נכונים, נדרש ללחוץ על הכפתור "שמור פרטים"
             </p>
             <div id="accountsInput">
                 <p class="labelsDown">
-                    <label for="userId" style="width: 250px">זיהות המשתמש:</label>
+                    <label for="userId" style="width: 250px">זיהוי המשתמש:</label>
                     <input type="text" id="userId" class="form-control" readonly/>
                 </p>
                 <p class="labelsDown">
@@ -55,7 +60,7 @@
                     <input type="text" id="userRealName" class="form-control" readonly/>
                 </p>
                 <p class="text-muted" style="font-size: 14px; margin: 0">
-                    פרטי המשתמש ישמשו על מנת למנוע מהתוסף לאחזר נתונים ממשתמשים אחרים
+                    * פרטי המשתמש "לא ניתן לערוך ידני" וישמשו על מנת למנוע מהתוסף לאחזר נתונים ממשתמשים אחרים
                 </p>
                 <div>
                     <button id="updateUserData" class="btn btn-warning" style="width: 200px">עדכון פרטים </button>
@@ -249,7 +254,7 @@
                     <span class="checkboxtext">הצג סכ"ה של שיעורי הבית בסמל</span>
                 </p>
                 <p class="option">
-                    <input type="checkbox" id=hiddeNoSelectedCourseInWindows/>
+                    <input type="checkbox" id="hiddeNoSelectedCourseInWindows"/>
                     <span class="checkboxtext">הראה רק מטלות מקורסים שלי  </span>
                 </p>
                 <p class="option">

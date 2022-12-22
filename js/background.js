@@ -171,7 +171,7 @@ function onInstalled(reason) {
     }
 
     DataAccess.setObject("Config","hiddeTasksDone",true);
-    DataAccess.setObject("Config","hiddeNoSelectedCourseInWindows",true);
+    DataAccess.setObject("Config","hiddeNoSelectedCourseInWindows",false);
 
     DataAccess.Data(function (data) {
         if ((data.moodleUser == null))
@@ -636,7 +636,7 @@ function getUserDataFromMoodle() {
             // Get htm with div
             var html = jQuery('<div>').html(data);
             var logininfo = html.find(".logininfo > a");
-            if (logininfo.length == 0) {
+            if (logininfo.length == 0 || $(logininfo[0]).text() === "התחברות") {
                 reject();
                 console.log("No logininfo found");
                 backgroundEvent({

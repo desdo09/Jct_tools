@@ -182,6 +182,10 @@ function insertEvents(data) {
     var deadLine = new Date();
     var checked;
     var duplicate = {};
+
+    if(data.Config == null || data.Config.hiddeNoSelectedCourseInWindows !== true){
+        $("#homeworksContentTitle").text("מראה את כל השיעורי הבית במודל")
+    }
     for (var i = 0; i <= events.length; i++) {
 
         // Check if the event already finish
@@ -201,7 +205,6 @@ function insertEvents(data) {
 
                 if (data.Config.hiddeNoSelectedCourseInWindows == true && data.moodleCoursesTable[events[i].courseId] != true)
                     continue;
-
 
                 /*
                  * In this part the program will check if the user limited the total of homeworks
@@ -280,6 +283,8 @@ function insertEvents(data) {
         event += "</span>";
         $("#homeworksContent").append(event);
     } 		//notifications
+
+
 
     $("#eventsTotal").text($(".event").length);
     $("#lastHwUpdate").text(formatDate(data.lastHWUpdate));

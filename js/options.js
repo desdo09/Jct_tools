@@ -1,4 +1,3 @@
-var localData;
 /*************************************************
 * FUNCTION:
 *	$(document).ready
@@ -71,10 +70,10 @@ $(document).ready(function () {
 function setAccountData(data)
 {
 
-
-	localData = data;
-	$("#userId").attr('value',data.moodleUser.id);
-	$("#userRealName").attr('value',data.moodleUser.name);
+	if(data.moodleUser != null) {
+        $("#userId").attr('value', data.moodleUser.id);
+        $("#userRealName").attr('value', data.moodleUser.name);
+    }
 }
 /*************************************************
 * FUNCTION
@@ -553,7 +552,7 @@ function setAdvancedData(data)
 	else
 		$("#todaysHW").attr('checked',false);
 
-	if(data.Config.hiddeNoSelectedCourseInWindows == undefined || data.Config.hiddeNoSelectedCourseInWindows)
+	if(data.Config.hiddeNoSelectedCourseInWindows == null || data.Config.hiddeNoSelectedCourseInWindows)
 		$("#hiddeNoSelectedCourseInWindows").attr('checked',true);
 	else
 		$("#hiddeNoSelectedCourseInWindows").attr('checked',false);
@@ -731,11 +730,11 @@ function onBackgroundEvent(eventType)
 
 	switch (eventType.type) {
 		case "login" :
-			if(eventType.operationCompleted == false)
+			if(eventType.operationCompleted === false)
 				notification(eventType.error,"error");
 		break;
 		case "userData":
-			if(eventType.operationCompleted == false)
+			if(eventType.operationCompleted === false)
 				notification(eventType.error,"error");
 			else {
 				$("#userId").attr('value',eventType.data.id);
